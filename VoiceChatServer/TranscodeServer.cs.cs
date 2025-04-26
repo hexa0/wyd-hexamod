@@ -35,15 +35,6 @@ namespace VoiceChatHost
             Buffer.BlockCopy(decodePCM, 0, decodeBytes, 0, decodePCM.Length * 2);
 
             server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.PCMData, decodeBytes), from);
-            //Console.WriteLine($"{Math.Round(frameSize / 128f, 3)} KiB");
-
-            // determine the highest value as a fraction of the maximum possible value
-            //float fraction = (float)decodePCM.Max() / short.MaxValue;
-
-            // print a level meter using the console
-            //string bar = new string('#', (int)(Math.Clamp(fraction * 60, 0, 100)));
-            //string meter = "[" + bar.PadRight(60, '-') + "]";
-            //Console.WriteLine($"{meter} {fraction * 100:00.0}%");
         }
 
         public TranscodeServer(string ip)

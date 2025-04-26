@@ -28,7 +28,6 @@ namespace HexaMod
                 {
                     buffer[i] = (short)(buffer[i] * 0.7f); // haha discord funni
                 }
-                // Mod.Warn("Mic Underrun, count: ", AudioInput.audioBuffers.Count);
             }
             else
             {
@@ -43,26 +42,6 @@ namespace HexaMod
         static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
         {
             Buffer.BlockCopy(source, (sourceIndex * 2), destination, destinationIndex * 2, length * 2);
-            /*if ((destinationIndex + length) > destination.Length)
-            {
-                Mod.Fatal($"out of bounds1 {destinationIndex + length} {destination.Length}");
-            }
-            else if ((sourceIndex + length) > source.Length)
-            {
-                Mod.Fatal($"out of bounds2 {sourceIndex + length} {source.Length}");
-            }
-            else if ((sourceIndex + length) < 0)
-            {
-                Mod.Fatal($"out of bounds3 {sourceIndex + length}");
-            }
-            else if ((destinationIndex + length) < 0)
-            {
-                Mod.Fatal($"out of bounds4 {destinationIndex + length}");
-            }
-            else
-            {
-                Buffer.BlockCopy(source, (sourceIndex * 2), destination, destinationIndex * 2, length * 2);
-            }*/
         }
         short[] NextChunk(int chunkSize)
         {
@@ -105,13 +84,11 @@ namespace HexaMod
                     firstHalfReduction // length
                 );
                 digestPosition = firstHalfReduction;
-                // Mod.Fatal($"condition 2 end");
             }
             else
             {
                 CopyData(buffer, digestPosition, slice, 0, chunkSize);
                 digestPosition += chunkSize;
-                // Mod.Fatal($"condition 3 end");
             }
 
             return slice;
@@ -144,23 +121,10 @@ namespace HexaMod
         void OnAudioFilterRead(float[] data, int channels)
         {
             int sampleCount = data.Length / channels;
-
-            /*            short[] monoInput = new short[(sampleCount / 2) + 1];
-                        Buffer.BlockCopy(NextChunk(sampleCount / 2), 0, monoInput, 2, sampleCount);
-                        monoInput[0] = lastEndByte;*/
             short[] monoInput = NextChunk(sampleCount);
 
             for (int sample = 0; sample < sampleCount; sample++)
             {
-                // float currentMonoSamplePosition = (sample / 2f);
-                //int floor = Mathf.FloorToInt(currentMonoSamplePosition);
-                //int ceil = Mathf.CeilToInt(currentMonoSamplePosition);
-                //float currentSampleValue = Mathf.Lerp(
-                //    monoInput[floor] / (float)short.MaxValue,
-                //    monoInput[ceil] / (float)short.MaxValue,
-                //    currentMonoSamplePosition % 1
-                //);
-
                 float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
 
                 data[sample * 2] = currentSampleValue * volumeL;
@@ -168,14 +132,6 @@ namespace HexaMod
             }
 
             lastEndByte = monoInput[sampleCount / 2];
-
-            // determine the highest value as a fraction of the maximum possible value
-            // float fraction = data.Max();
-
-            // print a level meter using the console
-            // string bar = new string('#', (int)(fraction * 70));
-            // string meter = "[" + bar.PadRight(60, '-') + "]";
-            // Mod.Print($"{meter} {fraction * 100:00.0}%");
         }
     }
 }

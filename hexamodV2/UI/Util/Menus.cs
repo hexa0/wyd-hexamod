@@ -84,7 +84,6 @@ namespace HexaMod.UI.Util
 
             if (backstates.ContainsKey(currentMenu))
             {
-                // Mod.Print($"go back from {currentMenu} to {backstates[currentMenu]}");
                 menuController.ChangeToMenu(backstates[currentMenu]);
             }
             else
@@ -201,7 +200,6 @@ namespace HexaMod.UI.Util
                         scrollbarComponent.colors = newColors;
 
                         image.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-                        // image.sprite = spriteInputField128;
                     }
                 }
             }
@@ -239,7 +237,6 @@ namespace HexaMod.UI.Util
                         foreach (var text in inputFieldComponent.GetComponentsInChildren<Text>(true))
                         {
                             text.color = new Color(1f, 1f, 1f);
-                            // text.font = HexaModMain.bundle.LoadAsset<Font>("Assets/ModResources/Font/osd.ttf");
                             text.fontSize = (int)(text.fontSize * 0.8f);
                         }
                     }
@@ -271,7 +268,6 @@ namespace HexaMod.UI.Util
                             foreach (var text in buttonComponent.GetComponentsInChildren<Text>(true))
                             {
                                 text.color = new Color(1f, 1f, 1f);
-                                // text.font = HexaModMain.bundle.LoadAsset<Font>("Assets/ModResources/Font/osd.ttf");
                                 text.fontSize = (int)(text.fontSize * 0.8f);
                             }
                         }

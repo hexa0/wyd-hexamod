@@ -7,7 +7,6 @@ using System.Reflection;
 using HexaVoiceChatShared.MessageProtocol;
 using HexaVoiceChatShared.Net;
 using NAudio.Wave;
-// using OpusNet;
 using UnityEngine;
 using static HexaVoiceChatShared.HexaVoiceChat;
 
@@ -33,11 +32,8 @@ namespace HexaMod
         public static int micBufferMillis = 20;
         public static int micChannels = 1;
         public static int micBits = 16;
-        //public static OpusEncoder encoder = new OpusEncoder(audioSampleRate, audioChannels, OpusApplication.Voip);
-        //public static OpusDecoder decoder = new OpusDecoder(audioSampleRate, audioChannels);
         public static int opusBitrate = 8192;
         public static int opusSegmentFrames = 960;
-        //public static int opusBytesPerSegment = encoder.FrameByteCount(opusSegmentFrames);
 
 
         internal static int underrunPreventionSize = 3;
@@ -107,18 +103,6 @@ namespace HexaMod
 
         static void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
         {
-/*            // copy buffer into an array of integers
-            short[] buffer = new short[e.Buffer.Length / 2];
-            Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.Buffer.Length);
-            audioBuffer = buffer;
-            audioBuffers.Add(buffer);
-
-            if (audioBuffers.Count > underrunPreventionSize)
-            {
-                audioBuffers.RemoveAt(0);
-                Mod.Warn("too many buffers exist? did you forget to consume the audio data?");
-            }*/
-
             try
             {
                 voicechatTranscodeClient.SendMessage(
@@ -150,7 +134,6 @@ namespace HexaMod
                     // Mod.Warn("too many buffers exist? did you forget to consume the audio data?");
                 }
             }
-            // Mod.Warn($"got {message.type}");
         }
     }
 }

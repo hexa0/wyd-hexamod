@@ -7,26 +7,6 @@ namespace HexaVoiceChatShared.MessageProtocol
     {
         internal static byte[] BuildMessageHeader(ulong clientId, byte[] body)
         {
-/*            byte[][] headerValues = new byte[][]
-            {
-                BitConverter.GetBytes(clientId)
-            };
-
-            int length = 0;
-            foreach (var value in headerValues)
-            {
-                length += value.Length;
-            }
-
-            byte[] header = new byte[length];
-
-            int offset = 0;
-            foreach (var value in headerValues)
-            {
-                Buffer.BlockCopy(value, 0, header, offset, value.Length);
-                offset += value.Length;
-            }*/
-
             return BitConverter.GetBytes(clientId);
         }
         public static byte[] BuildMessage(ulong clientId, VoiceChatMessageType type, byte[] body)

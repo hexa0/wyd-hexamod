@@ -35,13 +35,11 @@ namespace HexaMod.Util
     public static class GameModes
     {
         public static Dictionary<int, GameMode> gameModes = new Dictionary<int, GameMode>();
-        // public static Dictionary<string, GameModeInfo> gameModesByTag = new Dictionary<string, GameModeInfo>();
         public static Dictionary<string, GameMode> named = new Dictionary<string, GameMode>();
 
         public static void DefineGameMode(GameMode info)
         {
             gameModes[info.id] = info;
-            // gameModesByTag[info.tag] = info;
             named[info.internalName] = info;
         }
 

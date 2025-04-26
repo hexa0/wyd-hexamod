@@ -41,8 +41,6 @@ namespace HexaMod
             }
 
             titleLevel = HexaMod.coreBundle.LoadAsset<ModLevel>("Assets/ModResources/Core/Level/Title.asset");
-/*
-            Mod.Print($"loaded {levelBundles.Count()} level bundle(s) with {levels.Count()} level(s)");*/
         }
 
         public static void CleanupDefaultLevel()
@@ -80,10 +78,6 @@ namespace HexaMod
                     case "PoolCover":
                         bad = true;
                         break;
-                    // throws an error when spawning dads so we keep this obj
-/*                    case "Pets":
-                        bad = true;
-                        break;*/
                     case "Pool Cover":
                         bad = true;
                         break;
@@ -91,7 +85,6 @@ namespace HexaMod
                         bad = true;
                         break;
                     case "BackendObjects":
-                        // PoolChoreObjs
                         Object.Destroy(child.transform.Find("Dadlympics").Find("PoolChoreObjs").gameObject);
                         break;
                 }

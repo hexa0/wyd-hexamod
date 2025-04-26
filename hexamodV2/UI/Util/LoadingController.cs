@@ -53,14 +53,6 @@ namespace HexaMod.UI.Util
 
             if (isCurrentlyWorking)
             {
-                /*foreach (var task in tasks)
-                {
-                    if (task.Value)
-                    {
-                        Mod.Print(task.Key);
-                    }
-                }*/
-
                 lastWasWorking = Time.time;
                 ShowLoading(true);
             }

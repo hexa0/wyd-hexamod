@@ -23,7 +23,6 @@ namespace HexaMod.Patches
                         if (dadItemTargetting.heldItem == null && dadItemTargetting.heldItem2 == null)
                         {
                             // desynced!
-                            // HexaModBase.Instance.mls.LogFatal("DESYNCED FORK!");
                             __instance.held = false;
                             __instance.Drop(Vector3.zero);
                         }
@@ -33,7 +32,6 @@ namespace HexaMod.Patches
                         if (itemTargetting.heldItem == null && itemTargetting.heldItem2 == null)
                         {
                             // desynced!
-                            // HexaModBase.Instance.mls.LogFatal("DESYNCED FORK!");
                             __instance.held = false;
                             __instance.Drop(Vector3.zero);
                         }

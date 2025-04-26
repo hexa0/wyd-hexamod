@@ -10,12 +10,6 @@ namespace HexaMod.Patches
         {
             public static bool lastTabbedOut = false;
         }
-/*        [HarmonyPatch("Reset")]
-        [HarmonyPrefix]
-        static void MusicVolumeFixPatch(ref OptionsController __instance)
-        {
-            HexaModBase.Instance.mls.LogInfo($"MUSIC SOURCE IS NULL?: {__instance.musicSource == null}");
-        }*/
 
         [HarmonyPatch("Start")]
         [HarmonyPostfix]

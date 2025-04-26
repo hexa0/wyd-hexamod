@@ -88,7 +88,6 @@ namespace HexaMod.UI
 
                 HexaMod.persistentLobby.lobbySettings.mapName = mapName;
                 HexaMod.persistentLobby.CommitChanges();
-                // SceneManager.LoadSceneAsync(1);
             }
         }
 
@@ -104,17 +103,6 @@ namespace HexaMod.UI
                     break;
                 }
             }
-
-            /* disabled bc the start game button is good enough
-            var quickModes = Menus.online.Find("HiddenTilConnected");
-
-            quickModes.Find("FindDaddy").GetComponent<Button>().interactable = foundLevel.regular;
-            quickModes.Find("FindBaby").GetComponent<Button>().interactable = foundLevel.regular;
-            quickModes.Find("FamilyGathering").GetComponent<Button>().interactable = foundLevel.familyGathering;
-            quickModes.Find("The Hungry Games").GetComponent<Button>().interactable = foundLevel.hungryGames;
-            quickModes.Find("Dadlympics").GetComponent<Button>().interactable = foundLevel.dadlympics;
-            quickModes.Find("DaddysNightmare").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
-            */
 
             var gameModesCustom = Menus.gameList.Find("GameCreator").Find("GameModes");
 
@@ -245,7 +233,8 @@ namespace HexaMod.UI
                     Menus.titleScreen.Find("Return To New WYD").gameObject.SetActive(false);
 
                     // why was this disabled?
-                    Menus.gameList.Find("JoinRandom").gameObject.SetActive(true);
+                    // oh nvm it works on private lobbies 💀
+                    Menus.gameList.Find("JoinRandom").gameObject.SetActive(false);
 
                     Vector2 TopLeft = new Vector2(-160f, -118f);
 

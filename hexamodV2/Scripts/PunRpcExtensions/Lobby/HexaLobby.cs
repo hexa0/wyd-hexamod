@@ -39,12 +39,6 @@ namespace HexaMod
 
         public void Update()
         {
-/*            if (Time.time > lastSettingsUpdate + 5f)
-            {
-                lastSettingsUpdate = Time.time;
-                TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
-            }*/
-
             if (HexaMod.testGameWaitingForConn || waitingForTestRoom)
             {
                 if (!waitingForTestRoom)
@@ -250,21 +244,7 @@ namespace HexaMod
 
         public void StartMatch()
         {
-            StartCoroutine(StartMatchEnumerator());
-        }
-
-        [PunRPC]
-        public void HexaModMatchStarted()
-        {
-            HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
-            HexaMod.networkManager.fader.SendMessage("Fade");
-        }
-
-
-        private IEnumerator StartMatchEnumerator()
-        {
             netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { });
-            // yield return 0;
 
             if (PhotonNetwork.isMasterClient)
             {
@@ -279,8 +259,13 @@ namespace HexaMod
                     HexaMod.networkManager.RespawnPlayers();
                 }
             }
+        }
 
-            yield return 0;
+        [PunRPC]
+        public void HexaModMatchStarted()
+        {
+            HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
+            HexaMod.networkManager.fader.SendMessage("Fade");
         }
     }
 }

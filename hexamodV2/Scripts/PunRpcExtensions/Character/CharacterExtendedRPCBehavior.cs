@@ -22,7 +22,6 @@ namespace HexaMod
 
             if (gameObject.name == HexaMod.networkManager.playerObj.name)
             {
-                // SetShirtColor(new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)));
                 SetShirtColorForOthers(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex()));
                 FixUsernameForOthers(PlayerPrefs.GetString("LobbyName", "Player"));
             }
@@ -47,8 +46,6 @@ namespace HexaMod
         public void FixUsername(string username)
         {
             GetComponent<FirstPersonController>().playerName = username;
-            // This breaks inputName.Substring(0, 3) == "Bab" checks
-            // gameObject.name = $"{username} ({gameObject.name.Replace("Dad", "").Replace("Baby", "")})";
         }
 
         [PunRPC]

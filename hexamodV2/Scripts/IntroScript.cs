@@ -62,7 +62,6 @@ namespace HexaMod
 
         void Update()
         {
-            //Camera.current.backgroundColor = new Color(0.29019607843137254901960784313725f, 0.18431372549019607843137254901961f, 0.21176470588235294117647058823529f);
             Camera.current.backgroundColor = new Color(0.05f, 0.05f, 0.05f);
         }
 
@@ -90,15 +89,6 @@ namespace HexaMod
             void InitCoreResources()
             {
                 HexaMod.InitCoreBundle();
-/*                AudioSource elevtorMusic = gameObject.AddComponent<AudioSource>();
-                elevtorMusic.clip = HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/ElevatorWait.wav");
-                elevtorMusic.volume = (PlayerPrefs.GetFloat("MasterVolume", 1f) * PlayerPrefs.GetFloat("MusicVolume", 1f)) / 2f;
-                elevtorMusic.spatialBlend = 0f;
-                elevtorMusic.spatialize = false;
-                elevtorMusic.spread = 1f;
-                elevtorMusic.bypassEffects = true;
-                elevtorMusic.loop = true;
-                elevtorMusic.Play();*/
             }
 
             void InitCoreResourcesDone()
