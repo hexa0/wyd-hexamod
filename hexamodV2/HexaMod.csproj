@@ -81,9 +81,6 @@
     <Reference Include="NAudio, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NAudio.1.10.0\lib\net35\NAudio.dll</HintPath>
     </Reference>
-    <Reference Include="OpusNet">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\BepInEx\plugins\hexamod\OpusNet.dll</HintPath>
-    </Reference>
     <Reference Include="Photon3Unity3D">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\WhosYourDaddy_Data\Managed\Photon3Unity3D.dll</HintPath>
     </Reference>
