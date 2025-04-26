@@ -15,7 +15,7 @@ namespace VoiceChatHost
         private static readonly Dictionary<ulong, float[]> decodeBuffers = [];
         private readonly VoiceChatServer server;
         private RelayClient? relay;
-        private IPEndPoint gameEndPoint;
+        private IPEndPoint? gameEndPoint;
         private bool isSpeaking = false;
         private ulong clientId = (ulong)Process.GetCurrentProcess().Id;
 
@@ -33,6 +33,7 @@ namespace VoiceChatHost
                 relay = new RelayClient(relayIp);
                 relay.clientId = clientId;
                 relay.onOpusAction = OnOpus;
+                relay.onSpeakingStateAction = OnSpeakingState;
             }
             else
             {
@@ -44,47 +45,59 @@ namespace VoiceChatHost
         {
             gameEndPoint = from;
 
-            DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
-
-            clientId = clientMessage.clientId;
-
             if (relay == null)
             {
                 throw new Exception("OnVoiceRoomJoin() cannot be called when there is no RelayClient");
             }
 
+            DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+
+            clientId = clientMessage.clientId;
+
             relay.clientId = clientMessage.clientId;
             relay.JoinRoom(Encoding.ASCII.GetString(clientMessage.body));
+        }
+
+        private void OnVoiceRoomLeave(DecodedVoiceChatMessage message, IPEndPoint from)
+        {
+            gameEndPoint = from;
+
+            if (relay == null)
+            {
+                throw new Exception("OnVoiceRoomLeave() cannot be called when there is no RelayClient");
+            }
+
+            relay.LeaveRoom();
         }
 
         private void OnPCM(DecodedVoiceChatMessage message, IPEndPoint from)
         {
             gameEndPoint = from;
 
-            short[] pcm = new short[message.body.Length / 2];
-            Buffer.BlockCopy(message.body, 0, pcm, 0, message.body.Length);
-
-            float maxVolume = (float)pcm.Max() / short.MaxValue;
-            bool shouldBeSpeaking = maxVolume > 0.01; // > 1%
-            if (isSpeaking != shouldBeSpeaking)
-            {
-                isSpeaking = shouldBeSpeaking;
-                if (relay != null)
-                {
-                    relay.SetSpeakingState(isSpeaking);
-                }
-            }
-
-            int frameSize = EncodingSetup.encoder.Encode(pcm, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
-            Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
-
             if (relay != null)
             {
-                relay.SendOpus(encoded.ToArray(), pcm.Length);
+                short[] pcm = new short[message.body.Length / 2];
+                Buffer.BlockCopy(message.body, 0, pcm, 0, message.body.Length);
+
+                float maxVolume = MathF.Max((float)pcm.Max() / short.MaxValue, (float)pcm.Min() / short.MinValue);
+                bool shouldBeSpeaking = maxVolume > 0.005; // > 0.5%
+                if (isSpeaking != shouldBeSpeaking)
+                {
+                    isSpeaking = shouldBeSpeaking;
+                    relay.SetSpeakingState(isSpeaking);
+                }
+
+                if (isSpeaking)
+                {
+                    int frameSize = EncodingSetup.encoder.Encode(pcm, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
+                    Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
+
+                    relay.SendOpus(encoded.ToArray(), pcm.Length);
+                }
             }
         }
 
-        private void OnOpus(ulong clientId, byte[] opusFrame, int sampleCount)
+        private void OnOpus(ulong clientId, byte[] opusFrame, int frameSize)
         {
             if (!decodeBuffers.ContainsKey(clientId))
             {
@@ -93,9 +106,9 @@ namespace VoiceChatHost
 
             float[] decodeBuffer = decodeBuffers[clientId];
 
-            int decodedSampleCount = DecodingSetup.decoder.Decode(opusFrame, decodeBuffer, sampleCount);
+            int decodedSampleCount = DecodingSetup.decoder.Decode(opusFrame, decodeBuffer, frameSize);
 
-            Span<float> decoded = decodeBuffer.AsSpan(0, decodedSampleCount);
+            Span<float> decoded = decodeBuffer.AsSpan(0, frameSize);
 
             short[] decodePCM = new short[decodedSampleCount];
 
@@ -110,6 +123,11 @@ namespace VoiceChatHost
             server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.PCMData, decodeBytes), gameEndPoint);
         }
 
+        private void OnSpeakingState(ulong clientId, bool speaking)
+        {
+            server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.SpeakingStateUpdated, [speaking ? (byte)1 : (byte)0]), gameEndPoint);
+        }
+
         public TranscodeServer(string ip)
         {
             EncodingSetup.Init();
@@ -122,6 +140,7 @@ namespace VoiceChatHost
             server.OnMessage(VoiceChatMessageType.PCMData, OnPCM);
             server.OnMessage(VoiceChatMessageType.SwitchRelay, OnSwitchRelay);
             server.OnMessage(VoiceChatMessageType.VoiceRoomJoin, OnVoiceRoomJoin);
+            server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, OnVoiceRoomLeave);
 
             new Thread(new ThreadStart(KeepAliveThread)).Start();
 

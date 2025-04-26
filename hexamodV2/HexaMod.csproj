@@ -252,7 +252,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioInput.cs" />
+    <Compile Include="Voice\VoiceChatLeaveHook.cs" />
+    <Compile Include="Voice\VoiceChat.cs" />
     <Compile Include="Levels.cs" />
     <Compile Include="HexaMod.cs" />
     <Compile Include="Patches\Debugging\LogRPCPatch.cs" />
@@ -294,7 +295,7 @@
     <Compile Include="Scripts\Levels\DadSpawn.cs" />
     <Compile Include="Scripts\Levels\Factory\DestroyTimerFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\DoorFactory.cs" />
-    <Compile Include="Scripts\Mic\MicEmitter.cs" />
+    <Compile Include="Voice\VoiceEmitter.cs" />
     <Compile Include="Scripts\PunRpcExtensions\DoorSoundRPC.cs" />
     <Compile Include="Scripts\Levels\KeySpawn.cs" />
     <Compile Include="Scripts\PunRpcExtensions\Lobby\HexaLobby.cs" />

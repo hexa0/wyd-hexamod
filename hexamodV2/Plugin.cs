@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using HexaMod.Voice;
 using UnityEngine;
 
 namespace HexaMod
@@ -53,8 +54,7 @@ namespace HexaMod
 
             log.LogInfo($"Plugin {GUID} is loaded!");
 
-            AudioInput.InitUnityForVoiceChat();
-            AudioInput.InitMicrophone();
+            VoiceChat.InitUnityForVoiceChat();
             GameObject.Find("Canvas").AddComponent<IntroScript>().InitIntro();
         }
     }

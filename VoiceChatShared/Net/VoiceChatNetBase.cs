@@ -39,9 +39,13 @@ namespace HexaVoiceChatShared.Net
 
         public void SwitchToEndPoint(IPEndPoint newServer)
         {
-            Close();
-            endPoint = newServer;
-            Connect(true);
+            if (!newServer.Equals(endPoint))
+            {
+                Close();
+                socket = new UdpClient();
+                endPoint = newServer;
+                Connect(true);
+            }
         }
 
         public void Close()

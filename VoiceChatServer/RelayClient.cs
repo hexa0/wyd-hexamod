@@ -13,6 +13,7 @@ namespace VoiceChatHost
         private readonly VoiceChatClient client;
         public ulong clientId = (ulong)Process.GetCurrentProcess().Id;
         public Action<ulong, byte[], int>? onOpusAction;
+        public Action<ulong, bool>? onSpeakingStateAction;
         string? room = null;
 
         public void JoinRoom(string roomName)
@@ -102,6 +103,12 @@ namespace VoiceChatHost
             client.OnMessage(VoiceChatMessageType.SpeakingStateUpdated, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
             {
                 DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+                
+                if (onSpeakingStateAction != null)
+                {
+                    onSpeakingStateAction.Invoke(clientMessage.clientId, clientMessage.body[0] == 1);
+                }
+
                 Console.WriteLine($"client {clientMessage.clientId}'s voice chat state updated to {clientMessage.body[0]}");
             });
 
@@ -111,9 +118,10 @@ namespace VoiceChatHost
 
                 if (onOpusAction != null)
                 {
+                    int samples = BitConverter.ToInt32(clientMessage.body, 0);
                     byte[] opusFrame = new byte[clientMessage.body.Length - 4];
                     Buffer.BlockCopy(clientMessage.body, 4, opusFrame, 0, clientMessage.body.Length - 4);
-                    onOpusAction.Invoke(clientMessage.clientId, opusFrame, BitConverter.ToInt32(clientMessage.body, 0));
+                    onOpusAction.Invoke(clientMessage.clientId, opusFrame, samples);
                 }
             });
 

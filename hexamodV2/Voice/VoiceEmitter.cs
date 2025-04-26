@@ -1,53 +1,63 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace HexaMod
+namespace HexaMod.Voice
 {
     [RequireComponent(typeof(AudioSource))]
-    public class MicEmitter : MonoBehaviour
+    public class VoiceEmitter : MonoBehaviour
     {
         public AudioSource audioSource;
+        public ulong clientId = 0;
+        private List<short[]> buffers;
+        private short[] lastBuffer;
         private void Start()
         {
             audioSource = GetComponent<AudioSource>();
             audioSource.dopplerLevel = 0f;
             audioSource.Play();
-            AudioInput.StartListening();
         }
 
-        private void OnDestroy() => AudioInput.StopListening();
-
-        short[] NextBuffer()
+        private short[] NextBuffer()
         {
-            short[] buffer = AudioInput.audioBuffers.ElementAtOrDefault(0);
+            short[] buffer = buffers.ElementAtOrDefault(0);
             if (buffer == null)
             {
-                buffer = AudioInput.audioBuffer;
-                for (int i = 0; i < buffer.Length; i++)
+                buffer = lastBuffer;
+                if (VoiceChat.speakingStates[clientId])
                 {
-                    buffer[i] = (short)(buffer[i] * 0.7f); // haha discord funni
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        buffer[i] = (short)(buffer[i] * 0.7f); // haha discord funni
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        buffer[i] = 0;
+                    }
                 }
             }
             else
             {
-                AudioInput.audioBuffers.RemoveAt(0);
+                lastBuffer = buffer;
+                buffers.RemoveAt(0);
             }
 
             return buffer;
         }
 
-        int digestPosition = 0;
-        short[] buffer;
-        static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
+        private int digestPosition = 0;
+        private short[] buffer;
+        private static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
         {
             Buffer.BlockCopy(source, (sourceIndex * 2), destination, destinationIndex * 2, length * 2);
         }
-        short[] NextChunk(int chunkSize)
+        private short[] NextChunk(int chunkSize)
         {
             short[] slice = new short[chunkSize];
-            int micBufferSize = AudioInput.audioBuffer.Length;
-
             if (buffer == null)
             {
                 // this really shouldn't happen but still does
@@ -58,22 +68,22 @@ namespace HexaMod
                 }
             }
 
-            if (digestPosition >= micBufferSize)
+            if (digestPosition >= buffer.Length)
             {
                 digestPosition = 0;
                 buffer = NextBuffer();
                 CopyData(buffer, digestPosition, slice, 0, chunkSize);
                 digestPosition += chunkSize;
             }
-            else if ((digestPosition + chunkSize) > micBufferSize)
+            else if ((digestPosition + chunkSize) > buffer.Length)
             {
-                int firstHalfReduction = (digestPosition + chunkSize) - micBufferSize;
+                int firstHalfReduction = (digestPosition + chunkSize) - buffer.Length;
                 CopyData(
                     buffer, // source
                     digestPosition, // source start
                     slice, // destination
                     0, // write start
-                    micBufferSize - digestPosition // length
+                    buffer.Length - digestPosition // length
                 );
                 buffer = NextBuffer();
                 CopyData(
@@ -97,7 +107,7 @@ namespace HexaMod
         private float volumeL = 0;
         private float volumeR = 0;
 
-        void Update()
+        private void Update()
         {
             Transform cameraTransform = Camera.main.transform;
             Vector3 unitVector = (transform.position - cameraTransform.position).normalized;
@@ -116,22 +126,23 @@ namespace HexaMod
             }
         }
 
-        short lastEndByte = 0;
-
-        void OnAudioFilterRead(float[] data, int channels)
+        private void OnAudioFilterRead(float[] data, int channels)
         {
-            int sampleCount = data.Length / channels;
-            short[] monoInput = NextChunk(sampleCount);
-
-            for (int sample = 0; sample < sampleCount; sample++)
+            if (VoiceChat.audioBuffers.ContainsKey(clientId))
             {
-                float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
+                buffers = VoiceChat.audioBuffers[clientId];
 
-                data[sample * 2] = currentSampleValue * volumeL;
-                data[(sample * 2) + 1] = currentSampleValue * volumeR;
+                int sampleCount = data.Length / channels;
+                short[] monoInput = NextChunk(sampleCount);
+
+                for (int sample = 0; sample < sampleCount; sample++)
+                {
+                    float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
+
+                    data[sample * 2] = currentSampleValue * volumeL;
+                    data[(sample * 2) + 1] = currentSampleValue * volumeR;
+                }
             }
-
-            lastEndByte = monoInput[sampleCount / 2];
         }
     }
 }

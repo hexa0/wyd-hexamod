@@ -17,6 +17,7 @@ namespace HexaMod
         public bool cheats = true;
         public byte GameMode = 0; // Todo: switching game modes in the lobby & quit to lobby instead of the menu button
         public string mapName = "Default";
+        public string relay = "127.0.0.1";
         public UInt16 roundNumber = 0;
 
         public static byte[] Serialize(LobbySettings lobby)

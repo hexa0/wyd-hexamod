@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
+using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -35,7 +37,7 @@ namespace HexaMod
             text.alignment = TextAnchor.MiddleCenter;
 
             // begin the startup routine
-            if (!AudioInput.testMode)
+            if (!VoiceChat.testMode)
             {
                 StartCoroutine(InitHexaModAfterFrame());
             }
@@ -43,7 +45,7 @@ namespace HexaMod
 
         public void Start()
         {
-            if (AudioInput.testMode)
+            if (VoiceChat.testMode)
             {
                 AudioSource mic = gameObject.AddComponent<AudioSource>();
                 mic.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
@@ -53,7 +55,11 @@ namespace HexaMod
                 mic.bypassEffects = true;
                 mic.loop = true;
 
-                gameObject.AddComponent<MicEmitter>();
+                VoiceEmitter voiceEmitter = gameObject.AddComponent<VoiceEmitter>();
+                voiceEmitter.clientId = 0;
+
+                VoiceChat.SetRelay("127.0.0.1");
+                VoiceChat.JoinVoiceRoom("VoiceChat.testMode room");
             }
         }
 
