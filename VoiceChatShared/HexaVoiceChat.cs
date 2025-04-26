@@ -27,6 +27,7 @@ namespace HexaVoiceChatShared
                 // audio data events sent between the game and the internal server
 
                 PCMData = 10,
+                SwitchRelay,
 
                 // audio data events sent between the internal server and the relay server
 
