@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using HexaMod.Voice;
 using UnityEngine;
 
@@ -31,11 +32,11 @@ namespace HexaMod
 
         public void SetVoiceForOthers(ulong id)
         {
-            RPC("SetVoiceId", PhotonTargets.Others, new object[] { id });
+            RPC("SetVoiceId", PhotonTargets.Others, new object[] { BitConverter.GetBytes(id) });
         }
 
         [PunRPC]
-        public void SetVoiceId(ulong id)
+        public void SetVoiceId(byte[] id)
         {
             AudioSource audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.volume = 1f;
@@ -47,7 +48,7 @@ namespace HexaMod
             audioSource.loop = true;
 
             VoiceEmitter voiceEmitter = gameObject.AddComponent<VoiceEmitter>();
-            voiceEmitter.clientId = id;
+            voiceEmitter.clientId = BitConverter.ToUInt64(id, 0);
         }
     }
 }
