@@ -10,7 +10,7 @@ namespace HexaMod
     public class LobbySettings
     {
         public bool allMustDie = true;
-        public bool shufflePlayers = true;
+        public bool shufflePlayers = false;
         public bool disablePets = true;
         public bool doorSounds = true;
         public bool modernGrabbing = true;
