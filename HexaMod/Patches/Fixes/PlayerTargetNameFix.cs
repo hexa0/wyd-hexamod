@@ -4,7 +4,7 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches
 {
-    [HarmonyPatch()]
+    [HarmonyPatch]
     internal class PlayerTargetNameFix
     {
         [HarmonyPatch(typeof(ItemTargeting), "Update")]
@@ -20,7 +20,7 @@ namespace HexaMod.Patches
                 var playerController = curTarget.Value.GetComponentInChildren<FirstPersonController>();
                 if (playerController)
                 {
-                    __instance.textComp.text = __instance.textComp.text.Replace(curTarget.Value.name, playerController.playerName);
+                    __instance.textComp.text = playerController.playerName;
                 }
             }
         }
@@ -38,7 +38,7 @@ namespace HexaMod.Patches
                 var playerController = curTarget.Value.GetComponentInChildren<FirstPersonController>();
                 if (playerController)
                 {
-                    __instance.textComp.text = __instance.textComp.text.Replace(curTarget.Value.name, playerController.playerName);
+                    __instance.textComp.text = playerController.playerName;
                 }
             }
         }
