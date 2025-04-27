@@ -38,7 +38,22 @@ namespace HexaMod
         [PunRPC]
         public void SetVoiceId(byte[] id)
         {
-            AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+            GameObject model = gameObject;
+            var dadModel = transform.Find("DadModel");
+            if (dadModel)
+            {
+                model = dadModel.gameObject;
+            }
+            else
+            {
+                var babyModel = transform.Find("Baby001");
+                if (babyModel)
+                {
+                    model = babyModel.gameObject;
+                }
+            }
+
+            AudioSource audioSource = model.AddComponent<AudioSource>();
             audioSource.volume = 1f;
             audioSource.spatialBlend = 1f;
             audioSource.dopplerLevel = 0f;
@@ -47,7 +62,7 @@ namespace HexaMod
             audioSource.bypassEffects = true;
             audioSource.loop = true;
 
-            VoiceEmitter voiceEmitter = gameObject.AddComponent<VoiceEmitter>();
+            VoiceEmitter voiceEmitter = model.AddComponent<VoiceEmitter>();
             voiceEmitter.clientId = BitConverter.ToUInt64(id, 0);
         }
     }
