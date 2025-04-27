@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaMod", "hexamodV2\HexaMod.csproj", "{6E01048F-AA24-4B69-8098-10CC744CAEFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaMod", "HexaMod\HexaMod.csproj", "{6E01048F-AA24-4B69-8098-10CC744CAEFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatHost", "VoiceChatServer\VoiceChatHost.csproj", "{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatHost", "VoiceChatHost\VoiceChatHost.csproj", "{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatShared", "VoiceChatShared\VoiceChatShared.csproj", "{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}"
 EndProject
