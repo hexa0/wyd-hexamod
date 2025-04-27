@@ -2,8 +2,8 @@
 
 namespace VoiceChatHost.Opus
 {
-    public static class DecodingSetup
+    public class DecodingSetup
     {
-        public static IOpusDecoder decoder = OpusCodecFactory.CreateDecoder(EncodingSetup.sampleRate, EncodingSetup.channels);
+        public IOpusDecoder decoder = OpusCodecFactory.CreateDecoder(EncodingSetup.sampleRate, EncodingSetup.channels);
     }
 }

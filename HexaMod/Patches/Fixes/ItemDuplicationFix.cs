@@ -9,7 +9,7 @@ namespace HexaMod.Patches
         [HarmonyPrefix]
         static bool NetworkSpawnObjectsPatch()
         {
-            return PhotonNetwork.isMasterClient;
+            return true;// PhotonNetwork.isMasterClient;
         }
     }
 }

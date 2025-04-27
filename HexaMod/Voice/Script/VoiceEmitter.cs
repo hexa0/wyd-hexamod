@@ -124,6 +124,12 @@ namespace HexaMod.Voice
                 volumeL = Mathf.Lerp(1, 0, panAbs);
                 volumeR = Mathf.Lerp(1, 1, panAbs);
             }
+
+            if (gameObject.GetComponent<AudioSource>().spatialBlend > 0f)
+            {
+                volumeL *= 2f;
+                volumeR *= 2f;
+            }
         }
 
         private void OnAudioFilterRead(float[] data, int channels)

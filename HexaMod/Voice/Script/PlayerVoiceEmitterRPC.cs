@@ -55,6 +55,9 @@ namespace HexaMod
 
             AudioSource audioSource = model.AddComponent<AudioSource>();
             audioSource.volume = 1f;
+            audioSource.maxDistance = 25f;
+            audioSource.minDistance = 1.5f;
+            audioSource.rolloffMode = AudioRolloffMode.Linear;
             audioSource.spatialBlend = 1f;
             audioSource.dopplerLevel = 0f;
             audioSource.spatialize = true;

@@ -19,6 +19,7 @@ namespace HexaMod.Voice
             voiceSource.spread = 1f;
             voiceSource.bypassEffects = true;
             voiceSource.loop = true;
+            voiceSource.volume = 1f;
         }
 
         [HarmonyPatch(typeof(PlayerNames), "RefreshNameList")]

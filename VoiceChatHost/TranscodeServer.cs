@@ -13,6 +13,7 @@ namespace VoiceChatHost
     {
         private static readonly int decodeBufferSize = 4096;
         private static readonly Dictionary<ulong, float[]> decodeBuffers = [];
+        private static readonly Dictionary<ulong, DecodingSetup> decoders = [];
         private readonly VoiceChatServer server;
         private RelayClient? relay;
         private IPEndPoint? gameEndPoint;
@@ -104,9 +105,14 @@ namespace VoiceChatHost
                 decodeBuffers.Add(clientId, new float[decodeBufferSize]);
             }
 
+            if (!decoders.ContainsKey(clientId))
+            {
+                decoders.Add(clientId, new DecodingSetup());
+            }
+
             float[] decodeBuffer = decodeBuffers[clientId];
 
-            int decodedSampleCount = DecodingSetup.decoder.Decode(opusFrame, decodeBuffer, frameSize);
+            int decodedSampleCount = decoders[clientId].decoder.Decode(opusFrame, decodeBuffer, frameSize);
 
             Span<float> decoded = decodeBuffer.AsSpan(0, frameSize);
 
