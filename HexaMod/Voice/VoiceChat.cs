@@ -159,6 +159,8 @@ namespace HexaMod.Voice
             ));
         }
 
+        public static string room = null;
+
         public static void JoinVoiceRoom(string roomName)
         {
             voicechatTranscodeClient.SendMessage(ClientWrappedMessage.BuildMessage(
@@ -166,14 +168,22 @@ namespace HexaMod.Voice
                 Protocol.VoiceChatMessageType.VoiceRoomJoin,
                 Encoding.ASCII.GetBytes(roomName)
             ));
+
+            room = roomName;
+
+            StartListening();
         }
 
         public static void LeaveVoiceRoom()
         {
+            StopListening();
+
             voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
                 Protocol.VoiceChatMessageType.VoiceRoomLeave,
                 new byte[0]
             ));
+
+            room = null;
         }
     }
 }

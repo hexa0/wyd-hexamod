@@ -225,6 +225,12 @@ namespace HexaMod.UI
                 {
                     VoiceChat.SetRelay(newSettings.relay);
                 }
+
+                if (VoiceChatRoomsHook.wantedRoom != null)
+                {
+                    VoiceChat.JoinVoiceRoom(VoiceChatRoomsHook.wantedRoom);
+                    VoiceChatRoomsHook.wantedRoom = null;
+                }
             });
 
             mapInfo = Instantiate(Menus.root.Find("Version"), Menus.root).GetComponent<Text>();
@@ -460,6 +466,12 @@ namespace HexaMod.UI
                 if (PhotonNetwork.room != null)
                 {
                     loadingController.SetTaskState("RoomCreate", false);
+
+                    if (VoiceChatRoomsHook.wantedRoom != null)
+                    {
+                        VoiceChat.JoinVoiceRoom(VoiceChatRoomsHook.wantedRoom);
+                        VoiceChatRoomsHook.wantedRoom = null;
+                    }
                 }
             }
 

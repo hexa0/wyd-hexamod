@@ -252,7 +252,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Voice\VoiceChatLeaveHook.cs" />
+    <Compile Include="Voice\LobbyVoiceEmitterHook.cs" />
+    <Compile Include="Voice\VoiceChatRoomsHook.cs" />
     <Compile Include="Voice\VoiceChat.cs" />
     <Compile Include="Levels.cs" />
     <Compile Include="HexaMod.cs" />
