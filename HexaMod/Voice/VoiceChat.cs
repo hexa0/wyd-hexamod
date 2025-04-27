@@ -58,14 +58,20 @@ namespace HexaMod.Voice
             }
 
             Mod.Print("Mic Activated");
-            listening = true;
-            waveIn.StartRecording();
+            if (!listening)
+            {
+                listening = true;
+                waveIn.StartRecording();
+            }
         }
         public static void StopListening()
         {
             Mod.Print("Mic Deactivated");
-            listening = false;
-            waveIn.StopRecording();
+            if (listening)
+            {
+                listening = false;
+                waveIn.StopRecording();
+            }
         }
         private static bool microphoneInitialized = false;
         public static void InitMicrophone()
