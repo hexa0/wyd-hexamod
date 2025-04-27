@@ -105,10 +105,20 @@ namespace HexaVoiceChatShared.Net
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                // likely a throw when we change the relay server
+                // Console.WriteLine(e);
             }
 
-            socket.BeginReceive(Recieve, null);
+            try
+            {
+                socket.BeginReceive(Recieve, null);
+            }
+            catch (Exception e)
+            {
+                // also likely a throw from changing a relay server,
+                // if this is throwing from other means that is BAD
+                // Console.WriteLine(e);
+            }
         }
     }
 }

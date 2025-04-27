@@ -20,7 +20,7 @@ namespace HexaMod
         public void Init()
         {
             lobbySettings = new LobbySettings();
-            oldLobbySettings = lobbySettings;
+            oldLobbySettings = LobbySettings.Deserialize(LobbySettings.Serialize(lobbySettings));
             lobbySettings.mapName = PlayerPrefs.GetString("HMV2_CustomMap", "Default");
         }
 
@@ -30,6 +30,7 @@ namespace HexaMod
             currentLobbySettingsEvent.newSettings = lobbySettings;
             HexaMod.persistentLobby.lobbySettingsChanged.Invoke();
             HexaMod.hexaLobby.SetLobbySettings(lobbySettings, oldLobbySettings);
+            oldLobbySettings = LobbySettings.Deserialize(LobbySettings.Serialize(lobbySettings));
         }
     }
 }

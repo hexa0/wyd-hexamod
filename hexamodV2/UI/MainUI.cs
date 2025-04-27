@@ -6,6 +6,7 @@ using HexaMod.Util;
 using System.Linq;
 using HexaMod.ScriptableObjects;
 using System.Collections.Generic;
+using HexaMod.Voice;
 
 namespace HexaMod.UI
 {
@@ -216,6 +217,16 @@ namespace HexaMod.UI
                 UpdateUIForLobbySettings();
             });
 
+            HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
+            {
+                var oldSettings = HexaMod.persistentLobby.currentLobbySettingsEvent.oldSettings;
+                var newSettings = HexaMod.persistentLobby.currentLobbySettingsEvent.newSettings;
+                if (oldSettings.relay != newSettings.relay)
+                {
+                    VoiceChat.SetRelay(newSettings.relay);
+                }
+            });
+
             mapInfo = Instantiate(Menus.root.Find("Version"), Menus.root).GetComponent<Text>();
             mapInfo.name = "mapInfo";
             mapInfo.transform.localPosition = new Vector2(mapInfo.transform.localPosition.x, mapInfo.transform.localPosition.y * 0.8f);
@@ -338,7 +349,25 @@ namespace HexaMod.UI
 
                     LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
 
-                    Toggle[] controls = {
+                    GameObject relay = Templates.NewInputField(
+                        "relayServer", "Voice Chat Relay", menu.transform,
+                        new Vector2(250, -60),
+                        new UnityAction<string>[] { // edit
+                            
+                        },
+                        new UnityAction<string>[] { // submit
+                            delegate (string text)
+                            {
+                                HexaMod.persistentLobby.lobbySettings.relay = text;
+                                HexaMod.persistentLobby.CommitChanges();
+                            }
+                        }
+                    );
+
+                    InputField relayField = relay.transform.GetComponentInChildren<InputField>(true);
+                    relayField.text = ls.relay;
+
+                    GameObject[] controls = {
                         Templates.NewControlToggle(
                             "shufflePlayers", "Shuffle Players", ls.shufflePlayers, menu.transform,
                             Vector2.zero,
@@ -348,7 +377,7 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        ),
+                        ).gameObject,
 
                         Templates.NewControlToggle(
                             "disablePets", "Disable Pets", ls.disablePets, menu.transform,
@@ -359,7 +388,7 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        ),
+                        ).gameObject,
 
                         Templates.NewControlToggle(
                             "doorSounds", "Door Sounds", ls.doorSounds, menu.transform,
@@ -370,7 +399,7 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        ),
+                        ).gameObject,
 
                         Templates.NewControlToggle(
                             "modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
@@ -381,7 +410,7 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        ),
+                        ).gameObject,
 
                         Templates.NewControlToggle(
                             "allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
@@ -392,10 +421,10 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        ),
+                        ).gameObject,
 
                         Templates.NewControlToggle(
-                            "cheats", "Cheats", ls.allMustDie, menu.transform,
+                            "cheats", "Cheats", true, menu.transform,
                             Vector2.zero,
                             new UnityAction<bool>[] {
                                 delegate (bool value) {
@@ -403,13 +432,15 @@ namespace HexaMod.UI
                                     HexaMod.persistentLobby.CommitChanges();
                                 }
                             }
-                        )
+                        ).gameObject,
+
+                        relay
                     };
 
                     for (int i = 0; i < controls.Count(); i++)
                     {
-                        Toggle control = controls[i];
-                        control.transform.localPosition = bottomLeft + new Vector2(0f, gap * i);
+                        var control = controls[i];
+                        control.transform.localPosition = new Vector2(control.transform.localPosition.x, control.transform.localPosition.y) + bottomLeft + new Vector2(0f, gap * i);
                     }
                 }
             };

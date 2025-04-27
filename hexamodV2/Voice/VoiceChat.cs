@@ -18,13 +18,13 @@ namespace HexaMod.Voice
         public static bool testMode = false;
         public static Dictionary<ulong, List<short[]>> audioBuffers = new Dictionary<ulong, List<short[]>>();
         public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
-        public static VoiceChatClient voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), Ports.transcode));
+        public static VoiceChatClient voicechatTranscodeClient;
         public static Process internalTranscodeServerProcess = new Process()
         {
             StartInfo = new ProcessStartInfo()
             {
                 FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice/VoiceChatHost.exe"),
-                Arguments = "t 127.0.0.1",
+                Arguments = "t 127.39.20.0", // 39200
                 UseShellExecute = false
             }
         };
@@ -84,6 +84,7 @@ namespace HexaMod.Voice
             };
 
             internalTranscodeServerProcess.Start();
+            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(IPAddress.Parse("127.39.20.0"), Ports.transcode));
         }
 
         public static void InitUnityForVoiceChat()
@@ -98,7 +99,8 @@ namespace HexaMod.Voice
             audioConfiguration.speakerMode = AudioSpeakerMode.Stereo;
 
             AudioSettings.Reset(audioConfiguration);
-            StartListening();
+
+            InitMicrophone();
 
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
