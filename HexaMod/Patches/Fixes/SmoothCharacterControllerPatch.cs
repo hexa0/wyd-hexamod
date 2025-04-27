@@ -29,13 +29,17 @@ namespace HexaMod.Patches
         [HarmonyPostfix]
         static void RunFixedUpdateOnUpdate(ref FirstPersonController __instance)
         {
-            var oldDelta = Time.fixedDeltaTime;
-            SmoothCharacterControllerPatchGlobal.isRunningFromPatch = true;
-            Time.fixedDeltaTime = Time.deltaTime;
-            MethodInfo fixedUpdateMethod = AccessTools.Method(__instance.GetType(), "FixedUpdate");
-            fixedUpdateMethod?.Invoke(__instance, null);
-            SmoothCharacterControllerPatchGlobal.isRunningFromPatch = false;
-            Time.fixedDeltaTime = oldDelta;
+            PhotonView netView = __instance.GetComponent<PhotonView>();
+            if (netView & netView.isMine)
+            {
+                var oldDelta = Time.fixedDeltaTime;
+                SmoothCharacterControllerPatchGlobal.isRunningFromPatch = true;
+                Time.fixedDeltaTime = Time.deltaTime;
+                MethodInfo fixedUpdateMethod = AccessTools.Method(__instance.GetType(), "FixedUpdate");
+                fixedUpdateMethod?.Invoke(__instance, null);
+                SmoothCharacterControllerPatchGlobal.isRunningFromPatch = false;
+                Time.fixedDeltaTime = oldDelta;
+            }
         }
     }
 }
