@@ -118,16 +118,19 @@ namespace HexaMod
 
         public static void HandleSpawnTeleport(FirstPersonController player)
         {
-            Mod.Print($"handle player {player.name}");
-            if (player.name.ToLower().StartsWith("dad"))
+            if (dadSpawn && babySpawn)
             {
-                Mod.Print($"teleport dad {player.name}");
-                player.transform.position = dadSpawn.spots[0].position;
-            }
-            else if (player.name.ToLower().StartsWith("baby"))
-            {
-                Mod.Print($"teleport baby {player.name}");
-                player.transform.position = babySpawn.spots[0].position;
+                Mod.Print($"handle player {player.name}");
+                if (player.name.ToLower().StartsWith("dad"))
+                {
+                    Mod.Print($"teleport dad {player.name}");
+                    player.transform.position = dadSpawn.spots[0].position;
+                }
+                else if (player.name.ToLower().StartsWith("baby"))
+                {
+                    Mod.Print($"teleport baby {player.name}");
+                    player.transform.position = babySpawn.spots[0].position;
+                }
             }
         }
 
