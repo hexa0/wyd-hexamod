@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaMod", "HexaMod\HexaMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatHost", "VoiceChatHost\VoiceChatHost.csproj", "{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatSharedNet9", "VoiceChatSharedNet9\VoiceChatSharedNet9.csproj", "{37184A77-C889-436E-A38C-D30EA4B7E135}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatShared", "VoiceChatShared\VoiceChatShared.csproj", "{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}"
 EndProject
 Global
@@ -33,6 +35,14 @@ Global
 		{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}.Release|x64.ActiveCfg = Release|Any CPU
 		{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}.Release|x64.Build.0 = Release|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Debug|x64.Build.0 = Debug|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Release|x64.ActiveCfg = Release|Any CPU
+		{37184A77-C889-436E-A38C-D30EA4B7E135}.Release|x64.Build.0 = Release|Any CPU
 		{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}.Debug|x64.ActiveCfg = Debug|Any CPU
