@@ -2,7 +2,7 @@
 
 namespace HexaMod.Patches
 {
-    [HarmonyPatch()]
+    [HarmonyPatch]
     internal class MorePlayers
     {
         [HarmonyPatch(typeof(PhotonNetworkManager), "Start")]
