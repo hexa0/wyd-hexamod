@@ -18,6 +18,30 @@ namespace HexaMod.Voice
             }
         }
 
+        [HarmonyPatch(typeof(PhotonNetwork), "LeaveLobby")]
+        [HarmonyPrefix]
+        static void LeaveLobby()
+        {
+            Mod.Print($"LeaveLobby");
+            wantedRoom = null;
+            if (VoiceChat.room != null)
+            {
+                VoiceChat.LeaveVoiceRoom();
+            }
+        }
+
+        [HarmonyPatch(typeof(PhotonNetwork), "Disconnect")]
+        [HarmonyPrefix]
+        static void Disconnect()
+        {
+            Mod.Print($"Disconnect");
+            wantedRoom = null;
+            if (VoiceChat.room != null)
+            {
+                VoiceChat.LeaveVoiceRoom();
+            }
+        }
+
         public static string wantedRoom = null;
 
         [HarmonyPatch(typeof(PhotonNetwork), "JoinRoom", new Type[] { typeof(string) })]
