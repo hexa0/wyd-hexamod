@@ -297,6 +297,7 @@ namespace HexaMod.UI
 
                     currentShirtColorInputField = shirtColorInputField.transform.GetComponentInChildren<InputField>(true);
                     currentShirtColorInputField.text = GetCurrentShirtColorHex();
+                    currentShirtColorInputField.characterLimit = 7;
                 }
                 { // Host Options
                     foreach (string menuName in Menus.hostMenus)

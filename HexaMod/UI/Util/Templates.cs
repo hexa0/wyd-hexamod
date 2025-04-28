@@ -20,6 +20,8 @@ namespace HexaMod.UI.Util
             GameObject LobbyNameOriginal = Menus.online.Find("LobbyName").gameObject;
             GameObject SetSpectateOriginal = Menus.root.Find(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
 
+            LobbyNameOriginal.transform.GetChild(0).GetComponent<InputField>().characterLimit = 32;
+
             if (!buttonTemplate)
             {
                 buttonTemplate = Object.Instantiate(playLocalButton).GetComponent<Button>();
@@ -41,6 +43,7 @@ namespace HexaMod.UI.Util
                 field.onValueChanged = new InputField.OnChangeEvent();
                 field.onEndEdit = new InputField.SubmitEvent();
 
+                field.characterLimit = 0;
                 field.text = "";
                 field.name = "InputField";
                 text.text = "textInputFieldTemplate";
