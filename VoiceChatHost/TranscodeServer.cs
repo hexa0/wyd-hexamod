@@ -134,13 +134,13 @@ namespace VoiceChatHost
             server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.SpeakingStateUpdated, [speaking ? (byte)1 : (byte)0]), gameEndPoint);
         }
 
-        public TranscodeServer(string ip)
+        public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
         {
             EncodingSetup.Init();
 
             server = new VoiceChatServer(new IPEndPoint(
                 IPAddress.Parse(ip),
-                HexaVoiceChat.Ports.transcode
+                port
             ));
 
             server.OnMessage(VoiceChatMessageType.PCMData, OnPCM);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using HexaVoiceChatShared.MessageProtocol;
@@ -15,16 +16,26 @@ namespace HexaMod.Voice
 {
     internal static class VoiceChat
     {
+        static int FreePort()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return port;
+        }
+
         public static bool testMode = false;
         public static Dictionary<ulong, List<short[]>> audioBuffers = new Dictionary<ulong, List<short[]>>();
         public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
         public static VoiceChatClient voicechatTranscodeClient;
+        private static int transcodeServerPort = FreePort();
         public static Process internalTranscodeServerProcess = new Process()
         {
             StartInfo = new ProcessStartInfo()
             {
                 FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice/VoiceChatHost.exe"),
-                Arguments = "t 127.39.20.0", // 39200
+                Arguments = $"t 127.39.20.0 {transcodeServerPort}", // 39200
                 UseShellExecute = false
             }
         };
@@ -90,7 +101,7 @@ namespace HexaMod.Voice
             };
 
             internalTranscodeServerProcess.Start();
-            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(IPAddress.Parse("127.39.20.0"), Ports.transcode));
+            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(IPAddress.Parse("127.39.20.0"), transcodeServerPort));
         }
 
         public static void InitUnityForVoiceChat()

@@ -20,7 +20,7 @@ namespace VoiceChatHost
             switch (host.type)
             {
                 case Host.HostType.Transcode:
-                    new TranscodeServer(args[1]);
+                    new TranscodeServer(args[1], int.Parse(args[2]));
                     break;
                 case Host.HostType.Relay:
                     new RelayServer(args[1]);
