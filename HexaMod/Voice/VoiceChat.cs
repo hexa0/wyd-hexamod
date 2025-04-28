@@ -170,10 +170,22 @@ namespace HexaMod.Voice
 
         public static void SetRelay(string ip)
         {
+            string oldRoom = room;
+
+            if (room != null)
+            {
+                LeaveVoiceRoom();
+            }
+
             voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
                 Protocol.VoiceChatMessageType.SwitchRelay,
                 Encoding.ASCII.GetBytes(ip)
             ));
+
+            if (oldRoom != null)
+            {
+                JoinVoiceRoom(oldRoom);
+            }
         }
 
         public static string room = null;

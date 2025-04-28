@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -55,6 +56,8 @@ namespace HexaMod
                 {
                     LobbySettings deserializedSettings = LobbySettings.Deserialize(System.Convert.FromBase64String(data));
                     lobbySettings = deserializedSettings;
+
+                    VoiceChat.SetRelay(lobbySettings.relay);
                 }
             }
             catch (Exception e)
