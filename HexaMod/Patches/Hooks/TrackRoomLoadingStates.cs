@@ -18,6 +18,21 @@ namespace HexaMod.Patches
         static void JoinRoom()
         {
             HexaMod.mainUI.loadingController.SetTaskState("RoomJoin", true);
+            HexaMod.persistentLobby.SetInOtherLobby(true);
+        }
+
+        [HarmonyPatch(typeof(PhotonNetwork), "LeaveRoom")]
+        [HarmonyPrefix]
+        static void LeaveRoom()
+        {
+            HexaMod.persistentLobby.SetInOtherLobby(false);
+        }
+
+        [HarmonyPatch(typeof(PhotonNetwork), "Disconnect")]
+        [HarmonyPrefix]
+        static void Disconnect()
+        {
+            HexaMod.persistentLobby.SetInOtherLobby(false);
         }
 
         [HarmonyPatch(typeof(PhotonNetwork), "JoinLobby", new Type[] { typeof(TypedLobby) })]

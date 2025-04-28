@@ -6,6 +6,7 @@ namespace HexaMod
 {
     public class HexaPersistentLobby : MonoBehaviour
     {
+        private LobbySettings lobbySettingsBackup;
         public LobbySettings lobbySettings;
         public Dictionary<int, bool> dads = new Dictionary<int, bool>();
         private LobbySettings oldLobbySettings;
@@ -20,8 +21,20 @@ namespace HexaMod
         public void Init()
         {
             lobbySettings = new LobbySettings();
-            oldLobbySettings = LobbySettings.Deserialize(LobbySettings.Serialize(lobbySettings));
+            oldLobbySettings = LobbySettings.Copy(lobbySettings);
             lobbySettings.mapName = PlayerPrefs.GetString("HMV2_CustomMap", "Default");
+        }
+
+        private bool inOtherLobby = false;
+
+        public void SetInOtherLobby(bool inLobbyNew)
+        {
+            inOtherLobby = inLobbyNew;
+
+            if (!inLobbyNew)
+            {
+                lobbySettings = lobbySettingsBackup;
+            }
         }
 
         public void CommitChanges()
@@ -30,7 +43,11 @@ namespace HexaMod
             currentLobbySettingsEvent.newSettings = lobbySettings;
             HexaMod.persistentLobby.lobbySettingsChanged.Invoke();
             HexaMod.hexaLobby.SetLobbySettings(lobbySettings, oldLobbySettings);
-            oldLobbySettings = LobbySettings.Deserialize(LobbySettings.Serialize(lobbySettings));
+            oldLobbySettings = LobbySettings.Copy(lobbySettings);
+            if (!inOtherLobby)
+            {
+                lobbySettingsBackup = lobbySettings;
+            }
         }
     }
 }

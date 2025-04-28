@@ -43,5 +43,10 @@ namespace HexaMod
                 return (LobbySettings)serializer.Deserialize(memoryStream);
             }
         }
+
+        public static LobbySettings Copy(LobbySettings lobby)
+        {
+            return Deserialize(Serialize(lobby));
+        }
     }
 }
