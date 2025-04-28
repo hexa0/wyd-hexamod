@@ -3,7 +3,7 @@ using System.Collections;
 using HexaMod.Voice;
 using UnityEngine;
 
-namespace HexaMod
+namespace HexaMod.Voice
 {
     public class PlayerVoiceEmitterRPC : MonoBehaviour
     {

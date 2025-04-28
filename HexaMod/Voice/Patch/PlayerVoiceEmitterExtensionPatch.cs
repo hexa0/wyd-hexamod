@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Voice
 {
     [HarmonyPatch(typeof(FirstPersonController))]
     internal class PlayerVoiceEmitterExtensionPatch

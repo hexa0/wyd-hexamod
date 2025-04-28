@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 
 namespace HexaMod
 {
@@ -26,8 +27,9 @@ namespace HexaMod
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 serializer.Serialize(memoryStream, lobby);
+                byte[] data = memoryStream.ToArray();
 
-                return memoryStream.ToArray();
+                return data;
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -22,7 +23,7 @@ namespace HexaMod
         {
             lobbySettings = new LobbySettings();
             oldLobbySettings = LobbySettings.Copy(lobbySettings);
-            lobbySettings.mapName = PlayerPrefs.GetString("HMV2_CustomMap", "Default");
+            Load();
         }
 
         private bool inOtherLobby = false;
@@ -38,6 +39,30 @@ namespace HexaMod
             }
         }
 
+        public void Save()
+        {
+            byte[] serializedSettings = LobbySettings.Serialize(lobbySettings);
+            PlayerPrefs.SetString("HMV2_LobbySettings", System.Convert.ToBase64String(serializedSettings));
+        }
+
+        public void Load()
+        {
+            try
+            {
+                string data = PlayerPrefs.GetString("HMV2_LobbySettings", "none");
+
+                if (data != "none")
+                {
+                    LobbySettings deserializedSettings = LobbySettings.Deserialize(System.Convert.FromBase64String(data));
+                    lobbySettings = deserializedSettings;
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Error($"LobbySettings failed to load:\n{e}");
+            }
+        }
+
         public void CommitChanges()
         {
             currentLobbySettingsEvent.oldSettings = oldLobbySettings;
@@ -48,6 +73,7 @@ namespace HexaMod
             if (!inOtherLobby)
             {
                 lobbySettingsBackup = lobbySettings;
+                Save();
             }
         }
     }

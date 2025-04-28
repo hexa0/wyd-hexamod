@@ -255,6 +255,7 @@
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
+    <Compile Include="Voice\Patch\QuitFix.cs" />
     <Compile Include="Voice\Script\PlayerVoiceEmitterRPC.cs" />
     <Compile Include="Voice\Patch\VoiceChatRoomsHook.cs" />
     <Compile Include="Voice\VoiceChat.cs" />
