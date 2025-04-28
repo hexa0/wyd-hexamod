@@ -29,7 +29,7 @@ namespace HexaMod.Voice
                 emitters = null;
             }
 
-            int players = __instance.daddyPlayerIds.Count + __instance.babyPlayerIds.Count;
+            int players = __instance.daddyPlayerIds.Count + __instance.babyPlayerIds.Count - 1;
             emitters = new GameObject[players];
 
             Mod.Print($"Making {players} VoiceEmitter object(s).");
