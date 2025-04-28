@@ -6,20 +6,13 @@ namespace HexaMod.Voice
     [HarmonyPatch]
     internal class LobbyVoiceEmitterHook
     {
-        static VoiceEmitter[] emitters;
+        static GameObject[] emitters;
 
         [HarmonyPatch(typeof(PlayerNames), "Start")]
         [HarmonyPrefix]
         static void Start(ref PlayerNames __instance)
         {
             emitters = null;
-            AudioSource voiceSource = __instance.gameObject.AddComponent<AudioSource>();
-            voiceSource.spatialBlend = 0f;
-            voiceSource.spatialize = false;
-            voiceSource.spread = 1f;
-            voiceSource.bypassEffects = true;
-            voiceSource.loop = true;
-            voiceSource.volume = 1f;
         }
 
         [HarmonyPatch(typeof(PlayerNames), "RefreshNameList")]
@@ -30,20 +23,28 @@ namespace HexaMod.Voice
             {
                 foreach (var emitter in emitters)
                 {
-                    GameObject.DestroyImmediate(emitter);
+                    GameObject.Destroy(emitter);
                 }
 
                 emitters = null;
             }
 
             int players = __instance.daddyPlayerIds.Count + __instance.babyPlayerIds.Count;
-            emitters = new VoiceEmitter[players - 1];
+            emitters = new GameObject[players];
 
-            Mod.Print($"Making {players - 1} VoiceEmitter object(s).");
+            Mod.Print($"Making {players} VoiceEmitter object(s).");
 
-            for (int i = 0; i < players - 1; i++)
+            for (int i = 0; i < players; i++)
             {
-                emitters[i] = __instance.gameObject.AddComponent<VoiceEmitter>();
+                emitters[i] = new GameObject($"voice {i}").AddComponent<VoiceEmitter>().gameObject;
+
+                AudioSource voiceSource = emitters[i].AddComponent<AudioSource>();
+                voiceSource.spatialBlend = 0f;
+                voiceSource.spatialize = false;
+                voiceSource.spread = 1f;
+                voiceSource.bypassEffects = true;
+                voiceSource.loop = true;
+                voiceSource.volume = 1f;
             }
 
             int playerIndex = 0;
@@ -52,7 +53,7 @@ namespace HexaMod.Voice
                 if (player != PhotonNetwork.player)
                 {
                     Mod.Print($"Setup VoiceEmitter {playerIndex} (dad)");
-                    emitters[playerIndex].clientId = (ulong)player.ID;
+                    emitters[playerIndex].GetComponent<VoiceEmitter>().clientId = (ulong)player.ID;
                     playerIndex++;
                 }
             });
@@ -61,7 +62,7 @@ namespace HexaMod.Voice
                 if (player != PhotonNetwork.player)
                 {
                     Mod.Print($"Setup VoiceEmitter {playerIndex} (baby)");
-                    emitters[playerIndex].clientId = (ulong)player.ID;
+                    emitters[playerIndex].GetComponent<VoiceEmitter>().clientId = (ulong)player.ID;
                     playerIndex++;
                 }
             });
