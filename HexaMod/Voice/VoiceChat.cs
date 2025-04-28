@@ -201,6 +201,8 @@ namespace HexaMod.Voice
             ));
 
             room = null;
+            speakingStates.Clear();
+            audioBuffers.Clear();
         }
     }
 }

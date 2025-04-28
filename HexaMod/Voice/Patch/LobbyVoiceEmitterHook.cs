@@ -23,7 +23,7 @@ namespace HexaMod.Voice
             {
                 foreach (var emitter in emitters)
                 {
-                    GameObject.Destroy(emitter);
+                    Object.Destroy(emitter);
                 }
 
                 emitters = null;
@@ -36,7 +36,7 @@ namespace HexaMod.Voice
 
             for (int i = 0; i < players; i++)
             {
-                emitters[i] = new GameObject($"voice {i}").AddComponent<VoiceEmitter>().gameObject;
+                emitters[i] = new GameObject($"voice {i}");
 
                 AudioSource voiceSource = emitters[i].AddComponent<AudioSource>();
                 voiceSource.spatialBlend = 0f;
@@ -45,6 +45,14 @@ namespace HexaMod.Voice
                 voiceSource.bypassEffects = true;
                 voiceSource.loop = true;
                 voiceSource.volume = 1f;
+
+                VoiceEmitter voiceEmitter = emitters[i].AddComponent<VoiceEmitter>();
+
+                voiceEmitter.enabled = false;
+                voiceSource.enabled = false;
+
+                voiceSource.enabled = true;
+                voiceEmitter.enabled = true;
             }
 
             int playerIndex = 0;

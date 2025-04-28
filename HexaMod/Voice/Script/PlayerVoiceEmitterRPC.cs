@@ -17,7 +17,7 @@ namespace HexaMod
 
         IEnumerator Wait()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return 0;
 
             if (gameObject.name == HexaMod.networkManager.playerObj.name)
             {
@@ -34,6 +34,8 @@ namespace HexaMod
         {
             RPC("SetVoiceId", PhotonTargets.Others, new object[] { BitConverter.GetBytes(id) });
         }
+
+        AudioSource voiceSource;
 
         [PunRPC]
         public void SetVoiceId(byte[] id)
@@ -53,21 +55,38 @@ namespace HexaMod
                 }
             }
 
-            AudioSource audioSource = model.AddComponent<AudioSource>();
-            audioSource.playOnAwake = true;
-            audioSource.volume = 1f;
-            audioSource.maxDistance = 25f;
-            audioSource.minDistance = 1.5f;
-            audioSource.rolloffMode = AudioRolloffMode.Linear;
-            audioSource.spatialBlend = 1f;
-            audioSource.dopplerLevel = 0f;
-            audioSource.spatialize = true;
-            audioSource.spread = 0f;
-            audioSource.bypassEffects = true;
-            audioSource.loop = true;
+            voiceSource = model.AddComponent<AudioSource>();
+            voiceSource.playOnAwake = true;
+            voiceSource.volume = 1f;
+            voiceSource.maxDistance = 25f;
+            voiceSource.minDistance = 1.5f;
+            voiceSource.rolloffMode = AudioRolloffMode.Linear;
+            voiceSource.spatialBlend = 1f;
+            voiceSource.dopplerLevel = 0f;
+            voiceSource.spatialize = true;
+            voiceSource.spread = 0f;
+            voiceSource.bypassEffects = true;
+            voiceSource.loop = true;
 
             VoiceEmitter voiceEmitter = model.AddComponent<VoiceEmitter>();
             voiceEmitter.clientId = BitConverter.ToUInt64(id, 0);
+
+            voiceEmitter.enabled = false;
+            voiceSource.enabled = false;
+
+            voiceSource.enabled = true;
+            voiceEmitter.enabled = true;
+        }
+
+        public void FixedUpdate()
+        {
+            if (HexaMod.gameStateController != null && voiceSource != null)
+            {
+                if (HexaMod.gameStateController.gameOver)
+                {
+                    voiceSource.spatialBlend = 0f;
+                }
+            }
         }
     }
 }

@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace HexaMod.Voice
 {
-    [RequireComponent(typeof(AudioSource))]
     public class VoiceEmitter : MonoBehaviour
     {
         public AudioSource audioSource;
