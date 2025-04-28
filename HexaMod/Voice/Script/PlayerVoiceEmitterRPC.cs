@@ -54,6 +54,7 @@ namespace HexaMod
             }
 
             AudioSource audioSource = model.AddComponent<AudioSource>();
+            audioSource.playOnAwake = true;
             audioSource.volume = 1f;
             audioSource.maxDistance = 25f;
             audioSource.minDistance = 1.5f;

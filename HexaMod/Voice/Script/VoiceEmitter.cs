@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,7 +17,6 @@ namespace HexaMod.Voice
         {
             audioSource = GetComponent<AudioSource>();
             audioSource.dopplerLevel = 0f;
-            audioSource.Play();
         }
 
         private short[] NextBuffer()

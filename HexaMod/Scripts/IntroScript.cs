@@ -48,6 +48,7 @@ namespace HexaMod
             if (VoiceChat.testMode)
             {
                 AudioSource mic = gameObject.AddComponent<AudioSource>();
+                mic.playOnAwake = true;
                 mic.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
                 mic.spatialBlend = 0f;
                 mic.spatialize = false;
