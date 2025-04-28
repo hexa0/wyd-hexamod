@@ -34,6 +34,7 @@ namespace HexaMod
             if (!inLobbyNew)
             {
                 lobbySettings = lobbySettingsBackup;
+                CommitChanges();
             }
         }
 
