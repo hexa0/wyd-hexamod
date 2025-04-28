@@ -275,7 +275,7 @@
     <Compile Include="Patches\Fixes\PlayerTargetNameFix.cs" />
     <Compile Include="Patches\Fixes\SharpCharacterReplication.cs" />
     <Compile Include="ScriptableObjects\ModLevel.cs" />
-    <Compile Include="Patches\Fixes\BabyAudioFix.cs" />
+    <Compile Include="Patches\Fixes\CharacterAudioPanningFix.cs" />
     <Compile Include="Patches\Fixes\CanvasRaycast.cs" />
     <Compile Include="Patches\PunRpcExtensions\CharacterControllerExtensions.cs" />
     <Compile Include="Patches\Feature\CustomLevels\CustomSpawn.cs" />

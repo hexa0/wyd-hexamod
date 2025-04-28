@@ -5,7 +5,7 @@ using UnityStandardAssets.Characters.FirstPerson;
 namespace HexaMod.Patches
 {
     [HarmonyPatch(typeof(FirstPersonController))]
-    internal class BabyAudioFix
+    internal class CharacterAudioPanningFix
     {
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
@@ -17,7 +17,7 @@ namespace HexaMod.Patches
             {
                 var audioEmitter = __instance.GetComponent<AudioSource>();
                 audioEmitter.bypassEffects = true;
-                audioEmitter.panStereo = -0.4f;
+                // audioEmitter.panStereo = -0.4f;
                 audioEmitter.spatialBlend = 0;
                 audioEmitter.volume = 0.35f;
             }
