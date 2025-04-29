@@ -6,22 +6,35 @@ namespace VoiceChatHost.Type
 {
     public class VoiceRoom
     {
-        public string roomHash;
+        public string roomName;
         public Dictionary<ulong, IPEndPoint> clients = new Dictionary<ulong, IPEndPoint>();
+        public Dictionary<ulong, long> clientLastEvents = new Dictionary<ulong, long>();
         public long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         public VoiceChatServer server;
 
-        public VoiceRoom(string roomHash, VoiceChatServer server)
+        public VoiceRoom(string roomName, VoiceChatServer server)
         {
-            Console.WriteLine($"room with hash {roomHash} was created");
+            Console.WriteLine($"room with hash {roomName} was created");
 
-            this.roomHash = roomHash;
+            this.roomName = roomName;
             this.server = server;
         }
 
         public void UpdateLastEvent()
         {
             lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        public void UpdateLastClientEvent(ulong clientId)
+        {
+            if (!clientLastEvents.ContainsKey(clientId))
+            {
+                clientLastEvents.Add(clientId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            }
+            else
+            {
+                clientLastEvents[clientId] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
 
         public void SendToClient(ulong client, byte[] message)
@@ -38,11 +51,13 @@ namespace VoiceChatHost.Type
             }
         }
 
-        public void SendToAllClientsExcept(ulong excludedClient, byte[] message)
+        public void SendToAllClientsExcept(ulong excludedClientId, byte[] message)
         {
+            UpdateLastClientEvent(excludedClientId);
+
             foreach (var client in clients)
             {
-                if (client.Key != excludedClient)
+                if (client.Key != excludedClientId)
                 {
                     SendToClient(client.Key, message);
                 }
@@ -53,22 +68,24 @@ namespace VoiceChatHost.Type
         {
             if (!clients.ContainsKey(clientId))
             {
-                Console.WriteLine($"client {clientId} joined room with hash {roomHash}");
+                Console.WriteLine($"client {clientId} joined room with hash {roomName}");
                 clients.Add(clientId, clientEndPoint);
+                clientLastEvents.Add(clientId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             }
         }
 
         public void RemoveClient(ulong clientId)
         {
-            Console.WriteLine($"client {clientId} left room with hash {roomHash}");
+            Console.WriteLine($"client {clientId} left room with hash {roomName}");
 
             if (clients.ContainsKey(clientId))
             {
                 clients.Remove(clientId);
+                clientLastEvents.Remove(clientId);
             }
             else
             {
-                throw new Exception($"client {clientId} isn't apart of room {roomHash} that they are trying to leave");
+                throw new Exception($"client {clientId} isn't apart of room {roomName} that they are trying to leave");
             }
         }
     }

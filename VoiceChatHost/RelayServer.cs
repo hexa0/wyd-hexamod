@@ -18,17 +18,17 @@ namespace VoiceChatHost
             DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
 
             VoiceRoom room;
-            string roomHash = Encoding.ASCII.GetString(clientMessage.body);
+            string roomName = Encoding.ASCII.GetString(clientMessage.body);
 
-            if (rooms.ContainsKey(roomHash))
+            if (rooms.ContainsKey(roomName))
             {
-                room = rooms[roomHash];
+                room = rooms[roomName];
                 room.UpdateLastEvent();
             }
             else
             {
-                room = new VoiceRoom(roomHash, server);
-                rooms.Add(roomHash, room);
+                room = new VoiceRoom(roomName, server);
+                rooms.Add(roomName, room);
             }
 
             room.AddClient(clientMessage.clientId, from);
@@ -37,11 +37,11 @@ namespace VoiceChatHost
         private void VoiceRoomLeave(DecodedVoiceChatMessage message, IPEndPoint from)
         {
             DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
-            string roomHash = Encoding.ASCII.GetString(clientMessage.body);
+            string roomName = Encoding.ASCII.GetString(clientMessage.body);
 
-            if (rooms.ContainsKey(roomHash))
+            if (rooms.ContainsKey(roomName))
             {
-                rooms[roomHash].RemoveClient(clientMessage.clientId);
+                rooms[roomName].RemoveClient(clientMessage.clientId);
             }
         }
 
@@ -86,10 +86,20 @@ namespace VoiceChatHost
                 long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 foreach (var room in rooms)
                 {
-                    if (room.Value.clients.Count == 0 || (now - room.Value.lastEvent > 3))
+                    if (room.Value.clients.Count == 0 || (now - room.Value.lastEvent > 10))
                     {
                         Console.WriteLine($"room {room.Key} was destroyed");
                         rooms.Remove(room.Key);
+                    }
+                    else
+                    {
+                        foreach (var lastEvent in room.Value.clientLastEvents)
+                        {
+                            if (now - lastEvent.Value > 3)
+                            {
+                                room.Value.RemoveClient(lastEvent.Key);
+                            }
+                        }
                     }
                 }
                 Thread.Sleep(100);
