@@ -28,12 +28,18 @@ namespace HexaVoiceChatShared
 
                 PCMData = 10,
                 SwitchRelay,
+                KeepTranscodeAlive,
+
+                SetRNNoiseEnabled,
+                SetMicDeviceId, // DeviceNumber
+                SetMicBufferMillis, // BufferMilliseconds
+                SetMicBufferCount, // NumberOfBuffers
+                SetBitrate,
 
                 // audio data events sent between the internal server and the relay server
 
                 Opus = 20,
                 SpeakingStateUpdated,
-                GetRoomState,
             }
         }
     }

@@ -24,7 +24,18 @@ namespace HexaMod.Voice
             if (buffer == null)
             {
                 buffer = lastBuffer;
-                if (VoiceChat.speakingStates[clientId])
+
+                bool speaking = false;
+
+                if (VoiceChat.speakingStates.ContainsKey(clientId))
+                {
+                    if (VoiceChat.speakingStates[clientId])
+                    {
+                        speaking = true;
+                    }
+                }
+
+                if (speaking)
                 {
                     for (int i = 0; i < buffer.Length; i++)
                     {
@@ -142,20 +153,27 @@ namespace HexaMod.Voice
 
         private void OnAudioFilterRead(float[] data, int channels)
         {
-            if (VoiceChat.audioBuffers.ContainsKey(clientId))
+            try
             {
-                buffers = VoiceChat.audioBuffers[clientId];
-
-                int sampleCount = data.Length / channels;
-                short[] monoInput = NextChunk(sampleCount);
-
-                for (int sample = 0; sample < sampleCount; sample++)
+                if (VoiceChat.audioBuffers.ContainsKey(clientId))
                 {
-                    float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
+                    buffers = VoiceChat.audioBuffers[clientId];
 
-                    data[sample * 2] = currentSampleValue * volumeL;
-                    data[(sample * 2) + 1] = currentSampleValue * volumeR;
+                    int sampleCount = data.Length / channels;
+                    short[] monoInput = NextChunk(sampleCount);
+
+                    for (int sample = 0; sample < sampleCount; sample++)
+                    {
+                        float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
+
+                        data[sample * 2] = currentSampleValue * volumeL;
+                        data[(sample * 2) + 1] = currentSampleValue * volumeR;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Mod.Fatal(e);
             }
         }
     }

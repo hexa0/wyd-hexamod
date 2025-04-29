@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using HexaVoiceChatShared.MessageProtocol;
 using HexaVoiceChatShared.Net;
 using NAudio.Wave;
@@ -29,16 +30,8 @@ namespace HexaMod.Voice
         public static Dictionary<ulong, List<short[]>> audioBuffers = new Dictionary<ulong, List<short[]>>();
         public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
         public static VoiceChatClient voicechatTranscodeClient;
-        private static int transcodeServerPort = FreePort();
-        public static Process internalTranscodeServerProcess = new Process()
-        {
-            StartInfo = new ProcessStartInfo()
-            {
-                FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice/VoiceChatHost.exe"),
-                Arguments = $"t 127.39.20.0 {transcodeServerPort}", // 39200
-                UseShellExecute = false
-            }
-        };
+        private static int transcodeServerPort = 0;
+        public static Process internalTranscodeServerProcess;
 
         public static int micSampleRate = 48000;
         public static int micBufferMillis = 20;
@@ -96,12 +89,54 @@ namespace HexaMod.Voice
                 if (listening)
                 {
                     Mod.Warn("mic dropout, attempt to reconnect");
-                    waveIn.StartRecording();
+                    try
+                    {
+                        waveIn.StopRecording();
+                    }
+                    catch { }
+                    try
+                    {
+                        waveIn.StartRecording();
+                    }
+                    catch { }
+                }
+            };
+
+            StartListening();
+        }
+
+        public static void InitTranscodeServerProcess()
+        {
+            Mod.Print("Start internalTranscodeServerProcess");
+
+            transcodeServerPort = FreePort();
+
+            internalTranscodeServerProcess = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice/VoiceChatHost.exe"),
+                    Arguments = $"t 127.0.0.1 {transcodeServerPort}", // 39200
+                    UseShellExecute = false
                 }
             };
 
             internalTranscodeServerProcess.Start();
-            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(IPAddress.Parse("127.39.20.0"), transcodeServerPort));
+        }
+
+        public static void InitTranscodeServerConnection()
+        {
+            Mod.Print("Start voicechatTranscodeClient");
+
+            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(
+                IPAddress.Parse("127.0.0.1"),
+                transcodeServerPort
+            ));
+
+            voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
+            voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
+
+            new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
         }
 
         public static void InitUnityForVoiceChat()
@@ -116,11 +151,6 @@ namespace HexaMod.Voice
             audioConfiguration.speakerMode = AudioSpeakerMode.Stereo;
 
             AudioSettings.Reset(audioConfiguration);
-
-            InitMicrophone();
-
-            voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
-            voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
         }
 
         static void OnPCMData(DecodedVoiceChatMessage message, IPEndPoint from)
@@ -155,12 +185,15 @@ namespace HexaMod.Voice
         {
             try
             {
-                voicechatTranscodeClient.SendMessage(
-                    VoiceChatMessage.BuildMessage(
-                        Protocol.VoiceChatMessageType.PCMData,
-                        e.Buffer
-                    )
-                );
+                if (room != null)
+                {
+                    voicechatTranscodeClient.SendMessage(
+                        VoiceChatMessage.BuildMessage(
+                            Protocol.VoiceChatMessageType.PCMData,
+                            e.Buffer
+                        )
+                    );
+                }
             }
             catch (Exception ex)
             {
@@ -199,14 +232,10 @@ namespace HexaMod.Voice
             ));
 
             room = roomName;
-
-            StartListening();
         }
 
         public static void LeaveVoiceRoom()
         {
-            StopListening();
-
             voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
                 Protocol.VoiceChatMessageType.VoiceRoomLeave,
                 new byte[0]
@@ -215,6 +244,28 @@ namespace HexaMod.Voice
             room = null;
             speakingStates.Clear();
             audioBuffers.Clear();
+        }
+
+        public static void KeepTranscodeAliveThread()
+        {
+            while (true)
+            {
+                try
+                {
+                    voicechatTranscodeClient.SendMessage(
+                        VoiceChatMessage.BuildMessage(
+                            Protocol.VoiceChatMessageType.KeepTranscodeAlive,
+                            new byte[0]
+                        )
+                    );
+                }
+                catch (Exception e)
+                {
+                    Mod.Warn(e);
+                }
+
+                Thread.Sleep(500);
+            }
         }
     }
 }

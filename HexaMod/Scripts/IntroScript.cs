@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -39,7 +38,7 @@ namespace HexaMod
             // begin the startup routine
             if (!VoiceChat.testMode)
             {
-                StartCoroutine(InitHexaModAfterFrame());
+                InitHexaMod();
             }
         }
 
@@ -72,83 +71,63 @@ namespace HexaMod
             Camera.current.backgroundColor = new Color(0.05f, 0.05f, 0.05f);
         }
 
-        IEnumerator InitHexaModAfterFrame()
+        void ActionText(string actionText)
         {
-            yield return 0;
-            InitHexaMod();
+            Mod.Print(actionText);
+            text.text = actionText;
         }
+
+
+        AsyncOperation sceneLoadOperation;
 
         void InitHexaMod()
         {
-            void InitStartupResources()
-            {
-                HexaMod.InitStartupBundle();
-                text.font = HexaMod.startupBundle.LoadAsset<Font>("Assets/ModResources/Init/Font/osd.ttf");
-                var loadingAnimation = HexaMod.startupBundle.LoadAsset<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
-                Instantiate(loadingAnimation).transform.SetParent(transform, false);
-            }
-
-            void InitStartupResourcesDone()
-            {
-                DoActionThenWait(InitCoreResources, "Loading HexaModCoreResourcesBundle", InitCoreResourcesDone);
-            }
-
-            void InitCoreResources()
-            {
-                HexaMod.InitCoreBundle();
-            }
-
-            void InitCoreResourcesDone()
-            {
-                DoActionThenWait(PatchGame, "Patching Game", PatchGameDone);
-            }
-
-            void PatchGame()
-            {
-                Mod.Instance.harmony.PatchAll();
-            }
-
-            void PatchGameDone()
-            {
-                DoActionThenWait(InitGlobalState, "Init HexaMod", InitGlobalStateDone);
-            }
-
-            void InitGlobalState()
-            {
-                HexaMod.Init();
-            }
-
-            void InitGlobalStateDone()
-            {
-                DoActionThenWait(LoadGame, "Loading Game", LoadGameDone);
-            }
-
-            void LoadGame()
-            {
-                SceneManager.LoadSceneAsync(1);
-            }
-
-            void LoadGameDone()
-            {
-
-            }
-
-            DoActionThenWait(InitStartupResources, "Init HexaModInitResourcesBundle", InitStartupResourcesDone);
+            StartCoroutine(Load());
         }
 
-        void DoActionThenWait(Action callback, string actionText, Action onDone)
+        IEnumerator Load()
         {
-            IEnumerator Wait()
+            Mod.Warn(Application.installerName);
+            ActionText("Loading HexaModInitResourcesBundle");
+            yield return 0;
+            HexaMod.InitStartupBundle();
+            text.font = HexaMod.startupBundle.LoadAsset<Font>("Assets/ModResources/Init/Font/osd.ttf");
+            var loadingAnimation = HexaMod.startupBundle.LoadAsset<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
+            Instantiate(loadingAnimation).transform.SetParent(transform, false);
+            ActionText("Loading HexaModCoreResourcesBundle");
+            yield return 0;
+            HexaMod.InitCoreBundle();
+            ActionText("Patching Game");
+            yield return 0;
+            Mod.Instance.harmony.PatchAll();
+            ActionText("Start Scene Load");
+            yield return new WaitForSeconds(0.5f); // avoid a crash?
+            sceneLoadOperation = SceneManager.LoadSceneAsync(1);
+            sceneLoadOperation.allowSceneActivation = false;
+            ActionText("Init VoiceChat\n(Settings)");
+            yield return 0;
+            VoiceChat.InitUnityForVoiceChat();
+            ActionText("Init VoiceChat\n(Transcode Process)");
+            yield return 0;
+            VoiceChat.InitTranscodeServerProcess();
+            ActionText("Init VoiceChat\n(Transcode Connection)");
+            yield return new WaitForSeconds(1f);
+            VoiceChat.InitTranscodeServerConnection();
+            ActionText("Init VoiceChat\n(Microphone)");
+            yield return 0;
+            VoiceChat.InitMicrophone();
+            ActionText("Init HexaMod");
+            yield return 0;
+            HexaMod.Init();
+            ActionText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
+            yield return 0;
+            sceneLoadOperation.allowSceneActivation = true;
+            while (!sceneLoadOperation.isDone)
             {
+                ActionText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
                 yield return 0;
-                callback();
-                onDone();
             }
-
-            Mod.Print(actionText);
-            text.text = actionText;
-
-            StartCoroutine(Wait());
+            ActionText($"Loading Game Done");
         }
     }
 }

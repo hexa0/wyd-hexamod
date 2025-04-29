@@ -30,7 +30,9 @@ namespace HexaMod.Patches
         [HarmonyPostfix]
         static void Update(ref FirstPersonController __instance)
         {
-            if (!fixingNaN)
+            PhotonView netView = __instance.GetComponent<PhotonView>();
+
+            if (netView.isMine && !fixingNaN)
             {
                 var privateFields = Traverse.Create(__instance);
                 var m_Camera = privateFields.Field<Camera>("m_Camera");

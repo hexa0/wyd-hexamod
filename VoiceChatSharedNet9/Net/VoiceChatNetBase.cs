@@ -17,7 +17,7 @@ namespace HexaVoiceChatShared.Net
         internal Action<DecodedVoiceChatMessage, IPEndPoint> onMessageAction;
         internal Dictionary<VoiceChatMessageType, Action<DecodedVoiceChatMessage, IPEndPoint>> onMessageActions = new Dictionary<VoiceChatMessageType, Action<DecodedVoiceChatMessage, IPEndPoint>>();
         
-        public void SendMessage(byte[] data, IPEndPoint client = null)
+        public void SendMessage(byte[] data, IPEndPoint? client = null)
         {
             socket.SendAsync(data, data.Length, client);
             // socket.BeginSend(data, data.Length, client, null, null);

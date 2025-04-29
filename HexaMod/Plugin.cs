@@ -54,7 +54,6 @@ namespace HexaMod
 
             log.LogInfo($"Plugin {GUID} is loaded!");
 
-            VoiceChat.InitUnityForVoiceChat();
             GameObject.Find("Canvas").AddComponent<IntroScript>().InitIntro();
         }
     }

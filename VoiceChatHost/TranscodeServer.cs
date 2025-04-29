@@ -6,6 +6,7 @@ using VoiceChatHost.Opus;
 using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
 using System.Text;
 using System.Diagnostics;
+using RNNoise.NET;
 
 namespace VoiceChatHost
 {
@@ -15,12 +16,16 @@ namespace VoiceChatHost
         private static readonly int decodeBufferSize = 4096;
         private static readonly Dictionary<ulong, float[]> decodeBuffers = [];
         private static readonly Dictionary<ulong, DecodingSetup> decoders = [];
+        private static readonly Denoiser rnNoiseDenoiser = new Denoiser();
         private readonly VoiceChatServer server;
         private RelayClient? relay;
         private IPEndPoint? gameEndPoint;
         private bool isSpeaking = false;
         private double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
         private ulong clientId = (ulong)Process.GetCurrentProcess().Id;
+        private static long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        private static float shortMaxValueMul = 1f / short.MaxValue;
+        private static float shortMinValueMul = 1f / short.MinValue;
 
         private void OnSwitchRelay(DecodedVoiceChatMessage message, IPEndPoint from)
         {
@@ -70,6 +75,9 @@ namespace VoiceChatHost
                 throw new Exception("OnVoiceRoomLeave() cannot be called when there is no RelayClient");
             }
 
+            decoders.Clear();
+            decodeBuffers.Clear();
+
             relay.LeaveRoom();
         }
 
@@ -79,10 +87,21 @@ namespace VoiceChatHost
 
             if (relay != null)
             {
-                short[] pcm = new short[message.body.Length / 2];
+                int sampleCount = message.body.Length / 2;
+
+                short[] pcm = new short[sampleCount];
                 Buffer.BlockCopy(message.body, 0, pcm, 0, message.body.Length);
 
-                float maxVolume = MathF.Max((float)pcm.Max() / short.MaxValue, (float)pcm.Min() / short.MinValue);
+                float[] floatAudio = new float[sampleCount];
+
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    floatAudio[i] = pcm[i] * shortMaxValueMul;
+                }
+
+                rnNoiseDenoiser.Denoise(floatAudio);
+
+                float maxVolume = MathF.Max(floatAudio.Max(), -floatAudio.Min());
                 bool shouldBeSpeaking = maxVolume > 0.005; // > 0.5%
 
                 if (shouldBeSpeaking)
@@ -108,7 +127,8 @@ namespace VoiceChatHost
                 if (isSpeaking)
                 {
                     lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
-                    int frameSize = EncodingSetup.encoder.Encode(pcm, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
+
+                    int frameSize = EncodingSetup.encoder.Encode(floatAudio, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
                     Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
 
                     relay.SendOpus(encoded.ToArray(), pcm.Length);
@@ -152,6 +172,11 @@ namespace VoiceChatHost
             server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.SpeakingStateUpdated, [speaking ? (byte)1 : (byte)0]), gameEndPoint);
         }
 
+        private void OnKeepTranscodeAlive(DecodedVoiceChatMessage message, IPEndPoint from)
+        {
+            lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
         public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
         {
             EncodingSetup.Init();
@@ -165,6 +190,7 @@ namespace VoiceChatHost
             server.OnMessage(VoiceChatMessageType.SwitchRelay, OnSwitchRelay);
             server.OnMessage(VoiceChatMessageType.VoiceRoomJoin, OnVoiceRoomJoin);
             server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, OnVoiceRoomLeave);
+            server.OnMessage(VoiceChatMessageType.KeepTranscodeAlive, OnKeepTranscodeAlive);
 
             new Thread(new ThreadStart(KeepAliveThread)).Start();
 
@@ -173,9 +199,19 @@ namespace VoiceChatHost
 
         static void KeepAliveThread()
         {
-            while (true)
+            bool alive = true;
+
+            while (alive)
             {
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
+
+                long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                if (now - lastEvent > 5)
+                {
+                    Console.WriteLine("transcode server died of old age");
+                    alive = false;
+                }
             }
         }
     }
