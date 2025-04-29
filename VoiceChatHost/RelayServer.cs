@@ -63,6 +63,12 @@ namespace VoiceChatHost
             }
         }
 
+        private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
+        {
+            Console.WriteLine($"got handshake, respond to {from}");
+            server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, []), from);
+        }
+
         public RelayServer(string ip)
         {
             server = new VoiceChatServer(new IPEndPoint(
@@ -75,6 +81,7 @@ namespace VoiceChatHost
             server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, VoiceRoomLeave);
             server.OnMessage(VoiceChatMessageType.Opus, ForwardToOthersInRoom);
             server.OnMessage(VoiceChatMessageType.SpeakingStateUpdated, ForwardToOthersInRoom);
+            server.OnMessage(VoiceChatMessageType.Handshake, OnHandshake);
 
             new Thread(new ThreadStart(RelayServerMainThread)).Start();
         }

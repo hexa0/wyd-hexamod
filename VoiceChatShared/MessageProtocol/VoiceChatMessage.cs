@@ -1,6 +1,7 @@
 ﻿using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
 using System.Text;
 using System;
+using System.Linq;
 
 namespace HexaVoiceChatShared.MessageProtocol
 {
@@ -29,7 +30,9 @@ namespace HexaVoiceChatShared.MessageProtocol
         }
         internal static bool CheckForHeader(byte[] message)
         {
-            return Encoding.ASCII.GetString(message, 0, magicHeader.Length) == Encoding.ASCII.GetString(magicHeader);
+            var segment = new byte[magicHeader.Length];
+            Buffer.BlockCopy(message, 0, segment, 0, magicHeader.Length);
+            return magicHeader.SequenceEqual(segment);
         }
         internal static bool CheckForFooter(byte[] message)
         {

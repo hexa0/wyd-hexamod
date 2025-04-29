@@ -7,17 +7,13 @@ namespace HexaMod
 {
     public class AsyncLevelLoader : MonoBehaviour
     {
-        public bool loadIsDone = false;
         public UnityEvent loadCompleted;
-
-        private uint levelBundlesToLoad = 0;
-        private uint loadedLevelBundles = 0;
 
         public void LoadLevel(string filename, string file)
         {
             Mod.Print($"load level bundle {filename}");
 
-            levelBundlesToLoad++;
+            Levels.levelBundlesToLoad++;
             StartCoroutine(LoadLevelsAsync(filename, file));
         }
 
@@ -36,16 +32,25 @@ namespace HexaMod
 
             foreach (ModLevel level in allLevels.allAssets)
             {
-                Levels.levels.Add(level);
-                Mod.Print($"Found level {level.levelNameReadable}");
+                if (filename == "title_screen")
+                {
+                    Mod.Print($"Found title level {level.levelNameReadable}");
+                    Levels.titleLevel = level;
+                }
+                else
+                {
+                    Levels.levels.Add(level);
+                    Mod.Print($"Found level {level.levelNameReadable}");
+                }
             };
 
-            loadedLevelBundles++;
+            Levels.loadedLevelBundles++;
 
-            if (loadedLevelBundles >= levelBundlesToLoad)
+            if (Levels.loadedLevelBundles >= Levels.levelBundlesToLoad)
             {
-                loadIsDone = true;
-                loadCompleted.Invoke();
+                Mod.Print("All Levels Loaded!");
+                Levels.loadedLevels = true;
+                // loadCompleted.Invoke();
             }
         }
     }

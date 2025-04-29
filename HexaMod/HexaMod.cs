@@ -110,7 +110,7 @@ namespace HexaMod
             Menus.menuController.DeactivateAll();
             networkManager.ConnectToPhoton();
             testGameWaitingForConn = true;
-            networkManager.isDad = persistentLobby.lobbySettings.shufflePlayers ? spawnAsDad : !spawnAsDad;
+            networkManager.isDad = spawnAsDad;
         }
     }
 }

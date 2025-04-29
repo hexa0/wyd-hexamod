@@ -92,7 +92,7 @@ namespace HexaMod.UI
             }
         }
 
-        public void UpdateUIForLobbySettings()
+        public void UpdateUIForLobbyState()
         {
             ModLevel foundLevel = Levels.titleLevel;
 
@@ -130,7 +130,7 @@ namespace HexaMod.UI
         {
             HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", false);
 
-            UpdateUIForLobbySettings();
+            UpdateUIForLobbyState();
 
             // Map Menu
 
@@ -214,7 +214,7 @@ namespace HexaMod.UI
 
             HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
             {
-                UpdateUIForLobbySettings();
+                UpdateUIForLobbyState();
             });
 
             HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
@@ -239,220 +239,217 @@ namespace HexaMod.UI
             mapInfo.transform.SetParent(Menus.root.Find("Version"));
             mapInfo.text = "";
 
-            if (!HexaMod.networkManager.gameStarted)
-            {
-                { // Title Screen
-                    Mod.Print("edit title screen");
+            { // Title Screen
+                Mod.Print("edit title screen");
 
-                    Menus.root.Find("Version").GetComponent<Text>().text = HexaMod.networkManager.version;
+                Menus.root.Find("Version").GetComponent<Text>().text = HexaMod.networkManager.version;
 
-                    // booooring
-                    Menus.titleScreen.Find("Return To New WYD").gameObject.SetActive(false);
+                // booooring
+                Menus.titleScreen.Find("Return To New WYD").gameObject.SetActive(false);
 
-                    // why was this disabled?
-                    // oh nvm it works on private lobbies 💀
-                    Menus.gameList.Find("JoinRandom").gameObject.SetActive(false);
+                // why was this disabled?
+                // oh nvm it works on private lobbies 💀
+                Menus.gameList.Find("JoinRandom").gameObject.SetActive(false);
 
-                    Vector2 TopLeft = new Vector2(-160f, -118f);
+                Vector2 TopLeft = new Vector2(-160f, -118f);
 
-                    Button testDad = Templates.NewButton(
-                        "testDad", "Test Dad", Menus.titleScreen,
-                        TopLeft + new Vector2(
-                            Templates.ButtonGap.x * -1,
-                            Templates.ButtonGap.y * 0
-                        ),
-                        new UnityAction[] { ButtonCallbacks.TestDadButton }
-                    );
+                Button testDad = Templates.NewButton(
+                    "testDad", "Test Dad", Menus.titleScreen,
+                    TopLeft + new Vector2(
+                        Templates.ButtonGap.x * -1,
+                        Templates.ButtonGap.y * 0
+                    ),
+                    new UnityAction[] { ButtonCallbacks.TestDadButton }
+                );
 
-                    Button testBaby = Templates.NewButton(
-                        "testBaby", "Test Baby", Menus.titleScreen,
-                        TopLeft + new Vector2(
-                            Templates.ButtonGap.x * -1,
-                            Templates.ButtonGap.y * -1
-                        ),
-                        new UnityAction[] { ButtonCallbacks.TestBabyButton }
-                    );
+                Button testBaby = Templates.NewButton(
+                    "testBaby", "Test Baby", Menus.titleScreen,
+                    TopLeft + new Vector2(
+                        Templates.ButtonGap.x * -1,
+                        Templates.ButtonGap.y * -1
+                    ),
+                    new UnityAction[] { ButtonCallbacks.TestBabyButton }
+                );
+
+                Button matchSettings = Templates.NewButton(
+                    "matchSettings", "Match Settings", Menus.titleScreen,
+                    TopLeft + new Vector2(
+                        Templates.ButtonGap.x * -1,
+                        Templates.ButtonGap.y * -2
+                    ),
+                    new UnityAction[] { ButtonCallbacks.MatchSettingsButton }
+                );
+            };
+            { // Character Customization Menu
+                Mod.Print("edit character customization menu");
+
+                GameObject shirtColorInputField = Templates.NewInputField(
+                    "ShirtColor", "Shirt Color (Hex)", Menus.characterCustomization,
+                    new Vector2(
+                        -468.4f,
+                        -520f
+                    ),
+                    new UnityAction<string>[] { ButtonCallbacks.UpdateShirtColorVisual },
+                    new UnityAction<string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.UpdateShirtColorVisual }
+                );
+
+                currentShirtColorInputField = shirtColorInputField.transform.GetComponentInChildren<InputField>(true);
+                currentShirtColorInputField.text = GetCurrentShirtColorHex();
+                currentShirtColorInputField.characterLimit = 7;
+            }
+            { // Host Options
+                foreach (string menuName in Menus.hostMenus)
+                {
+                    Transform menu = Menus.root.Find(menuName);
 
                     Button matchSettings = Templates.NewButton(
-                        "matchSettings", "Match Settings", Menus.titleScreen,
-                        TopLeft + new Vector2(
-                            Templates.ButtonGap.x * -1,
-                            Templates.ButtonGap.y * -2
-                        ),
+                        "matchSettings", "Match Settings", menu,
+                        new Vector2(790f, 445.5f),
                         new UnityAction[] { ButtonCallbacks.MatchSettingsButton }
                     );
-                };
-                { // Character Customization Menu
-                    Mod.Print("edit character customization menu");
 
-                    GameObject shirtColorInputField = Templates.NewInputField(
-                        "ShirtColor", "Shirt Color (Hex)", Menus.characterCustomization,
-                        new Vector2(
-                            -468.4f,
-                            -520f
-                        ),
-                        new UnityAction<string>[] { ButtonCallbacks.UpdateShirtColorVisual },
-                        new UnityAction<string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.UpdateShirtColorVisual }
-                    );
+                    matchSettings.interactable = false;
 
-                    currentShirtColorInputField = shirtColorInputField.transform.GetComponentInChildren<InputField>(true);
-                    currentShirtColorInputField.text = GetCurrentShirtColorHex();
-                    currentShirtColorInputField.characterLimit = 7;
+                    matchSettingButtons.Add(matchSettings);
                 }
-                { // Host Options
-                    foreach (string menuName in Menus.hostMenus)
+            };
+            { // Match Settings
+                Mod.Print("make MatchSettings menu");
+
+                GameObject menu = Menus.NewMenu("MatchSettings");
+                int menuId = Menus.FindMenu(menu.name);
+                Button backButton = Templates.MakeBackButton(menu.transform);
+                Menus.menuController.startBtn[menuId] = backButton.gameObject;
+
+                var changeMapButton = Templates.NewButton(
+                    "changeMap", "Map", menu.transform,
+                    backButton.transform.localPosition + new Vector3(
+                        Templates.ButtonGap.x,
+                        0,
+                        0
+                    ),
+                    new UnityAction[] { ButtonCallbacks.ChangeMapButton }
+                );
+
+                changeMapButton.interactable = false;
+
+                if (Levels.loadedLevels)
+                {
+                    changeMapButton.interactable = Levels.levels.Count > 0;
+                    OnLevelsLoaded();
+                }
+                else
+                {
+                    HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", true);
+
+                    HexaMod.asyncLevelLoader.loadCompleted.AddListener(delegate ()
                     {
-                        Transform menu = Menus.root.Find(menuName);
-
-                        Button matchSettings = Templates.NewButton(
-                            "matchSettings", "Match Settings", menu,
-                            new Vector2(790f, 445.5f),
-                            new UnityAction[] { ButtonCallbacks.MatchSettingsButton }
-                        );
-
-                        matchSettings.interactable = false;
-
-                        matchSettingButtons.Add(matchSettings);
-                    }
-                };
-                { // Match Settings
-                    Mod.Print("make MatchSettings menu");
-
-                    GameObject menu = Menus.NewMenu("MatchSettings");
-                    int menuId = Menus.FindMenu(menu.name);
-                    Button backButton = Templates.MakeBackButton(menu.transform);
-                    Menus.menuController.startBtn[menuId] = backButton.gameObject;
-
-                    var changeMapButton = Templates.NewButton(
-                        "changeMap", "Map", menu.transform,
-                        backButton.transform.localPosition + new Vector3(
-                            Templates.ButtonGap.x,
-                            0,
-                            0
-                        ),
-                        new UnityAction[] { ButtonCallbacks.ChangeMapButton }
-                    );
-
-                    changeMapButton.interactable = false;
-
-                    if (HexaMod.asyncLevelLoader.loadIsDone)
-                    {
-                        changeMapButton.interactable = Levels.levels.Count > 0;
                         OnLevelsLoaded();
-                    }
-                    else
-                    {
-                        HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", true);
+                        changeMapButton.interactable = Levels.levels.Count > 0;
+                    });
+                }
 
-                        HexaMod.asyncLevelLoader.loadCompleted.AddListener(delegate ()
-                        {
-                            OnLevelsLoaded();
-                            changeMapButton.interactable = Levels.levels.Count > 0;
-                        });
-                    }
+                Vector2 bottomLeft = new Vector2(200f, 200f);
+                float gap = 75f;
 
-                    Vector2 bottomLeft = new Vector2(200f, 200f);
-                    float gap = 75f;
+                LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
 
-                    LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
-
-                    GameObject relay = Templates.NewInputField(
-                        "relayServer", "Voice Chat Relay", menu.transform,
-                        new Vector2(250, -60),
-                        new UnityAction<string>[] { // edit
+                GameObject relay = Templates.NewInputField(
+                    "relayServer", "Voice Chat Relay", menu.transform,
+                    new Vector2(250, -60),
+                    new UnityAction<string>[] { // edit
                             
-                        },
-                        new UnityAction<string>[] { // submit
-                            delegate (string text)
-                            {
-                                HexaMod.persistentLobby.lobbySettings.relay = text;
+                    },
+                    new UnityAction<string>[] { // submit
+                        delegate (string text)
+                        {
+                            HexaMod.persistentLobby.lobbySettings.relay = text;
+                            HexaMod.persistentLobby.CommitChanges();
+                        }
+                    }
+                );
+
+                InputField relayField = relay.transform.GetComponentInChildren<InputField>(true);
+                relayField.text = ls.relay;
+
+                GameObject[] controls = {
+                    Templates.NewControlToggle(
+                        "shufflePlayers", "Shuffle Players", ls.shufflePlayers, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.shufflePlayers = value;
                                 HexaMod.persistentLobby.CommitChanges();
                             }
                         }
-                    );
+                    ).gameObject,
 
-                    InputField relayField = relay.transform.GetComponentInChildren<InputField>(true);
-                    relayField.text = ls.relay;
-
-                    GameObject[] controls = {
-                        Templates.NewControlToggle(
-                            "shufflePlayers", "Shuffle Players", ls.shufflePlayers, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.shufflePlayers = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
+                    Templates.NewControlToggle(
+                        "disablePets", "Disable Pets", ls.disablePets, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.disablePets = value;
+                                HexaMod.persistentLobby.CommitChanges();
                             }
-                        ).gameObject,
+                        }
+                    ).gameObject,
 
-                        Templates.NewControlToggle(
-                            "disablePets", "Disable Pets", ls.disablePets, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.disablePets = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
+                    Templates.NewControlToggle(
+                        "doorSounds", "Door Sounds", ls.doorSounds, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.doorSounds = value;
+                                HexaMod.persistentLobby.CommitChanges();
                             }
-                        ).gameObject,
+                        }
+                    ).gameObject,
 
-                        Templates.NewControlToggle(
-                            "doorSounds", "Door Sounds", ls.doorSounds, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.doorSounds = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
+                    Templates.NewControlToggle(
+                        "modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
+                                HexaMod.persistentLobby.CommitChanges();
                             }
-                        ).gameObject,
+                        }
+                    ).gameObject,
 
-                        Templates.NewControlToggle(
-                            "modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
+                    Templates.NewControlToggle(
+                        "allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.allMustDie = value;
+                                HexaMod.persistentLobby.CommitChanges();
                             }
-                        ).gameObject,
+                        }
+                    ).gameObject,
 
-                        Templates.NewControlToggle(
-                            "allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.allMustDie = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
+                    Templates.NewControlToggle(
+                        "cheats", "Cheats", true, menu.transform,
+                        Vector2.zero,
+                        new UnityAction<bool>[] {
+                            delegate (bool value) {
+                                HexaMod.persistentLobby.lobbySettings.cheats = value;
+                                HexaMod.persistentLobby.CommitChanges();
                             }
-                        ).gameObject,
+                        }
+                    ).gameObject,
 
-                        Templates.NewControlToggle(
-                            "cheats", "Cheats", true, menu.transform,
-                            Vector2.zero,
-                            new UnityAction<bool>[] {
-                                delegate (bool value) {
-                                    HexaMod.persistentLobby.lobbySettings.cheats = value;
-                                    HexaMod.persistentLobby.CommitChanges();
-                                }
-                            }
-                        ).gameObject,
+                    relay
+                };
 
-                        relay
-                    };
-
-                    for (int i = 0; i < controls.Count(); i++)
-                    {
-                        var control = controls[i];
-                        control.transform.localPosition = new Vector2(control.transform.localPosition.x, control.transform.localPosition.y) + bottomLeft + new Vector2(0f, gap * i);
-                    }
+                for (int i = 0; i < controls.Count(); i++)
+                {
+                    var control = controls[i];
+                    control.transform.localPosition = new Vector2(control.transform.localPosition.x, control.transform.localPosition.y) + bottomLeft + new Vector2(0f, gap * i);
                 }
-            };
+            }
 
-            UpdateUIForLobbySettings();
+            UpdateUIForLobbyState();
         }
 
         public static string GetCurrentShirtColorHex()
@@ -460,8 +457,15 @@ namespace HexaMod.UI
             return PlayerPrefs.GetString("HMV2_ShirtColor", "#E76F3D");
         }
 
+        bool wasMasterClient = false;
         public void Update()
         {
+            if (PhotonNetwork.isMasterClient != wasMasterClient)
+            {
+                wasMasterClient = PhotonNetwork.isMasterClient;
+                UpdateUIForLobbyState();
+            }
+
             if (loadingController.GetTaskState("RoomCreate"))
             {
                 if (PhotonNetwork.room != null)

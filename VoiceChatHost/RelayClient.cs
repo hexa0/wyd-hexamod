@@ -100,6 +100,8 @@ namespace VoiceChatHost
                 HexaVoiceChat.Ports.relay
             ));
 
+            client.Connect(true);
+
             client.OnMessage(VoiceChatMessageType.SpeakingStateUpdated, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
             {
                 DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);

@@ -15,8 +15,15 @@ namespace HexaMod.Voice
             if (VoiceChat.internalTranscodeServerProcess != null)
             {
                 Mod.Print("Closing internalTranscodeServerProcess.");
-                VoiceChat.internalTranscodeServerProcess.Kill();
-                VoiceChat.internalTranscodeServerProcess = null;
+                try
+                {
+                    VoiceChat.internalTranscodeServerProcess.Kill();
+                    VoiceChat.internalTranscodeServerProcess = null;
+                }
+                catch
+                {
+                    // ignore
+                }
                 Mod.Print("Saving PlayerPrefs to disk.");
                 PlayerPrefs.Save();
                 Mod.Print("Quitting.");

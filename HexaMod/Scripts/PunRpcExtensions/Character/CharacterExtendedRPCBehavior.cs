@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using HexaMod.Patches;
 using HexaMod.UI;
 using HexaMod.Util;
 using UnityEngine;
@@ -68,6 +69,17 @@ namespace HexaMod
 
                 }
             }
+        }
+
+        [PunRPC]
+        public void FixNan(Vector3 characterPosition, Quaternion characterRotation, Vector3 cameraPosition, Quaternion cameraRotation)
+        {
+            NaNFixBehavior nanFixBehavior = gameObject.AddComponent<NaNFixBehavior>();
+            nanFixBehavior.firstPersonController = gameObject.GetComponent<FirstPersonController>();
+            nanFixBehavior.characterPosition = characterPosition;
+            nanFixBehavior.characterRotation = characterRotation;
+            nanFixBehavior.cameraPosition = cameraPosition;
+            nanFixBehavior.cameraRotation = cameraRotation;
         }
     }
 }

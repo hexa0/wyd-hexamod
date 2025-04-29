@@ -48,6 +48,7 @@ namespace HexaMod
 
         public void Load()
         {
+            Mod.Print("Loading LobbySettings");
             try
             {
                 string data = PlayerPrefs.GetString("HMV2_LobbySettings", "none");
@@ -55,9 +56,9 @@ namespace HexaMod
                 if (data != "none")
                 {
                     LobbySettings deserializedSettings = LobbySettings.Deserialize(System.Convert.FromBase64String(data));
+                    deserializedSettings.roundNumber = 0;
                     lobbySettings = deserializedSettings;
-
-                    VoiceChat.SetRelay(lobbySettings.relay);
+                    Mod.Print("Setup Saved Relay");
                 }
             }
             catch (Exception e)

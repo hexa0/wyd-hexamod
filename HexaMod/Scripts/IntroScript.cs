@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -85,9 +86,21 @@ namespace HexaMod
             StartCoroutine(Load());
         }
 
+        bool AttemptToConnect()
+        {
+            try
+            {
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         IEnumerator Load()
         {
-            Mod.Warn(Application.installerName);
             ActionText("Loading HexaModInitResourcesBundle");
             yield return 0;
             HexaMod.InitStartupBundle();
@@ -99,27 +112,72 @@ namespace HexaMod
             HexaMod.InitCoreBundle();
             ActionText("Patching Game");
             yield return 0;
-            Mod.Instance.harmony.PatchAll();
-            ActionText("Start Scene Load");
-            yield return new WaitForSeconds(0.5f); // avoid a crash?
-            sceneLoadOperation = SceneManager.LoadSceneAsync(1);
-            sceneLoadOperation.allowSceneActivation = false;
-            ActionText("Init VoiceChat\n(Settings)");
-            yield return 0;
-            VoiceChat.InitUnityForVoiceChat();
-            ActionText("Init VoiceChat\n(Transcode Process)");
-            yield return 0;
-            VoiceChat.InitTranscodeServerProcess();
-            ActionText("Init VoiceChat\n(Transcode Connection)");
-            yield return new WaitForSeconds(1f);
-            VoiceChat.InitTranscodeServerConnection();
-            ActionText("Init VoiceChat\n(Microphone)");
-            yield return 0;
-            VoiceChat.InitMicrophone();
+            Mod.Instance.harmony.PatchAll(Assembly.GetExecutingAssembly());
             ActionText("Init HexaMod");
             yield return 0;
             HexaMod.Init();
-            ActionText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
+            yield return 0;
+            ActionText($"Loading Level Bundles\n(?/?)");
+            while (!Levels.loadedLevels)
+            {
+                ActionText($"Loading Level Bundles\n({Levels.loadedLevelBundles}/{Levels.levelBundlesToLoad})");
+                yield return 0;
+            }
+            ActionText("Start Scene Load");
+            yield return 0;
+            VoiceChat.InitUnityForVoiceChat(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
+            sceneLoadOperation = SceneManager.LoadSceneAsync(1);
+            sceneLoadOperation.allowSceneActivation = false;
+            ActionText("Init VoiceChat\n(Transcode Process)");
+            yield return 0;
+            VoiceChat.InitTranscodeServerProcess();
+            VoiceChat.CreateTranscodeServerConnection();
+            ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
+            yield return 0;
+            int attempts = 0;
+            while (!VoiceChat.completedHandshake)
+            {
+                ActionText($"Init VoiceChat\n(Transcode Connection)\n(Attempt {attempts})");
+                yield return 0;
+
+                try
+                {
+                    VoiceChat.InitTranscodeServerConnection();
+                }
+                catch (Exception e)
+                {
+                    Mod.Warn(e);
+                }
+
+                yield return 0;
+
+                try
+                {
+                    VoiceChat.SendTranscodeServerHandshake();
+                }
+                catch (Exception e)
+                {
+                    Mod.Warn(e);
+                }
+
+                yield return 0;
+
+                attempts++;
+            }
+            ActionText("Init VoiceChat\n(Microphone)");
+            yield return 0;
+            VoiceChat.InitMicrophone();
+            ActionText("Init VoiceChat\n(Relay)");
+            yield return 0;
+            try
+            {
+                VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
+            }
+            catch
+            {
+
+            }
+            ActionText($"Loading Game\n(0%)");
             yield return 0;
             sceneLoadOperation.allowSceneActivation = true;
             while (!sceneLoadOperation.isDone)
@@ -127,7 +185,6 @@ namespace HexaMod
                 ActionText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
                 yield return 0;
             }
-            ActionText($"Loading Game Done");
         }
     }
 }

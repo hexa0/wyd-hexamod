@@ -124,19 +124,52 @@ namespace HexaMod.Voice
             internalTranscodeServerProcess.Start();
         }
 
-        public static void InitTranscodeServerConnection()
+        public static bool completedHandshake = false;
+        static void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
         {
-            Mod.Print("Start voicechatTranscodeClient");
+            if (!completedHandshake)
+            {
+                Mod.Print("Completed Handshake");
+                completedHandshake = true;
+                new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
+            }
+            else
+            {
+                Mod.Warn("Already Completed Handshake");
+            }
+        }
+
+        public static void CreateTranscodeServerConnection()
+        {
+            Mod.Print("Create voicechatTranscodeClient");
 
             voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"),
                 transcodeServerPort
             ));
+        }
+
+        public static void InitTranscodeServerConnection()
+        {
+            Mod.Print("Start voicechatTranscodeClient");
+
+            voicechatTranscodeClient.endPoint = null;
+            voicechatTranscodeClient.SwitchToEndPoint(new IPEndPoint(
+                IPAddress.Parse("127.0.0.1"),
+                transcodeServerPort
+            ));
+
+            Mod.Print("On Message");
 
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
+            voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.Handshake, OnHandshake);
+        }
 
-            new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
+        public static void SendTranscodeServerHandshake()
+        {
+            Mod.Print("Attempt Handshake");
+            voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(Protocol.VoiceChatMessageType.Handshake, new byte[1]));
         }
 
         public static void InitUnityForVoiceChat()
@@ -179,6 +212,11 @@ namespace HexaMod.Voice
         {
             DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
             speakingStates[clientMessage.clientId] = clientMessage.body[0] == 1;
+
+            if (clientMessage.body[0] == 1 && audioBuffers.ContainsKey(clientMessage.clientId))
+            {
+                audioBuffers[clientMessage.clientId].Clear();
+            }
         }
 
         static void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
@@ -238,7 +276,7 @@ namespace HexaMod.Voice
         {
             voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
                 Protocol.VoiceChatMessageType.VoiceRoomLeave,
-                new byte[0]
+                new byte[1]
             ));
 
             room = null;
@@ -255,7 +293,7 @@ namespace HexaMod.Voice
                     voicechatTranscodeClient.SendMessage(
                         VoiceChatMessage.BuildMessage(
                             Protocol.VoiceChatMessageType.KeepTranscodeAlive,
-                            new byte[0]
+                            new byte[1]
                         )
                     );
                 }

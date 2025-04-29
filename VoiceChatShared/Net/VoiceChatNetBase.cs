@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Net;
 using HexaVoiceChatShared.MessageProtocol;
 using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
+using System.Text;
 
 // huge shoutout to https://github.com/tom-weiland/tcp-udp-networking/tree/tutorial-part3 for being like the only source i could reference for implementing this, i was loosing my mind trying to make this two-way
 
@@ -13,7 +14,7 @@ namespace HexaVoiceChatShared.Net
     {
         internal Dictionary<string, FragmentQueue> fragmentQueue = new Dictionary<string, FragmentQueue>();
         internal UdpClient socket;
-        internal IPEndPoint endPoint;
+        public IPEndPoint endPoint;
         internal Action<DecodedVoiceChatMessage, IPEndPoint> onMessageAction;
         internal Dictionary<VoiceChatMessageType, Action<DecodedVoiceChatMessage, IPEndPoint>> onMessageActions = new Dictionary<VoiceChatMessageType, Action<DecodedVoiceChatMessage, IPEndPoint>>();
         
@@ -31,6 +32,7 @@ namespace HexaVoiceChatShared.Net
         {
             if (connectToEndPoint)
             {
+                Console.WriteLine($"VoiceChatClient: Connected to port {endPoint.Port} at {endPoint.Address}");
                 socket.Connect(endPoint);
             }
 
@@ -100,7 +102,8 @@ namespace HexaVoiceChatShared.Net
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Received broadcast from {from} : {Math.Round(bytes.Length / 128f, 3)} KiB, failed to decode, \n{exception}");
+                    queue.dataOffest = 0;
+                    Console.WriteLine($"Received broadcast from {from} : {Math.Round(bytes.Length / 128f, 3)} KiB, failed to decode {Encoding.ASCII.GetString(bytes)}, \n{exception}");
                 }
             }
             catch (Exception e)

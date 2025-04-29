@@ -40,6 +40,10 @@ namespace HexaVoiceChatShared
 
                 Opus = 20,
                 SpeakingStateUpdated,
+
+                // shared
+
+                Handshake = 30,
             }
         }
     }

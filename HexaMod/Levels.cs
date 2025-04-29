@@ -18,6 +18,10 @@ namespace HexaMod
         internal static List<ModLevel> levels = new List<ModLevel>();
         internal static ModLevel titleLevel;
 
+        public static bool loadedLevels = false;
+        public static uint levelBundlesToLoad = 0;
+        public static uint loadedLevelBundles = 0;
+
         public static class StaticAssets
         {
             public static GameObject outletExplosion;
@@ -39,8 +43,6 @@ namespace HexaMod
 
                 HexaMod.asyncLevelLoader.LoadLevel(filename, file);
             }
-
-            titleLevel = HexaMod.coreBundle.LoadAsset<ModLevel>("Assets/ModResources/Core/Level/Title.asset");
         }
 
         public static void CleanupDefaultLevel()

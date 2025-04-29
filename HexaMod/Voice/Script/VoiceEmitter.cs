@@ -122,10 +122,7 @@ namespace HexaMod.Voice
             if (speakingObject != null && VoiceChat.speakingStates.ContainsKey(clientId))
             {
                 var speaking = VoiceChat.speakingStates[clientId];
-                if (speakingObject.activeSelf != speaking)
-                {
-                    speakingObject.SetActive(speaking);
-                }
+                speakingObject.SetActive(speaking);
             }
 
             Transform cameraTransform = Camera.main.transform;

@@ -28,7 +28,7 @@ namespace HexaMod.Patches
                 SteamUserStats.SetAchievement(name);
                 SteamUserStats.StoreStats();
             }
-            catch (Exception e)
+            catch
             {
                 Mod.Warn("failed to unlock an achievement on the steam side, this error has been skipped to avoid game breaking bugs when playing offline/without launching through steam");
             }

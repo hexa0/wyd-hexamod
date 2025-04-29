@@ -62,6 +62,8 @@ namespace HexaMod.Patches
                     nanFixBehavior.characterRotation = characterRotationMemory[0];
                     nanFixBehavior.cameraPosition = cameraPositionMemory[0];
                     nanFixBehavior.cameraRotation = cameraRotationMemory[0];
+
+                    __instance.GetComponent<PhotonView>().RPC("FixNan", PhotonTargets.Others, new object[] { nanFixBehavior.characterPosition, nanFixBehavior.characterRotation, nanFixBehavior.cameraPosition, nanFixBehavior.cameraRotation });
                 }
             }
         }

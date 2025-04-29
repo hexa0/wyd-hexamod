@@ -102,7 +102,7 @@ namespace VoiceChatHost
                 rnNoiseDenoiser.Denoise(floatAudio);
 
                 float maxVolume = MathF.Max(floatAudio.Max(), -floatAudio.Min());
-                bool shouldBeSpeaking = maxVolume > 0.005; // > 0.5%
+                bool shouldBeSpeaking = maxVolume > 0.01; // > 1%
 
                 if (shouldBeSpeaking)
                 {
@@ -110,6 +110,7 @@ namespace VoiceChatHost
                     {
                         isSpeaking = true;
                         relay.SetSpeakingState(true);
+                        OnSpeakingState(clientId, true);
                     }
 
                     lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
@@ -117,17 +118,19 @@ namespace VoiceChatHost
                 else
                 {
                     double now = (DateTime.Now - start).TotalSeconds;
-                    if (now > lastSpeakingTime + 0.1d)
+                    if (now >= lastSpeakingTime + 0.25d)
                     {
-                        isSpeaking = false;
-                        relay.SetSpeakingState(false);
+                        if (isSpeaking)
+                        {
+                            isSpeaking = false;
+                            relay.SetSpeakingState(false);
+                            OnSpeakingState(clientId, false);
+                        }
                     }
                 }
 
                 if (isSpeaking)
                 {
-                    lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
-
                     int frameSize = EncodingSetup.encoder.Encode(floatAudio, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
                     Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
 
@@ -177,6 +180,12 @@ namespace VoiceChatHost
             lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
+        private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
+        {
+            Console.WriteLine($"got handshake, respond to {from}");
+            server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, [0]), from);
+        }
+
         public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
         {
             EncodingSetup.Init();
@@ -191,6 +200,7 @@ namespace VoiceChatHost
             server.OnMessage(VoiceChatMessageType.VoiceRoomJoin, OnVoiceRoomJoin);
             server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, OnVoiceRoomLeave);
             server.OnMessage(VoiceChatMessageType.KeepTranscodeAlive, OnKeepTranscodeAlive);
+            server.OnMessage(VoiceChatMessageType.Handshake, OnHandshake);
 
             new Thread(new ThreadStart(KeepAliveThread)).Start();
 
