@@ -19,7 +19,8 @@ namespace HexaVoiceChatShared.Net
         
         public void SendMessage(byte[] data, IPEndPoint client = null)
         {
-            socket.BeginSend(data, data.Length, client, null, null);
+            socket.SendAsync(data, data.Length, client);
+            // socket.BeginSend(data, data.Length, client, null, null);
         }
 
         public void OnMessage(VoiceChatMessageType type, Action<DecodedVoiceChatMessage, IPEndPoint> action)

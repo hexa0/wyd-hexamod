@@ -1,4 +1,5 @@
-﻿using Concentus;
+﻿using System.Text;
+using Concentus;
 using Concentus.Enums;
 
 
@@ -8,7 +9,7 @@ namespace VoiceChatHost.Opus
     {
         public static int sampleRate = 48000;
         public static int channels = 1;
-        private static int bitrateKB = 64;
+        private static int bitrateKB = 24;
 
         public static IOpusEncoder encoder = OpusCodecFactory.CreateEncoder(sampleRate, channels, OpusApplication.OPUS_APPLICATION_VOIP);
         public static byte[] encodeBuffer = new byte[16384];
