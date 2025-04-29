@@ -254,6 +254,8 @@
   <ItemGroup>
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
+    <Compile Include="Patches\Fixes\NanFix.cs" />
+    <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
     <Compile Include="Voice\Patch\QuitFix.cs" />

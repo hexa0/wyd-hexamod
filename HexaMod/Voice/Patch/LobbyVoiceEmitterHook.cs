@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace HexaMod.Voice
 {
@@ -7,12 +8,41 @@ namespace HexaMod.Voice
     internal class LobbyVoiceEmitterHook
     {
         static GameObject[] emitters;
+        static GameObject[] dadIndicators;
+        static GameObject[] babyIndicators;
 
         [HarmonyPatch(typeof(PlayerNames), "Start")]
         [HarmonyPrefix]
         static void Start(ref PlayerNames __instance)
         {
             emitters = null;
+
+            // local x 20
+            // remove button
+            // remove image
+            // set text to *
+
+/*            void onNameItem(GameObject gameObject)
+            {
+                var speakingIndicator = Object.Instantiate(gameObject.transform.Find("kickPlayer"), gameObject.transform);
+                speakingIndicator.name = "Speaking";
+
+                Object.Destroy(speakingIndicator.GetComponent<Button>());
+                Object.Destroy(speakingIndicator.GetComponent<Image>());
+
+                speakingIndicator.localPosition = new Vector2(20f, speakingIndicator.localPosition.y);
+                speakingIndicator.GetComponent<Text>().text = "*";
+            }
+
+            foreach (var item in __instance.daddyNames)
+            {
+                onNameItem(item.gameObject);
+            }
+
+            foreach (var item in __instance.babyNames)
+            {
+                onNameItem(item.gameObject);
+            }*/
         }
 
         [HarmonyPatch(typeof(PlayerNames), "RefreshNameList")]
@@ -27,6 +57,26 @@ namespace HexaMod.Voice
                 }
 
                 emitters = null;
+            }
+
+            if (dadIndicators != null)
+            {
+                foreach (var indicator in dadIndicators)
+                {
+                    Object.Destroy(indicator);
+                }
+
+                dadIndicators = null;
+            }
+
+            if (babyIndicators != null)
+            {
+                foreach (var indicator in babyIndicators)
+                {
+                    Object.Destroy(indicator);
+                }
+
+                babyIndicators = null;
             }
 
             int players = __instance.daddyPlayerIds.Count + __instance.babyPlayerIds.Count - 1;
@@ -56,6 +106,9 @@ namespace HexaMod.Voice
             }
 
             int playerIndex = 0;
+
+            dadIndicators = new GameObject[__instance.daddyPlayerIds.Count];
+            babyIndicators = new GameObject[__instance.babyPlayerIds.Count];
 
             __instance.daddyPlayerIds.ForEach(player => {
                 if (player != PhotonNetwork.player)

@@ -17,7 +17,7 @@ namespace HexaMod.Voice
 
         IEnumerator Wait()
         {
-            yield return 0;
+            yield return new WaitForSeconds(0.5f);
 
             if (gameObject.name == HexaMod.networkManager.playerObj.name)
             {

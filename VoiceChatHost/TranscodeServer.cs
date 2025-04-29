@@ -11,6 +11,7 @@ namespace VoiceChatHost
 {
     public class TranscodeServer
     {
+        private static DateTime start = DateTime.Now;
         private static readonly int decodeBufferSize = 4096;
         private static readonly Dictionary<ulong, float[]> decodeBuffers = [];
         private static readonly Dictionary<ulong, DecodingSetup> decoders = [];
@@ -18,6 +19,7 @@ namespace VoiceChatHost
         private RelayClient? relay;
         private IPEndPoint? gameEndPoint;
         private bool isSpeaking = false;
+        private double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
         private ulong clientId = (ulong)Process.GetCurrentProcess().Id;
 
         private void OnSwitchRelay(DecodedVoiceChatMessage message, IPEndPoint from)
@@ -82,14 +84,30 @@ namespace VoiceChatHost
 
                 float maxVolume = MathF.Max((float)pcm.Max() / short.MaxValue, (float)pcm.Min() / short.MinValue);
                 bool shouldBeSpeaking = maxVolume > 0.005; // > 0.5%
-                if (isSpeaking != shouldBeSpeaking)
+
+                if (shouldBeSpeaking)
                 {
-                    isSpeaking = shouldBeSpeaking;
-                    relay.SetSpeakingState(isSpeaking);
+                    if (isSpeaking != shouldBeSpeaking)
+                    {
+                        isSpeaking = true;
+                        relay.SetSpeakingState(true);
+                    }
+
+                    lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
+                }
+                else
+                {
+                    double now = (DateTime.Now - start).TotalSeconds;
+                    if (now > lastSpeakingTime + 0.1d)
+                    {
+                        isSpeaking = false;
+                        relay.SetSpeakingState(false);
+                    }
                 }
 
                 if (isSpeaking)
                 {
+                    lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
                     int frameSize = EncodingSetup.encoder.Encode(pcm, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
                     Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
 

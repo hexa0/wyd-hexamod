@@ -7,6 +7,7 @@ namespace HexaMod.Voice
 {
     public class VoiceEmitter : MonoBehaviour
     {
+        public GameObject speakingObject;
         public AudioSource audioSource;
         public ulong clientId = 0;
         private List<short[]> buffers;
@@ -107,6 +108,15 @@ namespace HexaMod.Voice
 
         private void Update()
         {
+            if (speakingObject != null && VoiceChat.speakingStates.ContainsKey(clientId))
+            {
+                var speaking = VoiceChat.speakingStates[clientId];
+                if (speakingObject.activeSelf != speaking)
+                {
+                    speakingObject.SetActive(speaking);
+                }
+            }
+
             Transform cameraTransform = Camera.main.transform;
             Vector3 unitVector = (transform.position - cameraTransform.position).normalized;
             float dot = Vector3.Dot(unitVector, cameraTransform.right);
