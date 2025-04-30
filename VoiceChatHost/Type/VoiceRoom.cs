@@ -70,6 +70,10 @@ namespace VoiceChatHost.Type
             {
                 Console.WriteLine($"client {clientId} joined room with hash {roomName}");
                 clients.Add(clientId, clientEndPoint);
+            }
+
+            if (!clientLastEvents.ContainsKey(clientId))
+            {
                 clientLastEvents.Add(clientId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             }
         }

@@ -12,8 +12,8 @@ namespace HexaVoiceChatShared.Net
             Console.WriteLine($"VoiceChatServer: Listening on port {remote.Port} from {remote.Address}");
             endPoint = remote;
             socket = new UdpClient(endPoint);
-            socket.Client.ReceiveBufferSize = 81920;
-            socket.Client.SendBufferSize = 81920;
+            socket.Client.ReceiveBufferSize = socketBufferSize;
+            socket.Client.SendBufferSize = socketBufferSize;
             onMessageAction = delegate (DecodedVoiceChatMessage message, IPEndPoint endPoint)
             {
                 if (onMessageActions.ContainsKey(message.type))

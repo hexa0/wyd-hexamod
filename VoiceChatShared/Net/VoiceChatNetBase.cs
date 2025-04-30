@@ -12,6 +12,7 @@ namespace HexaVoiceChatShared.Net
 {
     public class VoiceChatNetBase
     {
+        internal static int socketBufferSize = 1024 * 256;
         internal Dictionary<string, FragmentQueue> fragmentQueue = new Dictionary<string, FragmentQueue>();
         internal UdpClient socket;
         public IPEndPoint endPoint;
@@ -37,6 +38,9 @@ namespace HexaVoiceChatShared.Net
             }
 
             socket.BeginReceive(Recieve, null);
+
+            socket.Client.ReceiveBufferSize = socketBufferSize;
+            socket.Client.SendBufferSize = socketBufferSize;
         }
 
         public void SwitchToEndPoint(IPEndPoint newServer)
@@ -45,6 +49,8 @@ namespace HexaVoiceChatShared.Net
             {
                 Close();
                 socket = new UdpClient();
+                socket.Client.ReceiveBufferSize = socketBufferSize;
+                socket.Client.SendBufferSize = socketBufferSize;
                 endPoint = newServer;
                 Connect(true);
             }
@@ -52,6 +58,7 @@ namespace HexaVoiceChatShared.Net
 
         public void Close()
         {
+            socket.Client.Close();
             socket.Close();
         }
 

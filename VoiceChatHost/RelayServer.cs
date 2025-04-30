@@ -24,6 +24,7 @@ namespace VoiceChatHost
             {
                 room = rooms[roomName];
                 room.UpdateLastEvent();
+                room.UpdateLastClientEvent(clientMessage.clientId);
             }
             else
             {
