@@ -45,7 +45,7 @@ namespace HexaMod.Voice
                 speakingIndicator.GetComponentInChildren<Button>().enabled = false;
                 speakingIndicator.GetComponentInChildren<Image>().enabled = false;
 
-                speakingIndicator.transform.localPosition = new Vector2(20f, speakingIndicator.transform.localPosition.y);
+                speakingIndicator.transform.localPosition = new Vector2(PhotonNetwork.isMasterClient ? 20f : 120f, speakingIndicator.transform.localPosition.y);
                 speakingIndicator.GetComponentInChildren<Text>(true).text = "*";
                 speakingIndicator.SetActive(false);
 

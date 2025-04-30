@@ -83,14 +83,9 @@ namespace VoiceChatHost
             }
         }
 
-        public void SwitchRelay(string relayIp)
+        public void Close()
         {
-            if (room != null)
-            {
-                LeaveRoom();
-            }
-
-            client.SwitchToEndPoint(new IPEndPoint(IPAddress.Parse(relayIp), HexaVoiceChat.Ports.relay));
+            client.Close();
         }
 
         public RelayClient(string ip)

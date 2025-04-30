@@ -263,11 +263,14 @@ namespace HexaMod.Voice
 
         public static void JoinVoiceRoom(string roomName)
         {
-            voicechatTranscodeClient.SendMessage(ClientWrappedMessage.BuildMessage(
-                testMode ? 0 : (ulong)PhotonNetwork.player.ID,
-                Protocol.VoiceChatMessageType.VoiceRoomJoin,
-                Encoding.ASCII.GetBytes(roomName)
-            ));
+            if (room != roomName)
+            {
+                voicechatTranscodeClient.SendMessage(ClientWrappedMessage.BuildMessage(
+                    testMode ? 0 : (ulong)PhotonNetwork.player.ID,
+                    Protocol.VoiceChatMessageType.VoiceRoomJoin,
+                    Encoding.ASCII.GetBytes(roomName)
+                ));
+            }
 
             room = roomName;
         }

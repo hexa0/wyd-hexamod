@@ -36,17 +36,23 @@ namespace VoiceChatHost
 
             Console.WriteLine($"relay set to {newRelayEndPoint}");
 
-            if (relay == null)
+            if (relay != null)
             {
-                relay = new RelayClient(relayIp);
-                relay.clientId = clientId;
-                relay.onOpusAction = OnOpus;
-                relay.onSpeakingStateAction = OnSpeakingState;
+                try
+                {
+                    relay.LeaveRoom();
+                }
+                catch
+                {
+
+                }
+                relay.Close();
             }
-            else
-            {
-                relay.SwitchRelay(relayIp);
-            }
+
+            relay = new RelayClient(relayIp);
+            relay.clientId = clientId;
+            relay.onOpusAction = OnOpus;
+            relay.onSpeakingStateAction = OnSpeakingState;
         }
 
         private void OnVoiceRoomJoin(DecodedVoiceChatMessage message, IPEndPoint from)
