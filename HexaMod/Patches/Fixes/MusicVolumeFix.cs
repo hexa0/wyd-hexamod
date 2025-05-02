@@ -1,51 +1,64 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace HexaMod.Patches
 {
-    [HarmonyPatch(typeof(SetOptions))]
-    internal class MusicVolumeFix
-    {
-        internal static class VolumeState
-        {
-            public static bool lastTabbedOut = false;
-        }
+	[HarmonyPatch]
+	internal class MusicVolumeFix
+	{
 
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        static void StartPatch(ref SetOptions __instance)
-        {
-            GameObject networkManager = GameObject.Find("NetworkManager");
+		static void UpdateVolume()
+		{
+			TabOutMuteBehavior tabOutMute = HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>();
+			tabOutMute.UpdateFocusedState(tabOutMute.IsFocused());
+		}
 
-            networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+		[HarmonyPatch(typeof(SetOptions), "Start")]
+		[HarmonyPrefix]
+		static bool Start(ref SetOptions __instance)
+		{
+			GameObject networkManager = GameObject.Find("NetworkManager");
 
-            if (VolumeState.lastTabbedOut)
-            {
-                AudioListener.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
-            }
-            else
-            {
-                AudioListener.volume = 0f;
-            }
-        }
+			QualitySettings.antiAliasing = PlayerPrefs.GetInt("AntiAliasing", 0);
+			QualitySettings.vSyncCount = PlayerPrefs.GetInt("UseVSync", 1);
+			networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
 
-        [HarmonyPatch("Update")]
-        [HarmonyPostfix]
-        static void UpdatePatch(ref SetOptions __instance)
-        {
-            if (Application.isFocused != VolumeState.lastTabbedOut)
-            {
-                VolumeState.lastTabbedOut = Application.isFocused;
+			return false; // MasterVolume is now handled by TabOutMuteBehavior
+		}
 
-                if (VolumeState.lastTabbedOut)
-                {
-                    AudioListener.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
-                }
-                else
-                {
-                    AudioListener.volume = 0f;
-                }
-            }
-        }
-    }
+		[HarmonyPatch(typeof(SetSlider), "Reset")]
+		[HarmonyPrefix]
+		static bool Reset(ref SetSlider __instance)
+		{
+			if (__instance.audSlide)
+			{
+				UpdateVolume();
+				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MasterVolume", 0.75f);
+			}
+			if (__instance.sensSlide)
+			{
+				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSensitivity", (float)1);
+			}
+			if (__instance.barSlide)
+			{
+				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("SplitScreenBarSize", 0.75f);
+			}
+			if (__instance.musicSlide)
+			{
+				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
+			}
+
+			return false; // MasterVolume is now handled by TabOutMuteBehavior
+		}
+
+		[HarmonyPatch(typeof(OptionsController), "ControlVolume")]
+		[HarmonyPrefix]
+		static bool ControlVolume(ref float val)
+		{
+			PlayerPrefs.SetFloat("MasterVolume", val);
+			UpdateVolume();
+			return false;
+		}
+	}
 }

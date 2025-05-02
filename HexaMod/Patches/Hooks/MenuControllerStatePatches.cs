@@ -8,11 +8,12 @@ namespace HexaMod.Patches
     {
         [HarmonyPatch(typeof(MenuController), "ChangeToMenu")]
         [HarmonyPrefix]
-        static void TrackBackstate(ref int val)
+        static void TrackBackstate(ref MenuController __instance, ref int val)
         {
-            if (!Menus.goingBack)
+            MenuUtil menu = Menu.Menus.GetMenuUtilForController(__instance);
+            if (!menu.goingBack)
             {
-                Menus.backstates[val] = Menus.currentMenu;
+                menu.backstates[val] = menu.currentMenu;
             }
         }
     }

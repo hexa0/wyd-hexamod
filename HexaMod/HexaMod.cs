@@ -6,6 +6,7 @@ using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using static HexaMod.UI.Util.Menu;
 
 namespace HexaMod
 {
@@ -79,8 +80,8 @@ namespace HexaMod
                 FixRigidBodies();
                 SnappierReplication();
 
-                Menus.Init();
-                mainUI = Menus.menuCanvas.gameObject.AddComponent<MainUI>();
+                Menu.Init();
+                mainUI = menuCanvas.gameObject.AddComponent<MainUI>();
 
                 if (!PhotonNetwork.inRoom)
                 {
@@ -107,7 +108,7 @@ namespace HexaMod
         public static bool testGameWaitingForConn = false;
         public static void MakeTestGame(bool spawnAsDad = true)
         {
-            Menus.menuController.DeactivateAll();
+            Menus.title.menuController.DeactivateAll();
             networkManager.ConnectToPhoton();
             testGameWaitingForConn = true;
             networkManager.isDad = spawnAsDad;

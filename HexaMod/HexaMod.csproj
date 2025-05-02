@@ -257,6 +257,11 @@
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
+    <Compile Include="UI\Class\WYDBooleanControl.cs" />
+    <Compile Include="UI\Class\WYDTextButton.cs" />
+    <Compile Include="UI\Class\WYDTextInputField.cs" />
+    <Compile Include="UI\Class\WYDUIElement.cs" />
+    <Compile Include="UI\UITheming.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
@@ -327,10 +332,10 @@
     <Compile Include="Scripts\Levels\SpecialSpawn.cs" />
     <Compile Include="Scripts\PunRpcExtensions\PickUp\PickUpRpcExtension.cs" />
     <Compile Include="Scripts\TabOutMuteBehavior.cs" />
-    <Compile Include="UI\Util\LoadingController.cs" />
+    <Compile Include="UI\LoadingController.cs" />
     <Compile Include="UI\MainUI.cs" />
-    <Compile Include="UI\Util\Menus.cs" />
-    <Compile Include="UI\Util\Templates.cs" />
+    <Compile Include="UI\Util\Menu.cs" />
+    <Compile Include="UI\Util\UITemplates.cs" />
     <Compile Include="Util\HexToColor.cs" />
     <Compile Include="Util\GameModes.cs" />
   </ItemGroup>

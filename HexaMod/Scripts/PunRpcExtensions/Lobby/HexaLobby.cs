@@ -213,7 +213,7 @@ namespace HexaMod
                     networkManager.isDad = lobby.dads[PhotonNetwork.player.ID];
                 }
 
-                UI.Util.Menus.menuController.DeactivateAll();
+                UI.Util.Menu.Menus.title.menuController.DeactivateAll();
             }
 
             Destroy(HexaMod.rematchHelper);

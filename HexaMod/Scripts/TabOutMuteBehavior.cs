@@ -1,5 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HexaMod
 {
@@ -12,31 +13,48 @@ namespace HexaMod
 
         public void Start()
         {
-            if (VolumeState.lastTabbedOut)
-            {
-                AudioListener.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
-            }
-            else
-            {
-                AudioListener.volume = 0f;
-            }
-        }
+            UpdateFocusedState(IsFocused());
 
-        public void Update()
+            SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
+            {
+				UpdateFocusedState(IsFocused());
+                StartCoroutine(DelayedStart());
+            };
+        }
+		public bool currentlyFocused = true;
+		public bool tabOutMuteEnabled = true;
+
+        public void UpdateFocusedState(bool state)
         {
-            if (Application.isFocused != VolumeState.lastTabbedOut)
-            {
-                VolumeState.lastTabbedOut = Application.isFocused;
+			AudioListener.volume = state ? PlayerPrefs.GetFloat("MasterVolume", 0.75f) : 0f;
+		}
 
-                if (VolumeState.lastTabbedOut)
-                {
-                    AudioListener.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
-                }
-                else
-                {
-                    AudioListener.volume = 0f;
-                }
+        public bool IsFocused()
+        {
+            return tabOutMuteEnabled ? currentlyFocused : true;
+		}
+
+		void OnApplicationFocus(bool hasFocus)
+		{
+			currentlyFocused = hasFocus;
+		}
+
+
+		public void Update()
+        {
+            bool isFocused = IsFocused();
+
+            if (isFocused != VolumeState.lastTabbedOut)
+            {
+                VolumeState.lastTabbedOut = isFocused;
+				UpdateFocusedState(isFocused);
             }
         }
-    }
+
+		public IEnumerator DelayedStart()
+		{
+            yield return new WaitForSeconds(1f);
+			UpdateFocusedState(IsFocused());
+		}
+	}
 }

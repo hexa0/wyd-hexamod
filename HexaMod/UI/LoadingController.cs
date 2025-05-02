@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using static HexaMod.UI.Util.Menu;
+using static HexaMod.UI.Util.Menu.Menus;
 
-namespace HexaMod.UI.Util
+namespace HexaMod.UI
 {
     public class LoadingController : MonoBehaviour
     {
@@ -13,7 +14,7 @@ namespace HexaMod.UI.Util
         public LoadingController Init()
         {
             currentLoadingAnimation = Instantiate(loadingAnimation);
-            currentLoadingAnimation.transform.SetParent(Menus.menuCanvas.transform, false);
+            currentLoadingAnimation.transform.SetParent(menuCanvas.transform, false);
             currentLoadingAnimation.SetActive(currentlyShown);
 
             return this;
@@ -42,7 +43,7 @@ namespace HexaMod.UI.Util
                 currentlyShown = loadingShown;
 
                 currentLoadingAnimation.SetActive(loadingShown);
-                Menus.root.Find("Version").gameObject.SetActive(!loadingShown);
+                title.root.Find("Version").gameObject.SetActive(!loadingShown);
             }
         }
 

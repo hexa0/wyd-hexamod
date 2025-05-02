@@ -13,7 +13,7 @@ namespace HexaMod
         {
             // lower fps for the loading screen
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 30;
+            Application.targetFrameRate = 240;
 
             // setup scene loaded hook
             SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
@@ -49,7 +49,7 @@ namespace HexaMod
             {
                 AudioSource mic = gameObject.AddComponent<AudioSource>();
                 mic.playOnAwake = true;
-                mic.volume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+                mic.volume = PlayerPrefs.GetFloat("MasterVolume", 0.75f);
                 mic.spatialBlend = 0f;
                 mic.spatialize = false;
                 mic.spread = 1f;
@@ -72,10 +72,17 @@ namespace HexaMod
             Camera.current.backgroundColor = new Color(0.05f, 0.05f, 0.05f);
         }
 
+        string lastActionText = string.Empty;
         void ActionText(string actionText)
         {
-            Mod.Print(actionText);
-            text.text = actionText;
+            if (lastActionText != actionText)
+            {
+
+                Mod.Print(actionText);
+                text.text = actionText;
+                lastActionText = actionText;
+            }
+
         }
 
 
