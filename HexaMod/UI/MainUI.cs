@@ -14,9 +14,10 @@ namespace HexaMod.UI
 {
     public class MainUI : MonoBehaviour
     {
-        static WYDTextInputField currentShirtColorInputField;
+		static CharacterModelSwapper dadModelSwapper;
+		static CharacterModelSwapper babyModelSwapper;
 
-        internal static class ButtonCallbacks
+		internal static class ButtonCallbacks
         {
             public static void MatchSettingsButton()
             {
@@ -36,55 +37,39 @@ namespace HexaMod.UI
                 HexaMod.MakeTestGame(false);
             }
 
-            public static void SaveShirtColor(string hex)
-            {
-                bool isRouglyValid = (hex.Length == 7 && hex.StartsWith("#")) || (hex.Length == 6 && !hex.StartsWith("#"));
+			public static void SetShirtColor(Color color, string hex)
+			{
+                dadModelSwapper.SetShirtColor(color);
+				babyModelSwapper.SetShirtColor(color);
+			}
 
-                if (!isRouglyValid)
-                {
-                    currentShirtColorInputField.field.text = GetCurrentShirtColorHex();
-                }
-                else
-                {
-                    try
-                    {
-                        PlayerPrefs.SetString("HMV2_ShirtColor", currentShirtColorInputField.field.text);
-                    }
-                    catch
-                    {
-                        currentShirtColorInputField.field.text = GetCurrentShirtColorHex();
-                    }
-                }
+			public static void SaveShirtColor(Color color, string hex)
+            {
+                PlayerPrefs.SetString("HMV2_ShirtColor", hex);
             }
 
-            public static void UpdateShirtColorVisual(string hex)
-            {
-                bool isRouglyValid = (hex.Length == 7 && hex.StartsWith("#")) || (hex.Length == 6 && !hex.StartsWith("#"));
+			public static void SetSkinColor(Color color, string hex)
+			{
+				dadModelSwapper.SetSkinColor(color);
+				babyModelSwapper.SetSkinColor(color);
+			}
 
-                if (isRouglyValid)
-                {
-                    try
-                    {
-                        GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").transform.Find("MenuCamera").Find("Camera").Find("Canvas").gameObject;
-                        characterPreviewCanvas.transform.Find("Dad").Find("generic_male_01.005").GetComponent<SkinnedMeshRenderer>().materials[4].color = HexToColor.GetColorFromHex(hex);
-                        lastKnownGoodInputFieldText = currentShirtColorInputField.field.text;
-                    }
-                    catch
-                    {
-                        currentShirtColorInputField.field.text = lastKnownGoodInputFieldText;
-                        Mod.Print(currentShirtColorInputField.field.text);
-                    }
-                }
-                else
-                {
-                    if (hex.Length > (hex.StartsWith("#") ? 7 : 6))
-                    {
-                        currentShirtColorInputField.field.text = lastKnownGoodInputFieldText;
-                    }
-                }
-            }
+			public static void SaveSkinColor(Color color, string hex)
+			{
+				PlayerPrefs.SetString("HMV2_SkinColor", hex);
+			}
 
-            public static void ChangeLevel(string mapName)
+			public static void SetDadModel(string modelName)
+			{
+				dadModelSwapper.SetCharacterModel(modelName);
+			}
+
+			public static void SaveDadModel(string modelName)
+			{
+				PlayerPrefs.SetString("HMV2_DadCharacterModel", modelName);
+			}
+
+			public static void ChangeLevel(string mapName)
             {
                 Mod.Print($"change to {mapName}");
                 PlayerPrefs.SetString("HMV2_CustomMap", mapName);
@@ -96,9 +81,9 @@ namespace HexaMod.UI
 
         public void UpdateUIForLobbyState()
         {
-            ModLevel foundLevel = Levels.titleLevel;
+            ModLevel foundLevel = Assets.titleLevel;
 
-            foreach (var level in Levels.levels)
+            foreach (var level in Assets.levels)
             {
                 if (level.levelPrefab.name == HexaMod.persistentLobby.lobbySettings.mapName)
                 {
@@ -107,25 +92,28 @@ namespace HexaMod.UI
                 }
             }
 
-            var gameModesCustom = title.FindMenu("GameListMenu").Find("GameCreator").Find("GameModes");
-
-            gameModesCustom.Find("Original").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.regular;
-            gameModesCustom.Find("Family Gathering").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.familyGathering;
-            gameModesCustom.Find("The Hungry Games").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.hungryGames;
-            gameModesCustom.Find("The Great Dadlympics").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.dadlympics;
-            gameModesCustom.Find("Daddy's Nightmare").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
-
-            title.FindMenu("Family Gathering-Host").Find("Start").GetComponent<Button>().interactable = foundLevel.familyGathering;
-            title.FindMenu("HungryGames").Find("Start").GetComponent<Button>().interactable = foundLevel.hungryGames;
-            title.FindMenu("Dadlympics").Find("Start").GetComponent<Button>().interactable = foundLevel.dadlympics;
-            title.FindMenu("DaddysNightmare").Find("Start").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
-
-            mapInfo.text = $"{foundLevel.levelNameReadable}\n{foundLevel.levelDescriptionReadable}";
-
-            foreach (WYDTextButton matchSettings in matchSettingButtons)
+            if (foundLevel)
             {
-                matchSettings.button.interactable = PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom;
-            }
+				var gameModesCustom = title.FindMenu("GameListMenu").Find("GameCreator").Find("GameModes");
+
+				gameModesCustom.Find("Original").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.regular;
+				gameModesCustom.Find("Family Gathering").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.familyGathering;
+				gameModesCustom.Find("The Hungry Games").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.hungryGames;
+				gameModesCustom.Find("The Great Dadlympics").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.dadlympics;
+				gameModesCustom.Find("Daddy's Nightmare").Find("CreateGame").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
+
+				title.FindMenu("Family Gathering-Host").Find("Start").GetComponent<Button>().interactable = foundLevel.familyGathering;
+				title.FindMenu("HungryGames").Find("Start").GetComponent<Button>().interactable = foundLevel.hungryGames;
+				title.FindMenu("Dadlympics").Find("Start").GetComponent<Button>().interactable = foundLevel.dadlympics;
+				title.FindMenu("DaddysNightmare").Find("Start").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
+
+				mapInfo.text = $"{foundLevel.levelNameReadable}\n{foundLevel.levelDescriptionReadable}";
+
+				foreach (WYDTextButton matchSettings in matchSettingButtons)
+				{
+					matchSettings.button.interactable = PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom;
+				}
+			}
         }
 
         public void OnLevelsLoaded()
@@ -160,12 +148,12 @@ namespace HexaMod.UI
                 new UnityAction[] { Reset, title.GoBack }
             );
 
-            float height = Mathf.Clamp(Levels.levels.Count() - 1, 0f, 4f);
-            float width = Mathf.Floor((Levels.levels.Count() - 1) / 5f);
+            float height = Mathf.Clamp(Assets.levels.Count() - 1, 0f, 4f);
+            float width = Mathf.Floor((Assets.levels.Count() - 1) / 5f);
 
-			for (int i = 0; i < Levels.levels.Count(); i++)
+			for (int i = 0; i < Assets.levels.Count(); i++)
             {
-                ModLevel level = Levels.levels[i];
+                ModLevel level = Assets.levels[i];
 
                 float y = (-(i % 5) + (height / 2f)) + 0.5f;
                 float x = Mathf.Floor(i / 5f) - (width / 2f);
@@ -203,7 +191,7 @@ namespace HexaMod.UI
 
         public List<WYDTextButton> matchSettingButtons = new List<WYDTextButton>();
 
-        public void Start()
+        public void Init()
         {
             if (PlayerPrefs.GetInt("HMV2_DoUITheme", 1) == 1)
             {
@@ -219,6 +207,11 @@ namespace HexaMod.UI
 
             HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
             {
+                if (Assets.StaticAssets.didCache)
+                {
+					Assets.AttemptToLoadCurrentLevel();
+				}
+
                 UpdateUIForLobbyState();
             });
 
@@ -371,18 +364,134 @@ namespace HexaMod.UI
             { // Character Customization Menu
                 Mod.Print("edit character customization menu");
 
-				currentShirtColorInputField = new WYDTextInputField(
-                    "ShirtColor", "Shirt Color (Hex)", GetCurrentShirtColorHex(), title.FindMenu("CharacterCustomizationMenu"),
-                    new Vector2(
-                        -468.4f,
-                        -520f
-                    ),
-                    new UnityAction<string>[] { ButtonCallbacks.UpdateShirtColorVisual },
-                    new UnityAction<string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.UpdateShirtColorVisual }
-                );
+				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").transform.Find("MenuCamera").Find("Camera").Find("Canvas").gameObject;
+				dadModelSwapper = characterPreviewCanvas.transform.Find("Dad").gameObject.AddComponent<CharacterModelSwapper>();
+				babyModelSwapper = characterPreviewCanvas.transform.Find("Baby001").gameObject.AddComponent<CharacterModelSwapper>();
+                dadModelSwapper.initModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default");
+				dadModelSwapper.initShirtColor = HexToColor.GetColorFromHex(GetCurrentShirtColorHex());
+				dadModelSwapper.initSkinColor = HexToColor.GetColorFromHex(GetCurrentSkinColorHex());
+				babyModelSwapper.initModel = PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default");
+				babyModelSwapper.initShirtColor = HexToColor.GetColorFromHex(GetCurrentShirtColorHex());
+				babyModelSwapper.initSkinColor = HexToColor.GetColorFromHex(GetCurrentSkinColorHex());
 
-                currentShirtColorInputField.field.characterLimit = 7;
-            }
+                Transform characterCustomizationMenu = title.FindMenu("CharacterCustomizationMenu");
+
+				Vector2 bottomLeft = new Vector2(720f, -350f);
+				float gap = 15f;
+
+                WYDSwitchOption<string>[] dadModelOptions = new WYDSwitchOption<string>[Assets.dadCharacterModels.Count + 1];
+				WYDSwitchOption<string>[] babyModelOptions = new WYDSwitchOption<string>[Assets.babyCharacterModels.Count + 1];
+
+                dadModelOptions[0] = new WYDSwitchOption<string>
+                {
+                    name = "Dad (Original)",
+                    value = "default"
+                };
+
+				babyModelOptions[0] = new WYDSwitchOption<string>
+				{
+					name = "Baby (Original)",
+					value = "default"
+				};
+
+                int dadCharacterDefault = 0;
+				int babyCharacterDefault = 0;
+
+				for (int i = 0; i < Assets.dadCharacterModels.Count; i++)
+				{
+                    dadModelOptions[i + 1] = new WYDSwitchOption<string>
+                    {
+                        name = Assets.dadCharacterModels[i].modelNameReadable,
+                        value = Assets.dadCharacterModels[i].modelNameReadable
+					};
+
+                    if (Assets.dadCharacterModels[i].modelNameReadable == dadModelSwapper.initModel)
+                    {
+                        dadCharacterDefault = i + 1;
+					}
+				}
+
+				for (int i = 0; i < Assets.babyCharacterModels.Count; i++)
+				{
+					babyModelOptions[i + 1] = new WYDSwitchOption<string>
+					{
+						name = Assets.babyCharacterModels[i].modelNameReadable,
+						value = Assets.babyCharacterModels[i].modelNameReadable
+					};
+
+					if (Assets.babyCharacterModels[i].modelNameReadable == babyModelSwapper.initModel)
+					{
+						babyCharacterDefault = i + 1;
+					}
+				}
+
+				WYDUIElement[] options = {
+                    new WYDHexColorInputField(
+                        "ShirtColor", "Shirt Color (Hex)", GetCurrentShirtColorHex(), characterCustomizationMenu,
+                        new Vector2(
+                            -468.4f,
+                            0f
+                        ),
+                        new UnityAction<Color, string>[] { ButtonCallbacks.SetShirtColor },
+                        new UnityAction<Color, string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.SetShirtColor }
+                    ),
+                    new WYDHexColorInputField(
+                        "ShirtColor", "Skin Color (Hex)", GetCurrentSkinColorHex(), characterCustomizationMenu,
+                        new Vector2(
+                            -468.4f,
+                            0f
+                        ),
+                        new UnityAction<Color, string>[] { ButtonCallbacks.SetSkinColor },
+                        new UnityAction<Color, string>[] { ButtonCallbacks.SaveSkinColor, ButtonCallbacks.SetSkinColor }
+                    ),
+                    new WYDSwitchInput<string>(
+                        "DadCharacterModel", "", dadCharacterDefault,
+                        dadModelOptions,
+                        characterCustomizationMenu,
+                        new Vector2(
+                            -880,
+                            0f
+                        ),
+                        new UnityAction<WYDSwitchOption<string>>[] { (WYDSwitchOption<string> option) => {
+                            ButtonCallbacks.SetDadModel(option.value);
+							ButtonCallbacks.SaveDadModel(option.value);
+
+						}}
+                    ),
+					new WYDSwitchInput<string>(
+						"BabyCharacterModel", "", babyCharacterDefault,
+						babyModelOptions,
+						characterCustomizationMenu,
+						new Vector2(
+							-880,
+							0f
+						),
+						new UnityAction<WYDSwitchOption<string>>[] { (WYDSwitchOption<string> option) => {
+							// ButtonCallbacks.SetBabyModel(option.value);
+                            // ButtonCallbacks.SaveBabyModel(option.value);
+						}}
+					),
+					new WYDHexColorInputField(
+						"teswt", "Test", GetCurrentSkinColorHex(), characterCustomizationMenu,
+						new Vector2(
+							-468.4f,
+							0f
+						),
+						new UnityAction<Color, string>[] { },
+						new UnityAction<Color, string>[] { }
+					),
+				};
+
+				for (int i = 0; i < options.Count(); i++)
+				{
+					var control = options[i];
+
+					Mod.Print(control.gameObject.name, " ", control.rectTransform.sizeDelta.y);
+
+					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
+					bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
+				}
+			}
             { // Host Options
                 foreach (string menuName in Menu.hostMenus)
                 {
@@ -419,19 +528,19 @@ namespace HexaMod.UI
 
                 changeMapButton.button.interactable = false;
 
-                if (Levels.loadedLevels)
+                if (Assets.loadedAssets)
                 {
-                    changeMapButton.button.interactable = Levels.levels.Count > 0;
+                    changeMapButton.button.interactable = Assets.levels.Count > 0;
                     OnLevelsLoaded();
                 }
                 else
                 {
                     HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", true);
 
-                    HexaMod.asyncLevelLoader.loadCompleted.AddListener(delegate ()
+                    HexaMod.asyncAssetLoader.loadCompleted.AddListener(delegate ()
                     {
                         OnLevelsLoaded();
-                        changeMapButton.button.interactable = Levels.levels.Count > 0;
+                        changeMapButton.button.interactable = Assets.levels.Count > 0;
                     });
                 }
 
@@ -542,7 +651,19 @@ namespace HexaMod.UI
             return PlayerPrefs.GetString("HMV2_ShirtColor", "#E76F3D");
         }
 
-        bool wasMasterClient = false;
+		public static string GetCurrentSkinColorHex()
+		{
+            // todo: make this the actual default color code
+			return PlayerPrefs.GetString("HMV2_SkinColor", "#CC9485");
+		}
+
+		public static string GetCurrentDadModel()
+		{
+			// todo: make this the actual default color code
+			return PlayerPrefs.GetString("HMV2_DadCharacterModel", "default");
+		}
+
+		bool wasMasterClient = false;
         public void Update()
         {
             if (PhotonNetwork.isMasterClient != wasMasterClient)
@@ -597,7 +718,5 @@ namespace HexaMod.UI
                 }
             }
         }
-
-        private static string lastKnownGoodInputFieldText = GetCurrentShirtColorHex();
     }
 }

@@ -24,7 +24,9 @@ namespace HexaMod
             if (gameObject.name == HexaMod.networkManager.playerObj.name)
             {
                 SetShirtColorForOthers(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex()));
-                FixUsernameForOthers(PlayerPrefs.GetString("LobbyName", "Player"));
+				SetSkinColorForOthers(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex()));
+				SetCharacterModelForOthers(PlayerPrefs.GetString("HMV2_DadCharacterModel", "default"));
+				FixUsernameForOthers(PlayerPrefs.GetString("LobbyName", "Player"));
             }
         }
 
@@ -38,7 +40,17 @@ namespace HexaMod
             RPC("SetShirtColor", PhotonTargets.All, new object[] { newColor.r, newColor.g, newColor.b });
         }
 
-        public void FixUsernameForOthers(string username)
+		public void SetSkinColorForOthers(Color newColor)
+		{
+			RPC("SetSkinColor", PhotonTargets.All, new object[] { newColor.r, newColor.g, newColor.b });
+		}
+
+		public void SetCharacterModelForOthers(string modelName)
+		{
+			RPC("SetCharacterModel", PhotonTargets.All, new object[] { modelName });
+		}
+
+		public void FixUsernameForOthers(string username)
         {
             RPC("FixUsername", PhotonTargets.All, new object[] { username });
         }
@@ -49,29 +61,7 @@ namespace HexaMod
             GetComponent<FirstPersonController>().playerName = username;
         }
 
-        [PunRPC]
-        public void SetShirtColor(float R, float G, float B)
-        {
-            Color shirtColor = new Color(R, G, B);
-
-            var dadModel = transform.Find("DadModel");
-            if (dadModel)
-            {
-                var body = dadModel.Find("generic_male_01.005").GetComponent<SkinnedMeshRenderer>();
-                var shirtMaterial = body.materials[4];
-                shirtMaterial.color = shirtColor;
-            }
-            else
-            {
-                var babyModel = transform.Find("Baby001");
-                if (babyModel)
-                {
-
-                }
-            }
-        }
-
-        [PunRPC]
+		[PunRPC]
         public void FixNan(Vector3 characterPosition, Quaternion characterRotation, Vector3 cameraPosition, Quaternion cameraRotation)
         {
             NaNFixBehavior nanFixBehavior = gameObject.AddComponent<NaNFixBehavior>();

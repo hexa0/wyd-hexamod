@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using HarmonyLib;
+using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
 
@@ -32,10 +33,15 @@ namespace HexaMod
                 HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
             }
 
-            StartCoroutine(LoadLobbyLevel());
-        }
+			//StartCoroutine(LoadLobbyLevel());
+		}
 
-        private bool waitingForTestRoom = false;
+		public void Start()
+		{
+			LoadLobbyLevel();
+		}
+
+		private bool waitingForTestRoom = false;
 
         public void Update()
         {
@@ -213,7 +219,7 @@ namespace HexaMod
                     networkManager.isDad = lobby.dads[PhotonNetwork.player.ID];
                 }
 
-                UI.Util.Menu.Menus.title.menuController.DeactivateAll();
+                Menu.Menus.title.menuController.DeactivateAll();
             }
 
             Destroy(HexaMod.rematchHelper);
@@ -229,13 +235,11 @@ namespace HexaMod
             }
         }
 
-        public IEnumerator LoadLobbyLevel()
+        public void LoadLobbyLevel()
         {
-            yield return 0;
+            // yield return 0;
 
-            Levels.loadedLevel = null;
-            Levels.loadedLevelInstance = null;
-            Levels.AttemptToLoadCurrentLevel();
+			Assets.InitScene();
 
             if (HexaMod.rematchHelper != null && PhotonNetwork.inRoom) {
                 SetupMatch();
@@ -266,6 +270,14 @@ namespace HexaMod
         {
             HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
             HexaMod.networkManager.fader.SendMessage("Fade");
+            if (HexaMod.networkManager.curGameMode == GameModes.named["daddysNightmare"].id)
+            {
+				Countdown countdown = Menu.Menus.title.FindMenu("GameStart").Find("Countdown").gameObject.GetComponent<Countdown>();
+				
+                Instantiate(countdown.sound);
+				countdown.sky.SendMessage("Switch");
+				GameObject.Find("LightHolder").SendMessage("AllGoOut");
+			}
         }
     }
 }

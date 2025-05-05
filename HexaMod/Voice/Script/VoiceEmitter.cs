@@ -125,7 +125,7 @@ namespace HexaMod.Voice
                 speakingObject.SetActive(speaking);
             }
 
-            Transform cameraTransform = Camera.main.transform;
+            Transform cameraTransform = Camera.current.transform;
             Vector3 unitVector = (transform.position - cameraTransform.position).normalized;
             float dot = Vector3.Dot(unitVector, cameraTransform.right);
             float panAbs = Mathf.Abs(dot) * gameObject.GetComponent<AudioSource>().spatialBlend;

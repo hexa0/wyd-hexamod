@@ -18,7 +18,20 @@ namespace HexaMod
         internal static Mod Instance;
         internal static ManualLogSource log;
 
-        internal static void Print(params object[] messages) {
+        internal static int iFuckedUpAndNeedToDebugCounter = 0;
+
+		internal static void ResetDebugCounter()
+		{
+            iFuckedUpAndNeedToDebugCounter = 0;
+		}
+
+		internal static void DebugCounter(params object[] label)
+		{
+			log.LogInfo(string.Concat(label) + $": {iFuckedUpAndNeedToDebugCounter}");
+            iFuckedUpAndNeedToDebugCounter++;
+		}
+
+		internal static void Print(params object[] messages) {
             log.LogInfo(string.Concat(messages));
         }
 

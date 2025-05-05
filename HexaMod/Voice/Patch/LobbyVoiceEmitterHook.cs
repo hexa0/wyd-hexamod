@@ -1,6 +1,4 @@
 ﻿using HarmonyLib;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace HexaMod.Voice
 {
@@ -18,7 +16,12 @@ namespace HexaMod.Voice
         [HarmonyPostfix]
         static void RefreshNameList(ref PlayerNames __instance)
         {
-            __instance.GetComponent<LobbyVoiceEmitterBehavior>().Refresh();
+            LobbyVoiceEmitterBehavior lobbyVoice = __instance.GetComponent<LobbyVoiceEmitterBehavior>();
+
+            if (lobbyVoice != null)
+            {
+				lobbyVoice.Refresh();
+			}
         }
     }
 }

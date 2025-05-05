@@ -57,6 +57,7 @@ namespace HexaMod
                 {
                     LobbySettings deserializedSettings = LobbySettings.Deserialize(System.Convert.FromBase64String(data));
                     deserializedSettings.roundNumber = 0;
+                    oldLobbySettings = lobbySettings;
                     lobbySettings = deserializedSettings;
                     Mod.Print("Setup Saved Relay");
                 }

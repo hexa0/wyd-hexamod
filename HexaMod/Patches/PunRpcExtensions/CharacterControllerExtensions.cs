@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.Util;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches
@@ -12,6 +13,7 @@ namespace HexaMod.Patches
         static void CharacterControllerExtensionsPatch(ref FirstPersonController __instance)
         {
             __instance.gameObject.AddComponent<CharacterExtendedRPCBehavior>();
-        }
+			__instance.gameObject.AddComponent<CharacterModelSwapper>();
+		}
     }
 }

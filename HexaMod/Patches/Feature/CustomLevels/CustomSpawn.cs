@@ -11,7 +11,7 @@ namespace HexaMod.Patches
         [HarmonyPostfix]
         static void HandleSpawns(ref FirstPersonController __instance)
         {
-            Levels.HandleSpawnTeleport(__instance);
+            Assets.HandleSpawnTeleport(__instance);
         }
     }
 }

@@ -252,16 +252,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Patches\Feature\BetterSmokeDetector.cs" />
+    <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
+    <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
+    <Compile Include="Patches\Fixes\DeathCamFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
+    <Compile Include="Patches\Fixes\FixOptions.cs" />
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
+    <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
+    <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
+    <Compile Include="Scripts\Levels\LevelSkybox.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
+    <Compile Include="UI\Class\WYDHexColorInputField.cs" />
+    <Compile Include="UI\Class\WYDSwitchInput.cs" />
     <Compile Include="UI\Class\WYDTextButton.cs" />
     <Compile Include="UI\Class\WYDTextInputField.cs" />
     <Compile Include="UI\Class\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
+    <Compile Include="Scripts\CharacterModelSwapper.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
@@ -269,7 +280,7 @@
     <Compile Include="Voice\Script\PlayerVoiceEmitterRPC.cs" />
     <Compile Include="Voice\Patch\VoiceChatRoomsHook.cs" />
     <Compile Include="Voice\VoiceChat.cs" />
-    <Compile Include="Levels.cs" />
+    <Compile Include="Assets.cs" />
     <Compile Include="HexaMod.cs" />
     <Compile Include="Patches\Debugging\LogRPCPatch.cs" />
     <Compile Include="Patches\Feature\CustomLevels\HostControlDefaultFix.cs" />
@@ -304,7 +315,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scripts\HexaModPersistence.cs" />
-    <Compile Include="Scripts\AsyncLevelLoader.cs" />
+    <Compile Include="Scripts\AsyncAssetLoader.cs" />
     <Compile Include="Scripts\Levels\Factory\AirVentFactory.cs" />
     <Compile Include="Scripts\Levels\BabySpawn.cs" />
     <Compile Include="Scripts\Levels\DadSpawn.cs" />

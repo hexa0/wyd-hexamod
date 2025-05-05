@@ -10,8 +10,9 @@ namespace HexaMapAssemblies
             var outlet = gameObject.AddComponent<PowerOutlet>();
 
             outlet.tag = "Use";
-            outlet.explosion = Levels.StaticAssets.outletExplosion;
-            outlet.shockSound = Levels.StaticAssets.outletShockSound;
-        }
+            outlet.explosion = Assets.StaticAssets.outletExplosion;
+            outlet.shockSound = Assets.StaticAssets.outletShockSound;
+			outlet.coverPrefab = Assets.StaticAssets.outletCoverPrefab;
+		}
     }
 }

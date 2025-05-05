@@ -125,9 +125,9 @@ namespace HexaMod
             HexaMod.Init();
             yield return 0;
             ActionText($"Loading Level Bundles\n(?/?)");
-            while (!Levels.loadedLevels)
+            while (!Assets.loadedAssets)
             {
-                ActionText($"Loading Level Bundles\n({Levels.loadedLevelBundles}/{Levels.levelBundlesToLoad})");
+                ActionText($"Loading Level Bundles\n({Assets.loadedBundles}/{Assets.bundlesToLoad})");
                 yield return 0;
             }
             ActionText("Start Scene Load");

@@ -11,9 +11,9 @@ namespace HexaMapAssemblies
             var instantiated = Instantiate((GameObject)Resources.Load(PrefabName, typeof(GameObject)), transform.position, transform.rotation);
             instantiated.name = instantiated.name.Replace("(Clone)", "");
 
-            if (Levels.loadedLevelInstance)
+            if (Assets.loadedLevelInstance)
             {
-                instantiated.transform.SetParent(Levels.loadedLevelInstance);
+                instantiated.transform.SetParent(Assets.loadedLevelInstance);
             }
 
             var view = instantiated.GetComponent<PhotonView>();

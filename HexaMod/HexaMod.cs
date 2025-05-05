@@ -26,7 +26,7 @@ namespace HexaMod
         public static EventSystem eventSystem;
         public static HexaLobby hexaLobby;
         public static HexaModPersistence persistentInstance;
-        public static AsyncLevelLoader asyncLevelLoader;
+        public static AsyncAssetLoader asyncAssetLoader;
         public static HexaPersistentLobby persistentLobby;
         public static MainUI mainUI;
         public static void Init()
@@ -42,11 +42,11 @@ namespace HexaMod
 
             persistentGameObject.name = "HexaModPersistent";
             persistentInstance = persistentGameObject.AddComponent<HexaModPersistence>();
-            asyncLevelLoader = persistentGameObject.AddComponent<AsyncLevelLoader>();
+            asyncAssetLoader = persistentGameObject.AddComponent<AsyncAssetLoader>();
             persistentLobby = persistentGameObject.AddComponent<HexaPersistentLobby>();
 
             Mod.Print("Setup Levels");
-            Levels.Init();
+            Assets.Init();
             Mod.Print("Setup HexaPersistentLobby");
             persistentLobby.Init();
         }
@@ -82,6 +82,7 @@ namespace HexaMod
 
                 Menu.Init();
                 mainUI = menuCanvas.gameObject.AddComponent<MainUI>();
+                mainUI.Init();
 
                 if (!PhotonNetwork.inRoom)
                 {
@@ -112,6 +113,8 @@ namespace HexaMod
             networkManager.ConnectToPhoton();
             testGameWaitingForConn = true;
             networkManager.isDad = spawnAsDad;
-        }
+            networkManager.curGameMode = GameModes.named["familyGathering"].id;
+
+		}
     }
 }
