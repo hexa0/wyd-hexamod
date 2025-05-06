@@ -593,7 +593,7 @@ namespace HexaMod.UI
                     ),
 
                     new WYDBooleanControl(
-                        "cheats", "Cheats", true, menu.transform,
+                        "cheats", "Cheats", ls.cheats, menu.transform,
 						new Vector2(200f, 0f),
                         new UnityAction<bool>[] {
                             delegate (bool value) {

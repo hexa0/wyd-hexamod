@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using NAudio.SoundFont;
 using UnityEngine;
+using HexaMod.Util;
 
 namespace HexaMapAssemblies
 {
@@ -8,26 +8,10 @@ namespace HexaMapAssemblies
 	{
 		public GameObject gasSpawns;
 		public Transform generator;
-		public Transform itemSpawns;
-
-		List<GameObject> GetChildren(GameObject parent)
-		{
-			List<GameObject> children = new List<GameObject>();
-
-			foreach (var item in parent.GetComponentsInChildren<Transform>())
-			{
-				if (item.transform.parent == parent.transform)
-				{
-					children.Add(item.gameObject);
-				}
-			}
-
-			return children;
-		}
 
 		void Awake()
 		{
-			List<GameObject> gasSpots = GetChildren(gasSpawns);
+			List<GameObject> gasSpots = ObjectUtils.GetChildren(gasSpawns);
 
 			foreach (var child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
 			{

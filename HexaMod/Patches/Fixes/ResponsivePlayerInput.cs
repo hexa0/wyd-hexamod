@@ -28,25 +28,6 @@ namespace HexaMod.Patches
 	}
 
 	// all gemini because i can't do IL patching for shit
-
-	[HarmonyPatch(typeof(FirstPersonController), "GetInput")]
-	public static class ResponsivePlayerInputRemoveNormalization
-	{
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-		{
-			var codeMatcher = new CodeMatcher(instructions)
-				.MatchForward(
-					false,
-					new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(Vector2), "Normalize"))
-				)
-				.RemoveInstruction()
-				.InsertAndAdvance(new CodeInstruction(OpCodes.Nop))
-				.InsertAndAdvance(new CodeInstruction(OpCodes.Pop));
-
-			return codeMatcher.InstructionEnumeration();
-		}
-	}
-
 	// this was especially a pain to get working lol
 
 	[HarmonyPatch(typeof(FirstPersonController), "FixedUpdate")]

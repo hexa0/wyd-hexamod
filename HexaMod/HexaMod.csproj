@@ -268,8 +268,12 @@
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
     <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
+    <Compile Include="Patches\Fixes\SmootherBob.cs" />
+    <Compile Include="Patches\Fixes\WallClipFix.cs" />
+    <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
+    <Compile Include="Scripts\Levels\HGLevelSetup.cs" />
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
@@ -280,6 +284,7 @@
     <Compile Include="UI\Class\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
+    <Compile Include="Util\GetGameObjectChildren.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
