@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 using HarmonyLib;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -21,8 +20,6 @@ namespace HexaMod.Patches.Fixes
 			q.x = Mathf.Tan((float)Math.PI / 360f * value);
 			return q;
 		}
-
-		// fix offset the issues due to the collider offset
 
 		[HarmonyPatch(typeof(MouseLook), "LookRotation")]
 		[HarmonyPrefix]
@@ -53,6 +50,8 @@ namespace HexaMod.Patches.Fixes
 			}
 			else
 			{
+				// fix offset the issues due to the collider offset
+
 				CharacterController controller = character.GetComponent<CharacterController>();
 				if (controller != null)
 				{
@@ -141,13 +140,6 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool CrouchUpdate(ref Crouch __instance)
 		{
-			//LineRenderer line = __instance.gameObject.GetComponent<LineRenderer>();
-			//if (line == null)
-			//{
-			//	line = __instance.gameObject.AddComponent<LineRenderer>();
-			//	line.widthMultiplier = 0.1f;
-			//}
-
 			WallClipFixBehavior self = __instance.GetComponent<WallClipFixBehavior>();
 
 			CharacterController controller = __instance.charCont;
@@ -214,47 +206,5 @@ namespace HexaMod.Patches.Fixes
 			return false;
 		}
 
-			//[HarmonyPatch(typeof(Crouch), "Update")]
-			//[HarmonyPrefix]
-			//static void CrouchUpdatePre(ref Crouch __instance)
-			//{
-			//	if (!proning && __instance.btn2Down && __instance.charCont.height == 1f) // exiting a prone while not crouching
-			//	{
-			//		Mod.Print("exit prone");
-			//	}
-
-			//	if (!crouching && __instance.btnDown && __instance.charCont.height == 1.4f) // exiting a crouch while not proning
-			//	{
-			//		Mod.Print("exit crouch");
-			//	}
-
-			//	lastHeight = __instance.charCont.height;
-
-			//	__instance.goBack = true;
-			//}
-
-			//[HarmonyPatch(typeof(Crouch), "Update")]
-			//[HarmonyPostfix]
-			//static void CrouchUpdatePost(ref Crouch __instance)
-			//{
-			//	if (!crouching && !proning)
-			//	{
-			//		if (__instance.charCont.height != 2.8f)
-			//		{
-			//			RaycastHit hitInfo;
-			//			Physics.SphereCast(__instance.transform.position, 0.3f, Vector3.up, out hitInfo, 1000f, ~671088640);
-			//			if (!(hitInfo.distance <= 1.4f))
-			//			{
-			//				Mod.Print("Fix");
-			//				__instance.charCont.height = 2.8f;
-			//			}
-			//		}
-			//	}
-
-			//	if ((__instance.charCont.height - lastHeight) > 0f)
-			//	{
-			//		// __instance.transform.position += new Vector3(0f, (__instance.charCont.height - lastHeight) / -2f, 0f);
-			//	}
-			//}
-		}
+	}
 }
