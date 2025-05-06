@@ -308,8 +308,6 @@ namespace HexaMod.UI
 					{
 						var control = options[i];
 
-						Mod.Print(control.gameObject.name, " ", control.rectTransform.sizeDelta.y);
-
 						control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
 						bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
 					}
@@ -471,22 +469,11 @@ namespace HexaMod.UI
                             // ButtonCallbacks.SaveBabyModel(option.value);
 						}}
 					),
-					new WYDHexColorInputField(
-						"teswt", "Test", GetCurrentSkinColorHex(), characterCustomizationMenu,
-						new Vector2(
-							-468.4f,
-							0f
-						),
-						new UnityAction<Color, string>[] { },
-						new UnityAction<Color, string>[] { }
-					),
 				};
 
 				for (int i = 0; i < options.Count(); i++)
 				{
 					var control = options[i];
-
-					Mod.Print(control.gameObject.name, " ", control.rectTransform.sizeDelta.y);
 
 					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
 					bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
@@ -635,8 +622,6 @@ namespace HexaMod.UI
                 for (int i = 0; i < options.Count(); i++)
                 {
                     var control = options[i];
-
-                    Mod.Print(control.gameObject.name, " ", control.rectTransform.sizeDelta.y);
 
 					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
                     bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;

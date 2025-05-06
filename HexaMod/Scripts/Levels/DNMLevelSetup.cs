@@ -8,19 +8,26 @@ namespace HexaMapAssemblies
 	{
 		public GameObject gasSpawns;
 		public Transform generator;
+		public Transform itemSpawns;
+
+		List<GameObject> GetChildren(GameObject parent)
+		{
+			List<GameObject> children = new List<GameObject>();
+
+			foreach (var item in parent.GetComponentsInChildren<Transform>())
+			{
+				if (item.transform.parent == parent.transform)
+				{
+					children.Add(item.gameObject);
+				}
+			}
+
+			return children;
+		}
 
 		void Awake()
 		{
-			Transform[] gasTransforms = gasSpawns.GetComponentsInChildren<Transform>();
-			List<GameObject> gasSpots = new List<GameObject>();
-
-			foreach (var item in gasTransforms)
-			{
-				if (item.transform.parent == gasSpawns.transform)
-				{
-					gasSpots.Add(item.gameObject);
-				}
-			}
+			List<GameObject> gasSpots = GetChildren(gasSpawns);
 
 			foreach (var child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
 			{

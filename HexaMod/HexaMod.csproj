@@ -75,6 +75,10 @@
     <Reference Include="Boo.Lang">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\WhosYourDaddy_Data\Managed\Boo.Lang.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\BepInEx\core\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Security">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\WhosYourDaddy_Data\Managed\Mono.Security.dll</HintPath>
     </Reference>
@@ -256,15 +260,18 @@
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
+    <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
     <Compile Include="Patches\Fixes\DeathCamFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
     <Compile Include="Patches\Fixes\FixOptions.cs" />
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
+    <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
+    <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
     <Compile Include="UI\Class\WYDHexColorInputField.cs" />
     <Compile Include="UI\Class\WYDSwitchInput.cs" />
@@ -272,7 +279,7 @@
     <Compile Include="UI\Class\WYDTextInputField.cs" />
     <Compile Include="UI\Class\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
-    <Compile Include="Scripts\CharacterModelSwapper.cs" />
+    <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
@@ -297,7 +304,7 @@
     <Compile Include="ScriptableObjects\ModLevel.cs" />
     <Compile Include="Patches\Fixes\CharacterAudioPanningFix.cs" />
     <Compile Include="Patches\Fixes\CanvasRaycast.cs" />
-    <Compile Include="Patches\PunRpcExtensions\CharacterControllerExtensions.cs" />
+    <Compile Include="Patches\PunRpcExtensions\CharacterControllerRPCHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\CustomSpawn.cs" />
     <Compile Include="Patches\Feature\ReturnDoorSound.cs" />
     <Compile Include="Patches\Fixes\ForceNoSteamName.cs" />

@@ -13,14 +13,20 @@ namespace HexaMod.Patches
         {
             PhotonNetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
 
-            if (__instance.gameObject.name == networkManager.playerObj.name)
+			AudioSource audioEmitter = __instance.GetComponent<AudioSource>();
+
+			if (__instance.gameObject.name == networkManager.playerObj.name && __instance.GetComponent<PhotonView>().isMine)
             {
-                var audioEmitter = __instance.GetComponent<AudioSource>();
                 audioEmitter.bypassEffects = true;
                 // audioEmitter.panStereo = -0.4f;
                 audioEmitter.spatialBlend = 0;
                 audioEmitter.volume = 0.35f;
             }
+            else
+            {
+				audioEmitter.spatialBlend = 1f;
+                audioEmitter.spatialize = true;
+			}
         }
     }
 }
