@@ -35,7 +35,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPostfix]
 		static void RPCInteract(ref AirVent __instance, string inputName)
 		{
-			if (inputName.Substring(0, 3) == "Bab" && __instance.exitPos != null && __instance.correspondingVent != null)
+			if (HexaMod.persistentLobby.lobbySettings.ventSounds && inputName.Substring(0, 3) == "Bab" && __instance.exitPos != null && __instance.correspondingVent != null)
 			{
 				__instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ventOrignAudioClip);
 				__instance.correspondingVent.gameObject.GetComponent<AudioSource>().PlayOneShot(ventGoalAudioClip);

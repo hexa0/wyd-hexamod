@@ -181,10 +181,13 @@ namespace HexaMod
 				Destroy(rematchHelper.gameObject);
 			}
 
-			gameStateController.allMustDie = lobbySettings.allMustDie && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
-			networkManager.curGameMode = rematchHelper.curGameMode;
-			networkManager.alternateCharacters = lobby.lobbySettings.shufflePlayers == ShufflePlayersMode.Alternate;
+			rematchHelper.allowSpec = lobbySettings.allowSpectating && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
+			rematchHelper.allMustDie = lobbySettings.allMustDie && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
+
 			networkManager.allowSpectate = rematchHelper.allowSpec;
+			gameStateController.allMustDie = rematchHelper.allMustDie;
+			networkManager.curGameMode = rematchHelper.curGameMode;
+			networkManager.alternateCharacters = lobbySettings.shufflePlayers == ShufflePlayersMode.Alternate;
 
 			if (PhotonNetwork.isMasterClient)
 			{
@@ -198,13 +201,14 @@ namespace HexaMod
 
 			GameMode gameMode = GameModes.gameModes[rematchHelper.curGameMode];
 
-			if (lobby.lobbySettings.shufflePlayers == ShufflePlayersMode.Shuffle && gameMode.canShuffle)
+			if (lobbySettings.shufflePlayers == ShufflePlayersMode.Shuffle && gameMode.canShuffle)
 			{
+				// TODO: implement shuffle
 				networkManager.isDad = lobby.dads[PhotonNetwork.player.ID];
 			}
 			else
 			{
-				if (gameMode.canShuffle && networkManager.alternateCharacters)
+				if (gameMode.canShuffle && lobbySettings.shufflePlayers == ShufflePlayersMode.Alternate)
 				{
 					if (lobbySettings.roundNumber % 2 == 0)
 					{

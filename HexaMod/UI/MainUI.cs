@@ -260,7 +260,7 @@ namespace HexaMod.UI
 
 				void MakeMenu(GameObject menu, MenuUtil menuUtil)
 				{
-					WYDTextButton.MakeBackButton(menuUtil, menu.transform);
+					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = WYDTextButton.MakeBackButton(menuUtil, menu.transform).gameObject;
 
 					Vector2 bottomLeft = new Vector2(0f, 200f);
 					float gap = 15f;
@@ -362,6 +362,11 @@ namespace HexaMod.UI
 				// why was this disabled?
 				// oh nvm it works on private lobbies 💀
 				title.FindMenu("GameListMenu").Find("JoinRandom").gameObject.SetActive(false);
+
+				// we replace all of the match settings with our own menu so hide the originals
+				title.FindMenu("Family Gathering-Host").Find("AlternateCharacters (2)").gameObject.SetActive(false);
+				title.FindMenu("Family Gathering-Host").Find("SetSpectate").gameObject.SetActive(false);
+				title.FindMenu("HungryGames").Find("SetSpectate (1)").gameObject.SetActive(false);
 
 				Vector2 TopLeft = new Vector2(-160f, -118f);
 
@@ -581,8 +586,9 @@ namespace HexaMod.UI
 						}
 					),
 
+					// TODO: move this into a map specific settings menu
 					new WYDBooleanControl(
-						"disablePets", "Disable Pets", ls.disablePets, menu.transform,
+						"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
 						new Vector2(200f, 0f),
 						new UnityAction<bool>[] {
 							delegate (bool value) {
@@ -593,11 +599,22 @@ namespace HexaMod.UI
 					),
 
 					new WYDBooleanControl(
-						"doorSounds", "Door Sounds", ls.doorSounds, menu.transform,
+						"doorSounds", "Door Interact Sounds", ls.doorSounds, menu.transform,
 						new Vector2(200f, 0f),
 						new UnityAction<bool>[] {
 							delegate (bool value) {
 								HexaMod.persistentLobby.lobbySettings.doorSounds = value;
+								HexaMod.persistentLobby.CommitChanges();
+							}
+						}
+					),
+
+					new WYDBooleanControl(
+						"ventSounds", "Vent Interact Sounds", ls.ventSounds, menu.transform,
+						new Vector2(200f, 0f),
+						new UnityAction<bool>[] {
+							delegate (bool value) {
+								HexaMod.persistentLobby.lobbySettings.ventSounds = value;
 								HexaMod.persistentLobby.CommitChanges();
 							}
 						}
@@ -620,6 +637,17 @@ namespace HexaMod.UI
 						new UnityAction<bool>[] {
 							delegate (bool value) {
 								HexaMod.persistentLobby.lobbySettings.allMustDie = value;
+								HexaMod.persistentLobby.CommitChanges();
+							}
+						}
+					),
+
+					new WYDBooleanControl(
+						"spectatingAllowed", "Spectating Allowed", ls.allowSpectating, menu.transform,
+						new Vector2(200f, 0f),
+						new UnityAction<bool>[] {
+							delegate (bool value) {
+								HexaMod.persistentLobby.lobbySettings.allowSpectating = value;
 								HexaMod.persistentLobby.CommitChanges();
 							}
 						}
