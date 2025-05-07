@@ -121,7 +121,7 @@ namespace HexaMod.Patches
 			// string[] indexedInstructions = new string[patchedInstructions.Count];
 			// for (int i = 0; i < patchedInstructions.Count; i++)
 			// {
-			//     indexedInstructions[i] = $"[{i}] {patchedInstructions[i].ToString()}";
+			//	 indexedInstructions[i] = $"[{i}] {patchedInstructions[i].ToString()}";
 			// }
 			// Mod.Print("Final Patched IL with Indices:\n", string.Join("\n", indexedInstructions));
 

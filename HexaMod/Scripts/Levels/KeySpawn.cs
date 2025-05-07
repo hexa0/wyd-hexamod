@@ -2,8 +2,8 @@
 
 namespace HexaMapAssemblies
 {
-    public class KeySpawn : MonoBehaviour
-    {
-        public Transform[] spots;
-    }
+	public class KeySpawn : MonoBehaviour
+	{
+		public Transform[] spots;
+	}
 }

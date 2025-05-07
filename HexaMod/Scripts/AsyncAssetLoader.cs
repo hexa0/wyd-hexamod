@@ -5,42 +5,42 @@ using UnityEngine.Events;
 
 namespace HexaMod
 {
-    public class AsyncAssetLoader : MonoBehaviour
-    {
-        public UnityEvent loadCompleted;
+	public class AsyncAssetLoader : MonoBehaviour
+	{
+		public UnityEvent loadCompleted;
 
-        public void LoadAsset(string filename, string file)
-        {
-            Mod.Print($"load asset bundle {filename}");
+		public void LoadAsset(string filename, string file)
+		{
+			Mod.Print($"load asset bundle {filename}");
 
-            Assets.bundlesToLoad++;
-            StartCoroutine(LoadAssetsAsync(filename, file));
-        }
+			Assets.bundlesToLoad++;
+			StartCoroutine(LoadAssetsAsync(filename, file));
+		}
 
-        private IEnumerator LoadAssetsAsync(string filename, string file)
-        {
-            AssetBundleCreateRequest bundleLoadRequest = AssetBundle.LoadFromFileAsync(file);
+		private IEnumerator LoadAssetsAsync(string filename, string file)
+		{
+			AssetBundleCreateRequest bundleLoadRequest = AssetBundle.LoadFromFileAsync(file);
 
-            yield return bundleLoadRequest;
-            var bundle = bundleLoadRequest.assetBundle;
+			yield return bundleLoadRequest;
+			var bundle = bundleLoadRequest.assetBundle;
 
-            Assets.assetBundles.Add(filename, bundle);
-            Mod.Print($"Loaded Asset Bundle {filename}");
+			Assets.assetBundles.Add(filename, bundle);
+			Mod.Print($"Loaded Asset Bundle {filename}");
 
-            var allLevels = bundle.LoadAllAssetsAsync<ModLevel>();
-            yield return allLevels;
+			var allLevels = bundle.LoadAllAssetsAsync<ModLevel>();
+			yield return allLevels;
 
-            foreach (ModLevel level in allLevels.allAssets)
-            {
-                if (filename == "title_screen")
-                {
-                    Mod.Print($"Found title level {level.levelNameReadable}");
-                    Assets.titleLevel = level;
-                }
+			foreach (ModLevel level in allLevels.allAssets)
+			{
+				if (filename == "title_screen")
+				{
+					Mod.Print($"Found title level {level.levelNameReadable}");
+					Assets.titleLevel = level;
+				}
 
-                Assets.levels.Add(level);
-                Mod.Print($"Found level {level.levelNameReadable}");
-            };
+				Assets.levels.Add(level);
+				Mod.Print($"Found level {level.levelNameReadable}");
+			};
 
 			var allCharacterModels = bundle.LoadAllAssetsAsync<ModCharacterModel>();
 			yield return allCharacterModels;
@@ -62,12 +62,12 @@ namespace HexaMod
 
 			Assets.loadedBundles++;
 
-            if (Assets.loadedBundles >= Assets.bundlesToLoad)
-            {
-                Mod.Print("All Levels Loaded!");
-                Assets.loadedAssets = true;
-                // loadCompleted.Invoke();
-            }
-        }
-    }
+			if (Assets.loadedBundles >= Assets.bundlesToLoad)
+			{
+				Mod.Print("All Levels Loaded!");
+				Assets.loadedAssets = true;
+				// loadCompleted.Invoke();
+			}
+		}
+	}
 }

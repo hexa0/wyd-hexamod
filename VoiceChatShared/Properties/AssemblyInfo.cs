@@ -25,10 +25,10 @@ using System.Runtime.InteropServices;
 
 // Version information for an assembly consists of the following four values:
 //
-//      Major Version
-//      Minor Version
-//      Build Number
-//      Revision
+//	  Major Version
+//	  Minor Version
+//	  Build Number
+//	  Revision
 //
 [assembly: AssemblyVersion("6.9.4.2")]
 [assembly: AssemblyFileVersion("0.6.2.1")]

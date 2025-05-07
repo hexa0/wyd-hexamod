@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PlatformTarget>x64</PlatformTarget>
-    <ApplicationIcon>hexa.ico</ApplicationIcon>
+	<OutputType>Exe</OutputType>
+	<TargetFramework>net9.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<PlatformTarget>x64</PlatformTarget>
+	<ApplicationIcon>hexa.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="hexa.ico" />
+	<Content Include="hexa.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Concentus" Version="2.2.2" />
-    <PackageReference Include="YellowDogMan.RRNoise.NET" Version="0.1.6" />
+	<PackageReference Include="Concentus" Version="2.2.2" />
+	<PackageReference Include="YellowDogMan.RRNoise.NET" Version="0.1.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VoiceChatSharedNet9\VoiceChatSharedNet9.csproj" />
+	<ProjectReference Include="..\VoiceChatSharedNet9\VoiceChatSharedNet9.csproj" />
   </ItemGroup>
 
 </Project>

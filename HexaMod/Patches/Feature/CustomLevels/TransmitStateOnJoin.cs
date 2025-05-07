@@ -3,15 +3,15 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches
 {
-    [HarmonyPatch(typeof(PhotonNetworkManager))]
-    internal class TransmitStateOnJoin
-    {
+	[HarmonyPatch(typeof(PhotonNetworkManager))]
+	internal class TransmitStateOnJoin
+	{
 
-        [HarmonyPatch("OnPhotonPlayerConnected")]
-        [HarmonyPostfix]
-        static void OnPhotonPlayerConnected()
-        {
-            HexaMod.hexaLobby.TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
-        }
-    }
+		[HarmonyPatch("OnPhotonPlayerConnected")]
+		[HarmonyPostfix]
+		static void OnPhotonPlayerConnected()
+		{
+			HexaMod.hexaLobby.TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
+		}
+	}
 }

@@ -2,8 +2,8 @@
 
 namespace HexaMapAssemblies
 {
-    public class DadSpawn : MonoBehaviour
-    {
-        public Transform[] spots;
-    }
+	public class DadSpawn : MonoBehaviour
+	{
+		public Transform[] spots;
+	}
 }

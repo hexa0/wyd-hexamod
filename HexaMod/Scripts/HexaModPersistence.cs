@@ -2,11 +2,11 @@
 
 namespace HexaMod
 {
-    public class HexaModPersistence : MonoBehaviour
-    {
-        void Awake()
-        {
-            gameObject.AddComponent<TabOutMuteBehavior>();
-        }
-    }
+	public class HexaModPersistence : MonoBehaviour
+	{
+		void Awake()
+		{
+			gameObject.AddComponent<TabOutMuteBehavior>();
+		}
+	}
 }

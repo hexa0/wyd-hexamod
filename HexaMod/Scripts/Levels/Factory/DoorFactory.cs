@@ -2,37 +2,37 @@
 
 namespace HexaMapAssemblies
 {
-    public class DoorFactory : MonoBehaviour
-    {
-        void Start()
-        {
-            var door = gameObject.AddComponent<Door>();
+	public class DoorFactory : MonoBehaviour
+	{
+		void Start()
+		{
+			var door = gameObject.AddComponent<Door>();
 
-            door.tag = "Open";
-            door.locked = locked;
-            door.oneWay = oneWay;
-            door.rotPoint = rotPoint;
-            door.startRot = startRot;
-            door.targetRot = targetRot;
-            door.useX = useX;
-            door.useY = useY;
-            door.dir = 1;
-            door.dir2 = 1;
+			door.tag = "Open";
+			door.locked = locked;
+			door.oneWay = oneWay;
+			door.rotPoint = rotPoint;
+			door.startRot = startRot;
+			door.targetRot = targetRot;
+			door.useX = useX;
+			door.useY = useY;
+			door.dir = 1;
+			door.dir2 = 1;
 
-            door.openSound = openSound;
-            door.closeSound = closeSound;
-            door.occPortal = occPortal;
-        }
+			door.openSound = openSound;
+			door.closeSound = closeSound;
+			door.occPortal = occPortal;
+		}
 
-        public bool locked = false;
-        public bool oneWay = false;
-        public GameObject openSound;
-        public GameObject closeSound;
-        public Vector3 rotPoint;
-        public Quaternion startRot;
-        public Quaternion targetRot;
-        public bool useX = false;
-        public bool useY = true;
-        public OcclusionPortal occPortal;
-    }
+		public bool locked = false;
+		public bool oneWay = false;
+		public GameObject openSound;
+		public GameObject closeSound;
+		public Vector3 rotPoint;
+		public Quaternion startRot;
+		public Quaternion targetRot;
+		public bool useX = false;
+		public bool useY = true;
+		public OcclusionPortal occPortal;
+	}
 }

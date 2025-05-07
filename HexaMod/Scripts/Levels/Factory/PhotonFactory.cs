@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace HexaMapAssemblies
 {
-    public static class GlobalPhotonFactory
-    {
-        public static int startingNetId = 10000;
-        private static int currentNetId = startingNetId;
+	public static class GlobalPhotonFactory
+	{
+		public static int startingNetId = 10000;
+		private static int currentNetId = startingNetId;
 
 		public static void Reset()
 		{
-            currentNetId = startingNetId;
+			currentNetId = startingNetId;
 		}
 
 		public static void Register(GameObject gameObject)
@@ -27,11 +27,11 @@ namespace HexaMapAssemblies
 		}
 	}
 
-    public class PhotonFactory : MonoBehaviour
-    {
-        void Start()
-        {
+	public class PhotonFactory : MonoBehaviour
+	{
+		void Start()
+		{
 			GlobalPhotonFactory.Register(gameObject);
-        }
-    }
+		}
+	}
 }

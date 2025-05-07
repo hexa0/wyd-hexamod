@@ -8,10 +8,10 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod
 {
-    internal static class Assets
-    {
-        internal static string assetsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "assets");
-        internal static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
+	internal static class Assets
+	{
+		internal static string assetsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "assets");
+		internal static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
 
 		internal static List<ModLevel> levels = new List<ModLevel>();
 		internal static List<ModCharacterModel> characterModels = new List<ModCharacterModel>();
@@ -20,14 +20,14 @@ namespace HexaMod
 
 		internal static ModLevel titleLevel;
 
-        public static bool loadedAssets = false;
-        public static uint bundlesToLoad = 0;
-        public static uint loadedBundles = 0;
+		public static bool loadedAssets = false;
+		public static uint bundlesToLoad = 0;
+		public static uint loadedBundles = 0;
 
-        public static class StaticAssets
-        {
-            public static GameObject outletExplosion;
-            public static GameObject outletShockSound;
+		public static class StaticAssets
+		{
+			public static GameObject outletExplosion;
+			public static GameObject outletShockSound;
 			public static GameObject outletCoverPrefab;
 
 			public static AudioClip titleSong;
@@ -70,22 +70,22 @@ namespace HexaMod
 			}
 		}
 
-        static bool gameStarted = false;
+		static bool gameStarted = false;
 
-        public static void Init()
-        {
-            foreach (string file in Directory.GetFiles(assetsDir))
-            {
-                string filename = file.Substring(assetsDir.Length + 1);
+		public static void Init()
+		{
+			foreach (string file in Directory.GetFiles(assetsDir))
+			{
+				string filename = file.Substring(assetsDir.Length + 1);
 
-                HexaMod.asyncAssetLoader.LoadAsset(filename, file);
-            }
+				HexaMod.asyncAssetLoader.LoadAsset(filename, file);
+			}
 		}
 
-        public static List<GameObject> defaultLevelObjects = new List<GameObject>();
+		public static List<GameObject> defaultLevelObjects = new List<GameObject>();
 
-        public static void ActivateDefaultLevel()
-        {
+		public static void ActivateDefaultLevel()
+		{
 			if (loadedLevelInstance)
 			{
 				Object.Destroy(loadedLevelInstance.gameObject);
@@ -99,10 +99,10 @@ namespace HexaMod
 
 
 		public static void CleanupDefaultLevel()
-        {
-            Mod.Print($"defaultLevelObjects.Count = {defaultLevelObjects.Count}");
-            if (defaultLevelObjects.Count == 0)
-            {
+		{
+			Mod.Print($"defaultLevelObjects.Count = {defaultLevelObjects.Count}");
+			if (defaultLevelObjects.Count == 0)
+			{
 				foreach (var child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
 				{
 					var bad = false;
@@ -144,7 +144,7 @@ namespace HexaMod
 							bad = true;
 							break;
 						case "BackendObjects":
-                            defaultLevelObjects.Add(child.transform.Find("Dadlympics").Find("PoolChoreObjs").gameObject);
+							defaultLevelObjects.Add(child.transform.Find("Dadlympics").Find("PoolChoreObjs").gameObject);
 							break;
 					}
 
@@ -160,7 +160,7 @@ namespace HexaMod
 
 					if (bad && child.activeInHierarchy)
 					{
-                        defaultLevelObjects.Add(child);
+						defaultLevelObjects.Add(child);
 					}
 				}
 			}
@@ -173,141 +173,141 @@ namespace HexaMod
 			}
 		}
 
-        private static DadSpawn dadSpawn;
-        private static BabySpawn babySpawn;
-        private static LowSpawn lowSpawn;
-        private static MidSpawn midSpawn;
-        private static SpecialSpawn specialSpawn;
-        private static KeySpawn keySpawn;
-        private static LevelMusic customLevelMusic;
-        public static Transform loadedLevelInstance;
-        public static ModLevel loadedLevel;
+		private static DadSpawn dadSpawn;
+		private static BabySpawn babySpawn;
+		private static LowSpawn lowSpawn;
+		private static MidSpawn midSpawn;
+		private static SpecialSpawn specialSpawn;
+		private static KeySpawn keySpawn;
+		private static LevelMusic customLevelMusic;
+		public static Transform loadedLevelInstance;
+		public static ModLevel loadedLevel;
 
-        public static void HandleSpawnTeleport(FirstPersonController player)
-        {
-            if (dadSpawn && babySpawn)
-            {
-                Mod.Print($"handle player {player.name}");
-                if (player.name.ToLower().StartsWith("dad"))
-                {
-                    Mod.Print($"teleport dad {player.name}");
-                    player.transform.position = dadSpawn.spots[0].position;
-                }
-                else if (player.name.ToLower().StartsWith("baby"))
-                {
-                    Mod.Print($"teleport baby {player.name}");
-                    player.transform.position = babySpawn.spots[0].position;
-                }
-            }
-        }
+		public static void HandleSpawnTeleport(FirstPersonController player)
+		{
+			if (dadSpawn && babySpawn)
+			{
+				Mod.Print($"handle player {player.name}");
+				if (player.name.ToLower().StartsWith("dad"))
+				{
+					Mod.Print($"teleport dad {player.name}");
+					player.transform.position = dadSpawn.spots[0].position;
+				}
+				else if (player.name.ToLower().StartsWith("baby"))
+				{
+					Mod.Print($"teleport baby {player.name}");
+					player.transform.position = babySpawn.spots[0].position;
+				}
+			}
+		}
 
-        public static void LoadLevel(ModLevel level)
-        {
-            if (loadedLevel && loadedLevel.name == level.name)
-            {
-                return;
-            }
+		public static void LoadLevel(ModLevel level)
+		{
+			if (loadedLevel && loadedLevel.name == level.name)
+			{
+				return;
+			}
 
-            loadedLevel = level;
+			loadedLevel = level;
 
-            if (loadedLevelInstance)
-            {
-                Object.Destroy(loadedLevelInstance.gameObject);
-            }
+			if (loadedLevelInstance)
+			{
+				Object.Destroy(loadedLevelInstance.gameObject);
+			}
 
-            GlobalPhotonFactory.Reset();
-            Mod.Print($"attempting to load map {level.name}");
+			GlobalPhotonFactory.Reset();
+			Mod.Print($"attempting to load map {level.name}");
 
 			StaticAssets.CacheStaticWYDAssets();
 
 			if (level != titleLevel)
-            {
+			{
 				Mod.Print("clearing default level.");
 
 				CleanupDefaultLevel();
 			}
-            else
-            {
-                ActivateDefaultLevel();
-            }
+			else
+			{
+				ActivateDefaultLevel();
+			}
 
-            Mod.Print("fetch player spawns.");
+			Mod.Print("fetch player spawns.");
 
-            dadSpawn = level.levelPrefab.GetComponentInChildren<DadSpawn>();
-            babySpawn = level.levelPrefab.GetComponentInChildren<BabySpawn>();
+			dadSpawn = level.levelPrefab.GetComponentInChildren<DadSpawn>();
+			babySpawn = level.levelPrefab.GetComponentInChildren<BabySpawn>();
 
-            if (dadSpawn)
-            {
-                HexaMod.networkManager.dadSpawnPos = dadSpawn.spots[0];
-            }
+			if (dadSpawn)
+			{
+				HexaMod.networkManager.dadSpawnPos = dadSpawn.spots[0];
+			}
 
-            if (babySpawn)
-            {
-                HexaMod.networkManager.babySpawnPos = babySpawn.spots[0];
-            }
+			if (babySpawn)
+			{
+				HexaMod.networkManager.babySpawnPos = babySpawn.spots[0];
+			}
 
-            Mod.Print("done with (already connected) players!");
+			Mod.Print("done with (already connected) players!");
 
-            Mod.Print("fetch item spawns.");
+			Mod.Print("fetch item spawns.");
 
-            lowSpawn = level.levelPrefab.GetComponentInChildren<LowSpawn>();
-            midSpawn = level.levelPrefab.GetComponentInChildren<MidSpawn>();
-            specialSpawn = level.levelPrefab.GetComponentInChildren<SpecialSpawn>();
-            keySpawn = level.levelPrefab.GetComponentInChildren<KeySpawn>();
+			lowSpawn = level.levelPrefab.GetComponentInChildren<LowSpawn>();
+			midSpawn = level.levelPrefab.GetComponentInChildren<MidSpawn>();
+			specialSpawn = level.levelPrefab.GetComponentInChildren<SpecialSpawn>();
+			keySpawn = level.levelPrefab.GetComponentInChildren<KeySpawn>();
 
-            if (lowSpawn && midSpawn && specialSpawn && keySpawn)
-            {
-                ItemSpawner itemSpawner = HexaMod.networkManager.itemSpawner.GetComponent<ItemSpawner>();
-                itemSpawner.lowTierPos = new GameObject[itemSpawner.lowTierObj.Length];
-                itemSpawner.midTierPos = new GameObject[itemSpawner.midTierObj.Length];
-                itemSpawner.specialPos = specialSpawn.spots;
+			if (lowSpawn && midSpawn && specialSpawn && keySpawn)
+			{
+				ItemSpawner itemSpawner = HexaMod.networkManager.itemSpawner.GetComponent<ItemSpawner>();
+				itemSpawner.lowTierPos = new GameObject[itemSpawner.lowTierObj.Length];
+				itemSpawner.midTierPos = new GameObject[itemSpawner.midTierObj.Length];
+				itemSpawner.specialPos = specialSpawn.spots;
 
 				itemSpawner.keySpawns = keySpawn.spots;
 
-                for (int i = 0; i < itemSpawner.lowTierObj.Length; i++)
-                {
-                    itemSpawner.lowTierPos[i] = lowSpawn.spots[i % lowSpawn.spots.Length].gameObject;
-                }
+				for (int i = 0; i < itemSpawner.lowTierObj.Length; i++)
+				{
+					itemSpawner.lowTierPos[i] = lowSpawn.spots[i % lowSpawn.spots.Length].gameObject;
+				}
 
-                for (int i = 0; i < itemSpawner.midTierObj.Length; i++)
-                {
-                    itemSpawner.midTierPos[i] = midSpawn.spots[i % midSpawn.spots.Length].gameObject;
-                }
+				for (int i = 0; i < itemSpawner.midTierObj.Length; i++)
+				{
+					itemSpawner.midTierPos[i] = midSpawn.spots[i % midSpawn.spots.Length].gameObject;
+				}
 
 				itemSpawner.ShuffleOrder(itemSpawner.lowTierPos);
 				itemSpawner.ShuffleOrder(itemSpawner.midTierPos);
 			}
 
-            if (level != titleLevel)
-            {
+			if (level != titleLevel)
+			{
 				// prevent StartClocks from throwing an error
 
 				HexaMod.gameStateController.clocks = new GameObject[] { };
 				HexaMod.gameStateController.radio = HexaMod.gameStateController.gameObject.AddComponent<AudioSource>();
 			}
 
-            Mod.Print("done with item spawns.");
+			Mod.Print("done with item spawns.");
 
-            Mod.Print("loading music.");
+			Mod.Print("loading music.");
 
-            customLevelMusic = level.levelPrefab.GetComponentInChildren<LevelMusic>();
+			customLevelMusic = level.levelPrefab.GetComponentInChildren<LevelMusic>();
 
-            if (customLevelMusic != null)
-            {
-                HexaMod.networkManager.daddySong = customLevelMusic.DadTheme;
-                HexaMod.networkManager.babySong = customLevelMusic.BabyTheme;
-                HexaMod.networkManager.dadlympicSong = customLevelMusic.DadlympicTheme;
-                HexaMod.networkManager.hgSong = customLevelMusic.HungryGamesTheme;
-                HexaMod.networkManager.dadNightmareSongDad = customLevelMusic.DadNightmaresDadTheme;
-                HexaMod.networkManager.dadNightmareSongBaby = customLevelMusic.DadNightmaresBabyTheme;
-                if (!gameStarted)
-                {
-                    HexaMod.networkManager.aud.clip = customLevelMusic.TitleTheme;
-                    HexaMod.networkManager.aud.Play();
-                }
-            }
-            else
-            {
+			if (customLevelMusic != null)
+			{
+				HexaMod.networkManager.daddySong = customLevelMusic.DadTheme;
+				HexaMod.networkManager.babySong = customLevelMusic.BabyTheme;
+				HexaMod.networkManager.dadlympicSong = customLevelMusic.DadlympicTheme;
+				HexaMod.networkManager.hgSong = customLevelMusic.HungryGamesTheme;
+				HexaMod.networkManager.dadNightmareSongDad = customLevelMusic.DadNightmaresDadTheme;
+				HexaMod.networkManager.dadNightmareSongBaby = customLevelMusic.DadNightmaresBabyTheme;
+				if (!gameStarted)
+				{
+					HexaMod.networkManager.aud.clip = customLevelMusic.TitleTheme;
+					HexaMod.networkManager.aud.Play();
+				}
+			}
+			else
+			{
 				HexaMod.networkManager.daddySong = StaticAssets.daddySong;
 				HexaMod.networkManager.babySong = StaticAssets.babySong;
 				HexaMod.networkManager.dadlympicSong = StaticAssets.dadlympicSong;
@@ -321,22 +321,22 @@ namespace HexaMod
 				}
 			}
 
-            Mod.Print("inserting map assets.");
+			Mod.Print("inserting map assets.");
 
-            var loaded = Object.Instantiate(level.levelPrefab);
-            loaded.name = level.levelPrefab.name;
-            loadedLevelInstance = loaded.transform;
-        }
+			var loaded = Object.Instantiate(level.levelPrefab);
+			loaded.name = level.levelPrefab.name;
+			loadedLevelInstance = loaded.transform;
+		}
 
 		public static void InitScene()
 		{
-            dadSpawn = null;
+			dadSpawn = null;
 			babySpawn = null;
 			lowSpawn = null;
 			midSpawn = null;
 			specialSpawn = null;
 			keySpawn = null;
-		    loadedLevel = null;
+			loadedLevel = null;
 			loadedLevelInstance = null;
 			defaultLevelObjects.Clear();
 			gameStarted = HexaMod.networkManager.gameStarted;
@@ -345,7 +345,7 @@ namespace HexaMod
 		}
 
 		public static void AttemptToLoadCurrentLevel()
-        {
+		{
 			foreach (ModLevel level in levels)
 			{
 				if (level.levelPrefab.name == HexaMod.persistentLobby.lobbySettings.mapName)
@@ -357,5 +357,5 @@ namespace HexaMod
 
 			ActivateDefaultLevel();
 		}
-    }
+	}
 }

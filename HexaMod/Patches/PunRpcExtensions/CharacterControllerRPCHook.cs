@@ -6,15 +6,15 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches
 {
-    [HarmonyPatch(typeof(FirstPersonController))]
-    internal class CharacterControllerRPCHook
-    {
+	[HarmonyPatch(typeof(FirstPersonController))]
+	internal class CharacterControllerRPCHook
+	{
 
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        static void CharacterControllerExtensionsPatch(ref FirstPersonController __instance)
-        {
-            __instance.gameObject.AddComponent<CharacterExtendedRPCBehavior>();
+		[HarmonyPatch("Start")]
+		[HarmonyPostfix]
+		static void CharacterControllerExtensionsPatch(ref FirstPersonController __instance)
+		{
+			__instance.gameObject.AddComponent<CharacterExtendedRPCBehavior>();
 			__instance.gameObject.AddComponent<CharacterModelSwapper>();
 			NetworkedSoundBehavior networkedSound = __instance.gameObject.AddComponent<NetworkedSoundBehavior>();
 
@@ -23,5 +23,5 @@ namespace HexaMod.Patches
 			networkedSound.RegisterSound(fields.Field<AudioClip>("m_LandSound").Value);
 			networkedSound.RegisterSounds(fields.Field<AudioClip[]>("m_FootstepSounds").Value);
 		}
-    }
+	}
 }

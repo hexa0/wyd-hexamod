@@ -4,66 +4,66 @@ using UnityEngine.UI;
 
 namespace HexaMod.UI.Util
 {
-    public static class UITemplates
-    {
-        public static Button buttonTemplate;
-        public static GameObject textInputFieldTemplate;
-        public static Toggle hostControlToggleTemplate;
+	public static class UITemplates
+	{
+		public static Button buttonTemplate;
+		public static GameObject textInputFieldTemplate;
+		public static Toggle hostControlToggleTemplate;
 
-        public static void Init()
-        {
-            Mod.Print("init ui template references");
+		public static void Init()
+		{
+			Mod.Print("init ui template references");
 
-            GameObject playLocalButton = Menu.Menus.title.FindMenu("SplashMenu").Find("PlayLocal").gameObject;
-            GameObject LobbyNameOriginal = Menu.Menus.title.FindMenu("OnlineMenu").Find("LobbyName").gameObject;
-            GameObject SetSpectateOriginal = Menu.Menus.title.FindMenu(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
+			GameObject playLocalButton = Menu.Menus.title.FindMenu("SplashMenu").Find("PlayLocal").gameObject;
+			GameObject LobbyNameOriginal = Menu.Menus.title.FindMenu("OnlineMenu").Find("LobbyName").gameObject;
+			GameObject SetSpectateOriginal = Menu.Menus.title.FindMenu(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
 
-            LobbyNameOriginal.transform.GetChild(0).GetComponent<InputField>().characterLimit = 32;
+			LobbyNameOriginal.transform.GetChild(0).GetComponent<InputField>().characterLimit = 32;
 
-            if (!buttonTemplate)
-            {
-                buttonTemplate = Object.Instantiate(playLocalButton).GetComponent<Button>();
-                buttonTemplate.name = "buttonTemplate";
-                buttonTemplate.GetComponentInChildren<Text>(true).text = "buttonTemplate";
-                buttonTemplate.onClick = new Button.ButtonClickedEvent();
+			if (!buttonTemplate)
+			{
+				buttonTemplate = Object.Instantiate(playLocalButton).GetComponent<Button>();
+				buttonTemplate.name = "buttonTemplate";
+				buttonTemplate.GetComponentInChildren<Text>(true).text = "buttonTemplate";
+				buttonTemplate.onClick = new Button.ButtonClickedEvent();
 
-                buttonTemplate.gameObject.SetActive(false);
-            }
+				buttonTemplate.gameObject.SetActive(false);
+			}
 
-            if (!textInputFieldTemplate)
-            {
-                textInputFieldTemplate = Object.Instantiate(LobbyNameOriginal);
-                textInputFieldTemplate.name = "textInputFieldTemplate";
+			if (!textInputFieldTemplate)
+			{
+				textInputFieldTemplate = Object.Instantiate(LobbyNameOriginal);
+				textInputFieldTemplate.name = "textInputFieldTemplate";
 
-                InputField field = textInputFieldTemplate.transform.GetChild(0).GetComponent<InputField>();
-                Text text = textInputFieldTemplate.transform.GetChild(1).GetComponent<Text>();
+				InputField field = textInputFieldTemplate.transform.GetChild(0).GetComponent<InputField>();
+				Text text = textInputFieldTemplate.transform.GetChild(1).GetComponent<Text>();
 
-                field.onValueChanged = new InputField.OnChangeEvent();
-                field.onEndEdit = new InputField.SubmitEvent();
+				field.onValueChanged = new InputField.OnChangeEvent();
+				field.onEndEdit = new InputField.SubmitEvent();
 
-                field.characterLimit = 0;
-                field.text = "";
-                field.name = "InputField";
-                text.text = "textInputFieldTemplate";
-                text.name = "Title";
+				field.characterLimit = 0;
+				field.text = "";
+				field.name = "InputField";
+				text.text = "textInputFieldTemplate";
+				text.name = "Title";
 
-                textInputFieldTemplate.SetActive(false);
-            }
+				textInputFieldTemplate.SetActive(false);
+			}
 
-            if (!hostControlToggleTemplate)
-            {
-                hostControlToggleTemplate = Object.Instantiate(SetSpectateOriginal).GetComponent<Toggle>();
-                hostControlToggleTemplate.name = "hostControlToggleTemplate";
-                hostControlToggleTemplate.transform.GetComponentInChildren<Text>(true).text = "hostControlToggleTemplate";
-                hostControlToggleTemplate.onValueChanged = new Toggle.ToggleEvent();
-                Object.DestroyImmediate(hostControlToggleTemplate.GetComponent<HostControl>());
-                Object.DestroyImmediate(hostControlToggleTemplate.GetComponent<PhotonView>());
-                hostControlToggleTemplate.interactable = true;
+			if (!hostControlToggleTemplate)
+			{
+				hostControlToggleTemplate = Object.Instantiate(SetSpectateOriginal).GetComponent<Toggle>();
+				hostControlToggleTemplate.name = "hostControlToggleTemplate";
+				hostControlToggleTemplate.transform.GetComponentInChildren<Text>(true).text = "hostControlToggleTemplate";
+				hostControlToggleTemplate.onValueChanged = new Toggle.ToggleEvent();
+				Object.DestroyImmediate(hostControlToggleTemplate.GetComponent<HostControl>());
+				Object.DestroyImmediate(hostControlToggleTemplate.GetComponent<PhotonView>());
+				hostControlToggleTemplate.interactable = true;
 
-                hostControlToggleTemplate.gameObject.SetActive(false);
-            }
+				hostControlToggleTemplate.gameObject.SetActive(false);
+			}
 
-            playLocalButton.GetComponent<Button>().interactable = false;
-        }
-    }
+			playLocalButton.GetComponent<Button>().interactable = false;
+		}
+	}
 }

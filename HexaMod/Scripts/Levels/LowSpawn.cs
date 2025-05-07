@@ -2,8 +2,8 @@
 
 namespace HexaMapAssemblies
 {
-    public class LowSpawn : MonoBehaviour
-    {
-        public Transform[] spots;
-    }
+	public class LowSpawn : MonoBehaviour
+	{
+		public Transform[] spots;
+	}
 }
