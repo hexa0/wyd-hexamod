@@ -207,11 +207,6 @@ namespace HexaMod.Voice
 		{
 			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
 			speakingStates[clientMessage.clientId] = clientMessage.body[0] == 1;
-
-			if (clientMessage.body[0] == 1 && audioBuffers.ContainsKey(clientMessage.clientId))
-			{
-				audioBuffers[clientMessage.clientId].Clear();
-			}
 		}
 
 		static void WaveIn_DataAvailable(object sender, WaveInEventArgs e)

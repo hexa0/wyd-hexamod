@@ -63,7 +63,7 @@ namespace HexaMod.Voice
 		private short[] buffer;
 		private static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
 		{
-			Buffer.BlockCopy(source, (sourceIndex * 2), destination, destinationIndex * 2, length * 2);
+			Buffer.BlockCopy(source, sourceIndex * 2, destination, destinationIndex * 2, length * 2);
 		}
 		private short[] NextChunk(int chunkSize)
 		{
