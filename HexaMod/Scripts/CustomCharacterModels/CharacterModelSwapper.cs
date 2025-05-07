@@ -48,7 +48,6 @@ namespace HexaMod.Util
 			SetCharacterModel(initModel);
 		}
 
-		[PunRPC]
 		public void SetCharacterModel(string modelName)
 		{
 			if (isDad)
@@ -134,20 +133,6 @@ namespace HexaMod.Util
 
 				}
 			}
-		}
-
-		// Photon serialization SUCKS so these are proxies for that
-
-		[PunRPC]
-		public void SetShirtColor(float R, float G, float B)
-		{
-			SetShirtColor(new Color(R, G, B));
-		}
-
-		[PunRPC]
-		public void SetSkinColor(float R, float G, float B)
-		{
-			SetSkinColor(new Color(R, G, B));
 		}
 	}
 }

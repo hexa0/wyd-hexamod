@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using HexaMod.Patches;
+using HexaMod.SerializableObjects;
 using HexaMod.UI;
 using HexaMod.Util;
+using HexaMod.Voice;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -10,23 +12,49 @@ namespace HexaMod
 	public class CharacterExtendedRPCBehavior : MonoBehaviour
 	{
 		PhotonView netView;
+		InitialPlayerState initialState;
+		bool processedInitialState = false;
 		void Start()
 		{
 			netView = GetComponent<PhotonView>();
+			initialState = new InitialPlayerState()
+			{
+				username = PlayerPrefs.GetString("LobbyName", "Player"),
+				clientId = (ulong)PhotonNetwork.player.ID,
+				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
+				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
+				characterModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default")
+			};
 
-			StartCoroutine(Wait());
+			StartCoroutine(SendInitalState());
 		}
 
-		IEnumerator Wait()
+		void ProcessInitialState()
 		{
-			yield return new WaitForSeconds(0.5f);
-
-			if (gameObject.name == HexaMod.networkManager.playerObj.name)
+			if (processedInitialState)
 			{
-				SetShirtColorForOthers(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex()));
-				SetSkinColorForOthers(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex()));
-				SetCharacterModelForOthers(PlayerPrefs.GetString("HMV2_DadCharacterModel", "default"));
-				FixUsernameForOthers(PlayerPrefs.GetString("LobbyName", "Player"));
+				return;
+			}
+
+			processedInitialState = true;
+			GetComponent<FirstPersonController>().playerName = initialState.username;
+			GetComponent<CharacterModelSwapper>().SetShirtColor(initialState.shirtColor.toColor());
+			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
+			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);
+			GetComponent<PlayerVoiceEmitterRPC>().SetVoiceId(initialState.clientId);
+		}
+
+		IEnumerator SendInitalState()
+		{
+			if (gameObject == HexaMod.networkManager.playerObj)
+			{
+				yield return 0;
+
+				for (int i = 0; i < 10; i++) // when this delay is short sometimes people wouldn't have voice chat due to the event missing, although that might've been other stability issues i'm not taking chances so this is repeated to make sure the other clients actually recieve it
+				{
+					SetInitialStateForOthers();
+					yield return new WaitForSeconds(0.1f);
+				}
 			}
 		}
 
@@ -35,30 +63,17 @@ namespace HexaMod
 			netView.RPC(method, target, param);
 		}
 
-		public void SetShirtColorForOthers(Color newColor)
+		public void SetInitialStateForOthers()
 		{
-			RPC("SetShirtColor", PhotonTargets.All, new object[] { newColor.r, newColor.g, newColor.b });
-		}
-
-		public void SetSkinColorForOthers(Color newColor)
-		{
-			RPC("SetSkinColor", PhotonTargets.All, new object[] { newColor.r, newColor.g, newColor.b });
-		}
-
-		public void SetCharacterModelForOthers(string modelName)
-		{
-			RPC("SetCharacterModel", PhotonTargets.All, new object[] { modelName });
-		}
-
-		public void FixUsernameForOthers(string username)
-		{
-			RPC("FixUsername", PhotonTargets.All, new object[] { username });
+			ProcessInitialState();
+			RPC("SetInitialState", PhotonTargets.Others, new object[] { InitialPlayerState.serializer.Serialize(initialState) });
 		}
 
 		[PunRPC]
-		public void FixUsername(string username)
+		public void SetInitialState(byte[] bytes)
 		{
-			GetComponent<FirstPersonController>().playerName = username;
+			initialState = InitialPlayerState.serializer.Deserialize(bytes);
+			ProcessInitialState();
 		}
 
 		[PunRPC]

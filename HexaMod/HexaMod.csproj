@@ -277,6 +277,8 @@
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
     <Compile Include="Scripts\Levels\VoidFailSafe.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
+    <Compile Include="SerializableObjects\InitialPlayerState.cs" />
+    <Compile Include="SerializableObjects\SerializableColor.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
     <Compile Include="UI\Class\WYDHexColorInputField.cs" />
     <Compile Include="UI\Class\WYDMicrophoneIndicator.cs" />
@@ -290,7 +292,6 @@
     <Compile Include="Util\GetGameObjectChildren.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
-    <Compile Include="Voice\Patch\PlayerVoiceEmitterExtensionPatch.cs" />
     <Compile Include="Voice\Patch\QuitFix.cs" />
     <Compile Include="Voice\Script\PlayerVoiceEmitterRPC.cs" />
     <Compile Include="Voice\Patch\VoiceChatRoomsHook.cs" />
@@ -340,7 +341,7 @@
     <Compile Include="Scripts\PunRpcExtensions\DoorSoundRPC.cs" />
     <Compile Include="Scripts\Levels\KeySpawn.cs" />
     <Compile Include="Scripts\PunRpcExtensions\Lobby\HexaLobby.cs" />
-    <Compile Include="HexaPersistentLobby.cs" />
+    <Compile Include="Scripts\HexaPersistentLobby.cs" />
     <Compile Include="Scripts\IntroScript.cs" />
     <Compile Include="Scripts\Levels\LevelMusic.cs" />
     <Compile Include="Scripts\Levels\LowSpawn.cs" />
@@ -352,7 +353,7 @@
     <Compile Include="Scripts\Levels\Factory\PickUpFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\PrefabFactory.cs" />
     <Compile Include="Patches\Fixes\SharpPhysicsReplication.cs" />
-    <Compile Include="LobbySettings.cs" />
+    <Compile Include="SerializableObjects\LobbySettings.cs" />
     <Compile Include="Scripts\PunRpcExtensions\Character\CharacterExtendedRPCBehavior.cs" />
     <Compile Include="Scripts\Levels\Factory\SmokeDetectorFactory.cs" />
     <Compile Include="Scripts\Levels\SpecialSpawn.cs" />

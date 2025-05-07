@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using HexaMod.Voice;
+using HexaMod.SerializableObjects;
 using UnityEngine;
 using UnityEngine.Events;
 

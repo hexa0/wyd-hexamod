@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using HexaMod.Scripts;
 using HexaMod.Util;
+using HexaMod.Voice;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -16,6 +17,8 @@ namespace HexaMod.Patches
 		{
 			__instance.gameObject.AddComponent<CharacterExtendedRPCBehavior>();
 			__instance.gameObject.AddComponent<CharacterModelSwapper>();
+			__instance.gameObject.AddComponent<PlayerVoiceEmitterRPC>();
+
 			NetworkedSoundBehavior networkedSound = __instance.gameObject.AddComponent<NetworkedSoundBehavior>();
 
 			Traverse fields = Traverse.Create(__instance);

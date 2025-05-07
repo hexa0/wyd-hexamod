@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using HexaMod.Voice;
 using UnityEngine;
 
 namespace HexaMod.Voice
@@ -11,34 +10,11 @@ namespace HexaMod.Voice
 		void Start()
 		{
 			netView = GetComponent<PhotonView>();
-
-			StartCoroutine(Wait());
-		}
-
-		IEnumerator Wait()
-		{
-			yield return new WaitForSeconds(0.5f);
-
-			if (gameObject.name == HexaMod.networkManager.playerObj.name)
-			{
-				SetVoiceForOthers((ulong)PhotonNetwork.player.ID);
-			}
-		}
-
-		public void RPC(string method, PhotonTargets target, params object[] param)
-		{
-			netView.RPC(method, target, param);
-		}
-
-		public void SetVoiceForOthers(ulong id)
-		{
-			RPC("SetVoiceId", PhotonTargets.Others, new object[] { BitConverter.GetBytes(id) });
 		}
 
 		AudioSource voiceSource;
 
-		[PunRPC]
-		public void SetVoiceId(byte[] id)
+		public void SetVoiceId(ulong id)
 		{
 			GameObject model = gameObject;
 			var dadModel = transform.Find("DadModel");
@@ -69,7 +45,7 @@ namespace HexaMod.Voice
 			voiceSource.loop = true;
 
 			VoiceEmitter voiceEmitter = model.AddComponent<VoiceEmitter>();
-			voiceEmitter.clientId = BitConverter.ToUInt64(id, 0);
+			voiceEmitter.clientId = id;
 
 			voiceEmitter.enabled = false;
 			voiceSource.enabled = false;

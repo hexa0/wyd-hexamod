@@ -22,7 +22,7 @@ namespace HexaMod.Util
 		public string hostMenuName = "Family Gathering-Host";
 		public string respawnRPC = "RespawnLotsOfPlayers";
 		public bool twoPlayer = false;
-		public bool canAlternate = true;
+		public bool canShuffle = true;
 		public bool defaultTeamIsDad = false;
 		public bool twoTeams = true;
 
@@ -102,7 +102,7 @@ namespace HexaMod.Util
 				info.tag =		  "THG";
 				info.hostMenuName = "HungryGames";
 				info.respawnRPC =   "RespawnHungryPlayers";
-				info.canAlternate =   false;
+				info.canShuffle =   false;
 				info.twoTeams =	 false;
 
 				DefineGameMode(info);
@@ -118,7 +118,7 @@ namespace HexaMod.Util
 				info.tag =			  "TGD";
 				info.hostMenuName =	 "Dadlympics";
 				info.respawnRPC =	   "RespawnDadlympians";
-				info.canAlternate =	   false;
+				info.canShuffle =	   false;
 				info.defaultTeamIsDad = true;
 				info.twoTeams =		 false;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using HarmonyLib;
+using HexaMod.SerializableObjects;
 using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
@@ -180,14 +181,14 @@ namespace HexaMod
 				Destroy(rematchHelper.gameObject);
 			}
 
-			gameStateController.allMustDie = lobbySettings.allMustDie;
+			gameStateController.allMustDie = lobbySettings.allMustDie && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
 			networkManager.curGameMode = rematchHelper.curGameMode;
-			networkManager.alternateCharacters = rematchHelper.alternateChars;
+			networkManager.alternateCharacters = lobby.lobbySettings.shufflePlayers == ShufflePlayersMode.Alternate;
 			networkManager.allowSpectate = rematchHelper.allowSpec;
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				gameStateController.GetComponent<PhotonView>().RPC("SetAllMustDie", PhotonTargets.Others, new object[] { lobby.lobbySettings.allMustDie && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer });
+				gameStateController.GetComponent<PhotonView>().RPC("SetAllMustDie", PhotonTargets.Others, new object[] { gameStateController.allMustDie });
 			}
 
 			if (!lobby.dads.ContainsKey(PhotonNetwork.player.ID))
@@ -197,13 +198,13 @@ namespace HexaMod
 
 			GameMode gameMode = GameModes.gameModes[rematchHelper.curGameMode];
 
-			if (lobby.lobbySettings.shufflePlayers && gameMode.canAlternate)
+			if (lobby.lobbySettings.shufflePlayers == ShufflePlayersMode.Shuffle && gameMode.canShuffle)
 			{
 				networkManager.isDad = lobby.dads[PhotonNetwork.player.ID];
 			}
 			else
 			{
-				if (gameMode.canAlternate && networkManager.alternateCharacters)
+				if (gameMode.canShuffle && networkManager.alternateCharacters)
 				{
 					if (lobbySettings.roundNumber % 2 == 0)
 					{

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using HexaMod.Voice;
 using static HexaMod.UI.Util.Menu.Menus;
 using HexaMod.UI.Class;
+using HexaMod.SerializableObjects;
 
 namespace HexaMod.UI
 {
@@ -569,12 +570,12 @@ namespace HexaMod.UI
 				LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
 
 				WYDUIElement[] options = {
-					new WYDBooleanControl(
-						"shufflePlayers", "Shuffle Players", ls.shufflePlayers, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.shufflePlayers = value;
+					new WYDSwitchInput<ShufflePlayersMode>(
+						"shufflePlayers", "Shuffle Players", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
+						menu.transform, new Vector2(200f, 0f),
+						new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
+							delegate (WYDSwitchOption<ShufflePlayersMode> option) {
+								HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
 								HexaMod.persistentLobby.CommitChanges();
 							}
 						}
