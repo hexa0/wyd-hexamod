@@ -259,6 +259,7 @@
     <Compile Include="Patches\Feature\BetterSmokeDetector.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
+    <Compile Include="Patches\Feature\VentSound.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
     <Compile Include="Patches\Fixes\DeathCamFix.cs" />

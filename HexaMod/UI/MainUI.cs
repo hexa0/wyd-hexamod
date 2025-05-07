@@ -571,8 +571,8 @@ namespace HexaMod.UI
 
 				WYDUIElement[] options = {
 					new WYDSwitchInput<ShufflePlayersMode>(
-						"shufflePlayers", "Shuffle Players", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
-						menu.transform, new Vector2(200f, 0f),
+						"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
+						menu.transform, new Vector2(45f, 0f),
 						new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
 							delegate (WYDSwitchOption<ShufflePlayersMode> option) {
 								HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
