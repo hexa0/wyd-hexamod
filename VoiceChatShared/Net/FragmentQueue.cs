@@ -2,7 +2,7 @@
 {
     internal class FragmentQueue
     {
-        public byte[] data = new byte[1024 * 100];
+        public byte[] data = new byte[1024 * 4096];
         public int dataOffest = 0;
     }
 }

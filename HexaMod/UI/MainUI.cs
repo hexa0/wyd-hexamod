@@ -266,7 +266,21 @@ namespace HexaMod.UI
 
 					LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
 
-					WYDUIElement[] options = {
+                    VoiceChat.SetDenoiseEnabled(PlayerPrefs.GetInt("HMV2_UseRnNoise", 0) == 1);
+
+                    var devices = VoiceChat.GetDevices();
+                    WYDSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WYDSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
+
+                    for (int i = 0; i < devices.Length; i++)
+                    {
+                        deviceOptions[i] = new WYDSwitchOption<VoiceChat.MicrophoneDevice>()
+                        {
+                            name = $"({i + 1}/{devices.Length}) : {devices[i].capabilities.ProductName}",
+                            value = devices[i]
+                        };
+                    }
+
+                    WYDUIElement[] options = {
                         // Audio
 
 						new WYDBooleanControl(
@@ -275,8 +289,26 @@ namespace HexaMod.UI
 							new UnityAction<bool>[] {
 								delegate (bool value) {
 									PlayerPrefs.SetInt("HMV2_UseRnNoise", value ? 1 : 0);
+                                    VoiceChat.SetDenoiseEnabled(value);
 								}
 							}
+						),
+
+                        new WYDSwitchInput<VoiceChat.MicrophoneDevice>(
+                            "microphoneDevice", "", Mathf.Min(PlayerPrefs.GetInt("HMV2_MicrophoneDevice", 0), deviceOptions.Length - 1), deviceOptions,
+                            menu.transform, new Vector2(45f, 0f),
+                            new UnityAction<WYDSwitchOption<VoiceChat.MicrophoneDevice>>[] {
+                                delegate (WYDSwitchOption<VoiceChat.MicrophoneDevice> option) {
+                                    PlayerPrefs.SetInt("HMV2_MicrophoneDevice", option.value.deviceId);
+                                    VoiceChat.SetDevice(option.value);
+
+								}
+                            }
+                        ),
+
+						new WYDMicrophoneIndicator(
+							"microphoneVolume",
+							menu.transform, new Vector2(45f, 0f)
 						),
 
 						new WYDBooleanControl(

@@ -37,6 +37,8 @@ namespace HexaMod.UI.Class
 			}
 
 			button.gameObject.SetActive(true);
+
+			Init();
 		}
 
 		public static WYDTextButton MakeBackButton(MenuUtil menu, Transform root, string backMenu = null)

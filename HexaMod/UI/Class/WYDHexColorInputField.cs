@@ -56,6 +56,8 @@ namespace HexaMod.UI.Class
 			field.onEndEdit.AddListener((string hex) => {
 				Event(hex, submitActions);
 			});
+
+			Init();
 		}
 	}
 }

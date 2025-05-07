@@ -11,7 +11,7 @@ namespace HexaMod.Voice
         public AudioSource audioSource;
         public ulong clientId = 0;
         private List<short[]> buffers;
-        private short[] lastBuffer;
+        private short[] lastBuffer = new short[512];
         private void Start()
         {
             audioSource = GetComponent<AudioSource>();

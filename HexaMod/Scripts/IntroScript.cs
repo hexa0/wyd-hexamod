@@ -138,7 +138,6 @@ namespace HexaMod
             ActionText("Init VoiceChat\n(Transcode Process)");
             yield return 0;
             VoiceChat.InitTranscodeServerProcess();
-            VoiceChat.CreateTranscodeServerConnection();
             ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
             yield return 0;
             int attempts = 0;
@@ -160,7 +159,14 @@ namespace HexaMod
 
                 try
                 {
-                    VoiceChat.SendTranscodeServerHandshake();
+                    if (!VoiceChat.completedHandshake)
+                    {
+						VoiceChat.SendTranscodeServerHandshake();
+					}
+                    else
+                    {
+						Mod.Print("Cancelled Handshake, Already Completed Handshake");
+					}
                 }
                 catch (Exception e)
                 {

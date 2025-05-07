@@ -92,7 +92,14 @@ namespace HexaMod.UI.Class
 			currentOptions = options;
 			currentChangedActions = changedActions;
 
+			value.alignment = TextAnchor.MiddleLeft;
 			value.text = options[defaultSelection].name;
+			value.rectTransform.sizeDelta = new Vector2(2000f, 400f);
+			value.rectTransform.localPosition = new Vector2(1125f, -4.2999f);
+			label.alignment = TextAnchor.MiddleRight;
+			label.rectTransform.sizeDelta = new Vector2(2000f, 400f);
+			label.rectTransform.localPosition = new Vector2(-1010f, -4.2999f);
+
 			currentOption = defaultSelection;
 
 			gameObject.name = name;
@@ -108,6 +115,8 @@ namespace HexaMod.UI.Class
 			rectTransform.localPosition = position;
 
 			gameObject.SetActive(true);
+
+			Init();
 		}
 	}
 }

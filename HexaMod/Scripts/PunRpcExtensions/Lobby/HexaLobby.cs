@@ -80,7 +80,7 @@ namespace HexaMod
         {
             if (PhotonNetwork.isMasterClient && (PhotonNetwork.inRoom || PhotonNetwork.insideLobby))
             {
-                netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.Serialize(newSettings) });
+                netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.serializer.Serialize(newSettings) });
             }
         }
 
@@ -150,7 +150,7 @@ namespace HexaMod
         [PunRPC]
         public void SetLobbySettingsRPC(byte[] newSettings)
         {
-            HexaMod.persistentLobby.lobbySettings = LobbySettings.Deserialize(newSettings);
+            HexaMod.persistentLobby.lobbySettings = LobbySettings.serializer.Deserialize(newSettings);
             HexaMod.persistentLobby.CommitChanges();
         }
 

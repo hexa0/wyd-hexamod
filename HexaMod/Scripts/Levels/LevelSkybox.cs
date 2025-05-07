@@ -10,6 +10,7 @@ namespace HexaMapAssemblies
 
 	public class LevelSkybox : MonoBehaviour
 	{
+		public Cubemap cubemap;
 		public Material skybox;
 		public CameraClearFlags clearFlags;
 		public Light sunSource;
@@ -26,6 +27,9 @@ namespace HexaMapAssemblies
 
 			CurrentLevelSkybox.current = this;
 			RenderSettings.skybox = skybox;
+			RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
+			RenderSettings.defaultReflectionMode = UnityEngine.Rendering.DefaultReflectionMode.Skybox;
+			RenderSettings.customReflection = cubemap;
 
 			if (sunSource)
 			{

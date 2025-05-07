@@ -45,15 +45,17 @@ namespace HexaVoiceChatShared.Net
 
         public void SwitchToEndPoint(IPEndPoint newServer)
         {
-            if (!newServer.Equals(endPoint))
-            {
-                Close();
-                socket = new UdpClient();
-                socket.Client.ReceiveBufferSize = socketBufferSize;
-                socket.Client.SendBufferSize = socketBufferSize;
-                endPoint = newServer;
-                Connect(true);
-            }
+            throw new Exception("calls to SwitchToEndPoint are unstable and as such have been disabled, please reconstruct the class itself.");
+
+            //if (!newServer.Equals(endPoint))
+            //{
+            //    Close();
+            //    socket = new UdpClient();
+            //    socket.Client.ReceiveBufferSize = socketBufferSize;
+            //    socket.Client.SendBufferSize = socketBufferSize;
+            //    endPoint = newServer;
+            //    Connect(true);
+            //}
         }
 
         public void Close()

@@ -35,6 +35,8 @@ namespace HexaMod.UI.Class
 			}
 
 			control.gameObject.SetActive(true);
+
+			Init();
 		}
 	}
 }

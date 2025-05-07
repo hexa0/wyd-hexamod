@@ -19,9 +19,9 @@ namespace HexaMod.Patches
 			NetworkedSoundBehavior networkedSound = __instance.gameObject.AddComponent<NetworkedSoundBehavior>();
 
 			Traverse fields = Traverse.Create(__instance);
-			networkedSound.AddSound(fields.Field<AudioClip>("m_JumpSound").Value);
-			networkedSound.AddSound(fields.Field<AudioClip>("m_LandSound").Value);
-			networkedSound.AddSounds(fields.Field<AudioClip[]>("m_FootstepSounds").Value);
+			networkedSound.RegisterSound(fields.Field<AudioClip>("m_JumpSound").Value);
+			networkedSound.RegisterSound(fields.Field<AudioClip>("m_LandSound").Value);
+			networkedSound.RegisterSounds(fields.Field<AudioClip[]>("m_FootstepSounds").Value);
 		}
     }
 }

@@ -7,16 +7,16 @@ namespace HexaMod.Scripts
 	{
 		private List<AudioClip> clips = new List<AudioClip>();
 
-		public void AddSound(AudioClip sound)
+		public void RegisterSound(AudioClip sound)
 		{
 			clips.Add(sound);
 		}
 
-		public void AddSounds(AudioClip[] sounds)
+		public void RegisterSounds(AudioClip[] sounds)
 		{
 			foreach (AudioClip sound in sounds)
 			{
-				AddSound(sound);
+				RegisterSound(sound);
 			}
 		}
 

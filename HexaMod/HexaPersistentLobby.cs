@@ -23,7 +23,7 @@ namespace HexaMod
         public void Init()
         {
             lobbySettings = new LobbySettings();
-            oldLobbySettings = LobbySettings.Copy(lobbySettings);
+            oldLobbySettings = LobbySettings.serializer.MakeUnique(lobbySettings);
             Load();
         }
 
@@ -42,8 +42,8 @@ namespace HexaMod
 
         public void Save()
         {
-            byte[] serializedSettings = LobbySettings.Serialize(lobbySettings);
-            PlayerPrefs.SetString("HMV2_LobbySettings", System.Convert.ToBase64String(serializedSettings));
+            byte[] serializedSettings = LobbySettings.serializer.Serialize(lobbySettings);
+            PlayerPrefs.SetString("HMV2_LobbySettings", Convert.ToBase64String(serializedSettings));
         }
 
         public void Load()
@@ -55,7 +55,7 @@ namespace HexaMod
 
                 if (data != "none")
                 {
-                    LobbySettings deserializedSettings = LobbySettings.Deserialize(System.Convert.FromBase64String(data));
+                    LobbySettings deserializedSettings = LobbySettings.serializer.Deserialize(Convert.FromBase64String(data));
                     deserializedSettings.roundNumber = 0;
                     oldLobbySettings = lobbySettings;
                     lobbySettings = deserializedSettings;
@@ -74,7 +74,7 @@ namespace HexaMod
             currentLobbySettingsEvent.newSettings = lobbySettings;
             HexaMod.persistentLobby.lobbySettingsChanged.Invoke();
             HexaMod.hexaLobby.SetLobbySettings(lobbySettings, oldLobbySettings);
-            oldLobbySettings = LobbySettings.Copy(lobbySettings);
+            oldLobbySettings = LobbySettings.serializer.MakeUnique(lobbySettings);
             if (!inOtherLobby)
             {
                 lobbySettingsBackup = lobbySettings;

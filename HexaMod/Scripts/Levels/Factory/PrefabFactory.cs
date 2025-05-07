@@ -16,13 +16,7 @@ namespace HexaMapAssemblies
                 instantiated.transform.SetParent(Assets.loadedLevelInstance);
             }
 
-            var view = instantiated.GetComponent<PhotonView>();
-            if (view)
-            {
-                view.viewID = GlobalPhotonFactory.currentNetId;
-                GlobalPhotonFactory.currentNetId += 1;
-                view.ObservedComponents = new List<Component>(0);
-            }
+			GlobalPhotonFactory.Register(instantiated);
 
             Destroy(gameObject);
         }

@@ -26,8 +26,9 @@ namespace VoiceChatHost
         private static long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         private static float shortMaxValueMul = 1f / short.MaxValue;
         private static float shortMinValueMul = 1f / short.MinValue;
+        private static bool doDenoise = true;
 
-        private void OnSwitchRelay(DecodedVoiceChatMessage message, IPEndPoint from)
+		private void OnSwitchRelay(DecodedVoiceChatMessage message, IPEndPoint from)
         {
             gameEndPoint = from;
 
@@ -46,7 +47,14 @@ namespace VoiceChatHost
                 {
 
                 }
-                relay.Close();
+				try
+				{
+					relay.Close();
+				}
+				catch
+				{
+
+				}
             }
 
             relay = new RelayClient(relayIp);
@@ -105,7 +113,10 @@ namespace VoiceChatHost
                     floatAudio[i] = pcm[i] * shortMaxValueMul;
                 }
 
-                rnNoiseDenoiser.Denoise(floatAudio);
+                if (doDenoise)
+                {
+					rnNoiseDenoiser.Denoise(floatAudio);
+				}
 
                 float maxVolume = MathF.Max(floatAudio.Max(), -floatAudio.Min());
                 bool shouldBeSpeaking = maxVolume > 0.01; // > 1%
@@ -189,10 +200,16 @@ namespace VoiceChatHost
         private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
         {
             Console.WriteLine($"got handshake, respond to {from}");
-            server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, [0]), from);
+            server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, Encoding.ASCII.GetBytes("!")), from);
         }
 
-        public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
+		private void OnDenoise(DecodedVoiceChatMessage message, IPEndPoint from)
+		{
+			Console.WriteLine($"set rn noise: {message.body[0]}");
+            doDenoise = message.body[0] == 1;
+		}
+
+		public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
         {
             EncodingSetup.Init();
 
@@ -207,8 +224,9 @@ namespace VoiceChatHost
             server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, OnVoiceRoomLeave);
             server.OnMessage(VoiceChatMessageType.KeepTranscodeAlive, OnKeepTranscodeAlive);
             server.OnMessage(VoiceChatMessageType.Handshake, OnHandshake);
+			server.OnMessage(VoiceChatMessageType.SetRNNoiseEnabled, OnDenoise);
 
-            new Thread(new ThreadStart(KeepAliveThread)).Start();
+			new Thread(new ThreadStart(KeepAliveThread)).Start();
 
             Console.WriteLine("transcode server started");
         }

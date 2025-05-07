@@ -215,7 +215,7 @@ namespace HexaMod
                 Object.Destroy(loadedLevelInstance.gameObject);
             }
 
-            GlobalPhotonFactory.currentNetId = GlobalPhotonFactory.startingNetId;
+            GlobalPhotonFactory.Reset();
             Mod.Print($"attempting to load map {level.name}");
 
 			StaticAssets.CacheStaticWYDAssets();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -88,22 +89,23 @@ namespace HexaMod.Voice
             {
                 if (listening)
                 {
-                    Mod.Warn("mic dropout, attempt to reconnect");
-                    try
-                    {
-                        waveIn.StopRecording();
-                    }
-                    catch { }
+                    listening = false;
+					Mod.Warn("mic dropout, attempt to reconnect");
+                    //try
+                    //{
+                    //    waveIn.StopRecording();
+                    //}
+                    //catch { }
                     try
                     {
                         waveIn.StartRecording();
                     }
                     catch { }
-                }
-            };
 
-            StartListening();
-        }
+                    listening = true;
+				}
+            };
+		}
 
         public static void InitTranscodeServerProcess()
         {
@@ -127,39 +129,30 @@ namespace HexaMod.Voice
         public static bool completedHandshake = false;
         static void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
         {
-            if (!completedHandshake)
-            {
-                Mod.Print("Completed Handshake");
-                completedHandshake = true;
-                new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
-            }
-            else
-            {
-                Mod.Warn("Already Completed Handshake");
-            }
-        }
-
-        public static void CreateTranscodeServerConnection()
-        {
-            Mod.Print("Create voicechatTranscodeClient");
-
-            voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"),
-                transcodeServerPort
-            ));
+			if (!completedHandshake)
+			{
+				Mod.Print($"Completed Handshake With Signature \"{Encoding.ASCII.GetString(message.body)}\" which should always match \"!\"");
+				completedHandshake = true;
+				new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
+			}
+			else
+			{
+				Mod.Warn("Receive Handshake: Already Completed Handshake");
+			}
         }
 
         public static void InitTranscodeServerConnection()
         {
             Mod.Print("Start voicechatTranscodeClient");
 
-            voicechatTranscodeClient.endPoint = null;
-            voicechatTranscodeClient.SwitchToEndPoint(new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"),
-                transcodeServerPort
+			voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(
+	            IPAddress.Parse("127.0.0.1"),
+	            transcodeServerPort
             ));
 
-            Mod.Print("On Message");
+            voicechatTranscodeClient.Connect(true);
+
+			Mod.Print("On Message");
 
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
             voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
@@ -186,6 +179,8 @@ namespace HexaMod.Voice
             AudioSettings.Reset(audioConfiguration);
         }
 
+        public static float currentPeak = 0f;
+
         static void OnPCMData(DecodedVoiceChatMessage message, IPEndPoint from)
         {
             DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
@@ -193,7 +188,7 @@ namespace HexaMod.Voice
             short[] pcm = new short[Mathf.CeilToInt(clientMessage.body.Length / 2f)];
             Buffer.BlockCopy(clientMessage.body, 0, pcm, 0, clientMessage.body.Length);
 
-            if (!audioBuffers.ContainsKey(clientMessage.clientId))
+			if (!audioBuffers.ContainsKey(clientMessage.clientId))
             {
                 audioBuffers.Add(clientMessage.clientId, new List<short[]>());
             }
@@ -221,7 +216,12 @@ namespace HexaMod.Voice
 
         static void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
         {
-            try
+			short[] pcm = new short[Mathf.CeilToInt(e.Buffer.Length / 2f)];
+			Buffer.BlockCopy(e.Buffer, 0, pcm, 0, e.Buffer.Length);
+
+			currentPeak = (float)Math.Max(pcm.Max(), -pcm.Min()) / (float)short.MaxValue;
+
+			try
             {
                 if (room != null)
                 {
@@ -273,9 +273,22 @@ namespace HexaMod.Voice
             }
 
             room = roomName;
+
+            if (!listening)
+            {
+                StartListening();
+            }
         }
 
-        public static void LeaveVoiceRoom()
+		public static void SetDenoiseEnabled(bool denoise)
+		{
+			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
+				Protocol.VoiceChatMessageType.SetRNNoiseEnabled,
+				new byte[] { (byte)(denoise ? 1 : 0) }
+			));
+		}
+
+		public static void LeaveVoiceRoom()
         {
             voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
                 Protocol.VoiceChatMessageType.VoiceRoomLeave,
@@ -285,9 +298,51 @@ namespace HexaMod.Voice
             room = null;
             speakingStates.Clear();
             audioBuffers.Clear();
+
+			if (listening)
+			{
+				StopListening();
+			}
+		}
+
+        public class MicrophoneDevice
+        {
+            public WaveInCapabilities capabilities;
+            public int deviceId;
         }
 
-        public static void KeepTranscodeAliveThread()
+		public static MicrophoneDevice[] GetDevices()
+		{
+			MicrophoneDevice[] devices = new MicrophoneDevice[WaveInEvent.DeviceCount];
+
+            for (int i = 0; i < devices.Length; i++)
+            {
+                devices[i] = new MicrophoneDevice()
+                {
+                    capabilities = WaveInEvent.GetCapabilities(i),
+                    deviceId = i
+                };
+            }
+
+            return devices;
+		}
+
+        public static void SetDevice(MicrophoneDevice device)
+        {
+            bool wasListening = listening;
+            if (wasListening)
+            {
+                StopListening();
+            }
+            waveIn.DeviceNumber = device.deviceId;
+			Mod.Print($"mic device changed to {device.deviceId}");
+			if (wasListening)
+            {
+                StartListening();
+            }
+        }
+
+		public static void KeepTranscodeAliveThread()
         {
             while (true)
             {
