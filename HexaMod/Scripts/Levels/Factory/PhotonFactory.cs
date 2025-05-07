@@ -5,7 +5,7 @@ namespace HexaMapAssemblies
 {
 	public static class GlobalPhotonFactory
 	{
-		public static int startingNetId = 10000;
+		private static int startingNetId = 10000;
 		private static int currentNetId = startingNetId;
 
 		public static void Reset()
@@ -15,15 +15,22 @@ namespace HexaMapAssemblies
 
 		public static void Register(GameObject gameObject)
 		{
-			var view = gameObject.AddComponent<PhotonView>();
+			var view = gameObject.GetComponent<PhotonView>();
+
+			if (view == null)
+			{
+				view = gameObject.AddComponent<PhotonView>();
+			}
+
 			view.viewID = Next();
 			view.ObservedComponents = new List<Component>(0);
 		}
 
-		public static int Next()
+		private static int Next()
 		{
+			int id = currentNetId;
 			currentNetId += 1;
-			return currentNetId - 1;
+			return id;
 		}
 	}
 
