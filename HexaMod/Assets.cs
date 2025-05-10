@@ -38,6 +38,12 @@ namespace HexaMod
 			public static AudioClip dadNightmareSongDad;
 			public static AudioClip dadNightmareSongBaby;
 
+			public static GameObject cabinetOpen;
+			public static GameObject cabinetClose;
+			public static GameObject cabinetLocked;
+			public static GameObject doorOpen;
+			public static GameObject doorClose;
+
 			public static bool didCache = false;
 
 			public static void CacheStaticWYDAssets()
@@ -54,6 +60,22 @@ namespace HexaMod
 				outletExplosion = outlet.explosion;
 				outletShockSound = outlet.shockSound;
 				outletCoverPrefab = outlet.coverPrefab;
+
+
+				foreach (Cabinet2 cabinet in Object.FindObjectsOfType<Cabinet2>())
+				{
+					if (cabinet.cabOpen != null)
+					{
+						cabinetOpen = cabinet.cabOpen;
+						cabinetClose = cabinet.cabClose;
+						cabinetLocked = cabinet.lockSound;
+						break;
+					}
+				}
+
+				var door = Object.FindObjectOfType<Door>();
+				doorOpen = door.openSound;
+				doorClose = door.closeSound;
 
 				daddySong = HexaMod.networkManager.daddySong;
 				babySong = HexaMod.networkManager.babySong;
@@ -188,16 +210,11 @@ namespace HexaMod
 			if (dadSpawn && babySpawn)
 			{
 				Mod.Print($"handle player {player.name}");
-				if (player.name.ToLower().StartsWith("dad"))
-				{
-					Mod.Print($"teleport dad {player.name}");
-					player.transform.position = dadSpawn.spots[0].position;
-				}
-				else if (player.name.ToLower().StartsWith("baby"))
-				{
-					Mod.Print($"teleport baby {player.name}");
-					player.transform.position = babySpawn.spots[0].position;
-				}
+				TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
+
+				Mod.Print($"teleport player {player.name}");
+				player.transform.position = spawn.GetSpawn(0).position;
+				player.transform.rotation = spawn.GetSpawn(0).rotation;
 			}
 		}
 
@@ -238,12 +255,22 @@ namespace HexaMod
 
 			if (dadSpawn)
 			{
-				HexaMod.networkManager.dadSpawnPos = dadSpawn.spots[0];
+				Mod.Print("got dad spawn.");
+				dadSpawn.Init();
+				HexaMod.networkManager.dadSpawnPos = dadSpawn.GetSpawn(0);
 			}
 
 			if (babySpawn)
 			{
-				HexaMod.networkManager.babySpawnPos = babySpawn.spots[0];
+				Mod.Print("got baby spawn.");
+				babySpawn.Init();
+				HexaMod.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
+
+				if (babySpawn.hgSpawns != null)
+				{
+					Mod.Print("got hg baby spawn.");
+					babySpawn.hgSpawns.Init();
+				}
 			}
 
 			Mod.Print("done with (already connected) players!");

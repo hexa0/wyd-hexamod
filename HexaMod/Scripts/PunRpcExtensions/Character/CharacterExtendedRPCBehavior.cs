@@ -70,9 +70,9 @@ namespace HexaMod
 		}
 
 		[PunRPC]
-		public void SetInitialState(byte[] bytes)
+		public void SetInitialState(byte[] data)
 		{
-			initialState = InitialPlayerState.serializer.Deserialize(bytes);
+			initialState = InitialPlayerState.serializer.Deserialize(data);
 			ProcessInitialState();
 		}
 

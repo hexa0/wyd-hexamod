@@ -12,8 +12,17 @@ namespace HexaMapAssemblies
 			vent.broken = broken;
 			vent.correspondingVent = vent;
 			vent.brokenVent = brokenVent;
-			vent.tag = "Enter";
-			vent.gameObject.layer = 8;
+
+			if (vent.exitPos != null)
+			{
+				vent.gameObject.layer = 8;
+				vent.tag = "Enter";
+			}
+			else
+			{
+				vent.gameObject.layer = 0;
+			}
+
 			StartCoroutine(AssignCorrespondingVent());
 		}
 

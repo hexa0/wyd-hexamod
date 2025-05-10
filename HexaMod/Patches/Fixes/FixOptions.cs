@@ -59,7 +59,11 @@ namespace HexaMod.Patches
 		static void RefreshFX(ref SpecFXHelper __instance)
 		{
 			__instance.aoComp.gameObject.GetComponent<ScreenSpaceAmbientObscurance>().enabled = __instance.aoComp.enabled;
-			__instance.aoComp.enabled = true;
+			__instance.aoComp.Downsampling = 3;
+			__instance.aoComp.Blur = SSAOPro.BlurMode.Gaussian;
+			__instance.aoComp.BlurPasses = 3;
+			__instance.aoComp.CutoffDistance = 100;
+			__instance.aoComp.CutoffFalloff = 25;
 		}
 	}
 }

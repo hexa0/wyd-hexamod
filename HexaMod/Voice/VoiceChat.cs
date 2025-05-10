@@ -20,11 +20,18 @@ namespace HexaMod.Voice
 	{
 		static int FreePort()
 		{
-			TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-			l.Start();
-			int port = ((IPEndPoint)l.LocalEndpoint).Port;
-			l.Stop();
-			return port;
+			if (Environment.GetCommandLineArgs().Contains("ForceConsistantTranscodePort"))
+			{
+				return Ports.transcode;
+			}
+			else
+			{
+				TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+				l.Start();
+				int port = ((IPEndPoint)l.LocalEndpoint).Port;
+				l.Stop();
+				return port;
+			}
 		}
 
 		public static bool testMode = false;

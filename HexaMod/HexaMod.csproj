@@ -274,8 +274,11 @@
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
+    <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />
+    <Compile Include="Scripts\Levels\Factory\DrawerFactory.cs" />
     <Compile Include="Scripts\Levels\HGLevelSetup.cs" />
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
+    <Compile Include="Scripts\Levels\TeamSpawn.cs" />
     <Compile Include="Scripts\Levels\VoidFailSafe.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
     <Compile Include="SerializableObjects\InitialPlayerState.cs" />
@@ -289,7 +292,7 @@
     <Compile Include="UI\Class\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
-    <Compile Include="Util\ClassSerializer.cs" />
+    <Compile Include="Util\SerializationHelper.cs" />
     <Compile Include="Util\GetGameObjectChildren.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />

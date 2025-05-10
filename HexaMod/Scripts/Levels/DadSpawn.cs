@@ -1,9 +1,7 @@
-﻿using UnityEngine;
-
-namespace HexaMapAssemblies
+﻿namespace HexaMapAssemblies
 {
-	public class DadSpawn : MonoBehaviour
+	public class DadSpawn : TeamSpawn
 	{
-		public Transform[] spots;
+
 	}
 }

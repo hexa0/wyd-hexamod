@@ -1,9 +1,7 @@
-﻿using UnityEngine;
-
-namespace HexaMapAssemblies
+﻿namespace HexaMapAssemblies
 {
-	public class BabySpawn : MonoBehaviour
+	public class BabySpawn : TeamSpawn
 	{
-		public Transform[] spots;
+		public TeamSpawn hgSpawns;
 	}
 }

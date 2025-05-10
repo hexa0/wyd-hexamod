@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using HexaMod.Voice;
 using UnityEngine;
@@ -114,6 +115,12 @@ namespace HexaMod
 			text.font = HexaMod.startupBundle.LoadAsset<Font>("Assets/ModResources/Init/Font/osd.ttf");
 			var loadingAnimation = HexaMod.startupBundle.LoadAsset<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
 			Instantiate(loadingAnimation).transform.SetParent(transform, false);
+			if (!Environment.GetCommandLineArgs().Contains("SkipTranscodeProcessStart"))
+			{
+				ActionText("Init VoiceChat\n(Transcode Process)");
+				yield return 0;
+				VoiceChat.InitTranscodeServerProcess();
+			}
 			ActionText("Loading HexaModCoreResourcesBundle");
 			yield return 0;
 			HexaMod.InitCoreBundle();
@@ -135,9 +142,6 @@ namespace HexaMod
 			VoiceChat.InitUnityForVoiceChat(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
 			sceneLoadOperation = SceneManager.LoadSceneAsync(1);
 			sceneLoadOperation.allowSceneActivation = false;
-			ActionText("Init VoiceChat\n(Transcode Process)");
-			yield return 0;
-			VoiceChat.InitTranscodeServerProcess();
 			ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
 			yield return 0;
 			int attempts = 0;

@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Linq;
 using HexaMod.Util;
 using UnityEngine;
 
 namespace HexaMod.SerializableObjects
 {
 	// [XmlRoot("SerializableColor", Namespace = "https://hexa.blueberry.coffee/hexa-mod/")]
-	[Serializable]
 	public class SerializableColor
 	{
 		public byte r;
@@ -19,6 +19,11 @@ namespace HexaMod.SerializableObjects
 			b = (byte)(color.b * byte.MaxValue);
 		}
 
+		public SerializableColor()
+		{
+
+		}
+
 		public Color toColor()
 		{
 			return new Color(
@@ -28,6 +33,41 @@ namespace HexaMod.SerializableObjects
 			);
 		}
 
-		public static ClassSerializer<SerializableColor> serializer = new ClassSerializer<SerializableColor>();
+		public static SerializableColorSerializer serializer = new SerializableColorSerializer();
+	}
+
+	public class SerializableColorSerializer
+	{
+		public byte[] Serialize(SerializableColor color)
+		{
+			SerializationHelper writer = new SerializationHelper();
+
+			writer.Write(color.r);
+			writer.Write(color.g);
+			writer.Write(color.b);
+
+			return writer.data.ToArray();
+		}
+
+		public SerializableColor Deserialize(byte[] serializedBytes)
+		{
+			SerializationHelper reader = new SerializationHelper()
+			{
+				data = serializedBytes.ToList()
+			};
+
+			SerializableColor color = new SerializableColor();
+
+			color.r = reader.Read();
+			color.g = reader.Read();
+			color.b = reader.Read();
+
+			return color;
+		}
+
+		public SerializableColor MakeUnique(SerializableColor toCopy)
+		{
+			return Deserialize(Serialize(toCopy));
+		}
 	}
 }

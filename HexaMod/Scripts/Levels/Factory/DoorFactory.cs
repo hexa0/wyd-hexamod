@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HexaMod;
+using UnityEngine;
 
 namespace HexaMapAssemblies
 {
@@ -19,8 +20,8 @@ namespace HexaMapAssemblies
 			door.dir = 1;
 			door.dir2 = 1;
 
-			door.openSound = openSound;
-			door.closeSound = closeSound;
+			door.openSound = openSound != null ? openSound : Assets.StaticAssets.doorOpen;
+			door.closeSound = closeSound != null ? closeSound : Assets.StaticAssets.doorClose;
 			door.occPortal = occPortal;
 		}
 
