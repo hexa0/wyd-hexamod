@@ -7,6 +7,8 @@ namespace HexaMapAssemblies
 	{
 		void Start()
 		{
+			gameObject.tag = "Open";
+
 			var cabinet = gameObject.AddComponent<Cabinet2>();
 			cabinet.locked = locked;
 			cabinet.dadLocked = dadLocked;

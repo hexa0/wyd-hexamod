@@ -7,6 +7,8 @@ namespace HexaMapAssemblies
 	{
 		void Start()
 		{
+			gameObject.tag = "Open";
+
 			var drawer = gameObject.AddComponent<Drawer>();
 			drawer.open = length;
 			drawer.direction = transform.up;
