@@ -19,11 +19,13 @@ namespace HexaMod.Util
 		public Color initShirtColor = HexToColor.GetColorFromHex("#E76F3D");
 		public Color initSkinColor = HexToColor.GetColorFromHex("#CC9485");
 
+		private bool isSelf = false;
 		private bool isDad = true;
 		SkinnedMeshRenderer body;
 
 		public void Start()
 		{
+			isSelf = HexaMod.networkManager.playerObj == transform.gameObject;
 			var dadModel = transform.name == "Dad" ? transform : transform.Find("DadModel");
 			if (dadModel)
 			{
@@ -64,6 +66,11 @@ namespace HexaMod.Util
 						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
 
 						body.sharedMesh = model.characterMesh;
+						if (isSelf)
+						{
+							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
+							body.gameObject.layer = 12;
+						}
 
 						if (model.materials.Length > 0)
 						{
@@ -78,6 +85,7 @@ namespace HexaMod.Util
 
 				if (!foundMatch)
 				{
+					body.gameObject.layer = 0;
 					body.sharedMesh = defaultMesh;
 					body.materials = defaultMaterials;
 					skinMaterialIndex = 2;

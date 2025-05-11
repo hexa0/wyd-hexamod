@@ -257,6 +257,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patches\Feature\BetterSmokeDetector.cs" />
+    <Compile Include="Patches\Feature\CharacterCulling.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
     <Compile Include="Patches\Feature\VentSound.cs" />
