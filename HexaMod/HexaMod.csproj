@@ -271,6 +271,7 @@
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
     <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
     <Compile Include="Patches\Fixes\SmootherBob.cs" />
+    <Compile Include="Patches\Fixes\UpsideDownMirrorFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
