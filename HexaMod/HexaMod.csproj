@@ -265,7 +265,9 @@
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
     <Compile Include="Patches\Fixes\DeathCamFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
+    <Compile Include="Patches\Fixes\ExplosionShadowFix.cs" />
     <Compile Include="Patches\Fixes\FixOptions.cs" />
+    <Compile Include="Patches\Fixes\ItemTargetingNameSizeFix.cs" />
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
@@ -274,6 +276,7 @@
     <Compile Include="Patches\Fixes\UpsideDownMirrorFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
+    <Compile Include="Patches\Fixes\FixStartingChallanges.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />

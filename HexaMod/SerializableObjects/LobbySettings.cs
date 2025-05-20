@@ -23,7 +23,7 @@ namespace HexaMod.SerializableObjects
 		public bool modernGrabbing = true;
 		public bool cheats = true;
 		public byte GameMode = 0; // TODO: switching game modes in the lobby & quit to lobby instead of the menu button
-		public string mapName = "Default";
+		public string mapName = Assets.titleName;
 		public string relay = "127.0.0.1";
 		public ushort roundNumber = 0;
 

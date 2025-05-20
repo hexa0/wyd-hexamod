@@ -19,6 +19,7 @@ namespace HexaMod
 		internal static List<ModCharacterModel> babyCharacterModels = new List<ModCharacterModel>();
 
 		internal static ModLevel titleLevel;
+		internal static string titleName = "compiled_Default";
 
 		public static bool loadedAssets = false;
 		public static uint bundlesToLoad = 0;
@@ -235,8 +236,6 @@ namespace HexaMod
 			GlobalPhotonFactory.Reset();
 			Mod.Print($"attempting to load map {level.name}");
 
-			StaticAssets.CacheStaticWYDAssets();
-
 			if (level != titleLevel)
 			{
 				Mod.Print("clearing default level.");
@@ -373,6 +372,8 @@ namespace HexaMod
 
 		public static void AttemptToLoadCurrentLevel()
 		{
+			StaticAssets.CacheStaticWYDAssets();
+
 			foreach (ModLevel level in levels)
 			{
 				if (level.levelPrefab.name == HexaMod.persistentLobby.lobbySettings.mapName)

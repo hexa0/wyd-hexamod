@@ -23,7 +23,6 @@ namespace HexaMod.Patches
 				{
 					if (Input.GetKeyDown("v"))
 					{
-						Mod.Print(NoclipGlobal.isNoclipping);
 						NoclipGlobal.isNoclipping = !NoclipGlobal.isNoclipping;
 
 						__instance.gameObject.GetComponentInChildren<CharacterController>().enabled = !NoclipGlobal.isNoclipping;
@@ -37,7 +36,6 @@ namespace HexaMod.Patches
 			}
 			if (SmoothCharacterControllerPatch.SmoothCharacterControllerPatchGlobal.isRunningFromPatch && NoclipGlobal.isNoclipping)
 			{
-				//Vector3 moveVector = __instance.transform.forward * __instance.yAxis + __instance.transform.right * __instance.xAxis;
 				Vector3 moveVector = new Vector3(
 					__instance.xAxis,
 					0f +

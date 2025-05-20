@@ -5,6 +5,11 @@ namespace HexaMapAssemblies
 {
 	public class DoorFactory : MonoBehaviour
 	{
+		public enum OpenDirection
+		{
+			Inwards,
+			Outwards
+		}
 		void Start()
 		{
 			var door = gameObject.AddComponent<Door>();
@@ -17,8 +22,16 @@ namespace HexaMapAssemblies
 			door.targetRot = targetRot;
 			door.useX = useX;
 			door.useY = useY;
-			door.dir = 1;
-			door.dir2 = 1;
+			if (openDirection == OpenDirection.Inwards)
+			{
+				door.dir = 1;
+				door.dir2 = 1;
+			}
+			else
+			{
+				door.dir = -1;
+				door.dir2 = -1;
+			}
 
 			door.openSound = openSound != null ? openSound : Assets.StaticAssets.doorOpen;
 			door.closeSound = closeSound != null ? closeSound : Assets.StaticAssets.doorClose;
@@ -35,5 +48,6 @@ namespace HexaMapAssemblies
 		public bool useX = false;
 		public bool useY = true;
 		public OcclusionPortal occPortal;
+		public OpenDirection openDirection = OpenDirection.Inwards;
 	}
 }

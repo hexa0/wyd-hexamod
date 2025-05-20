@@ -134,20 +134,20 @@ namespace HexaMod.UI
 
 			Vector2 center = new Vector2(1920f / 2f, 1080f / 2f);
 
-			void Reset()
-			{
-				ButtonCallbacks.ChangeLevel("Default");
-			}
+			//void Reset()
+			//{
+			//	ButtonCallbacks.ChangeLevel(Assets.titleName);
+			//}
 
-			new WYDTextButton(
-				"resetMapToDefault", "Default", menu.transform,
-				backButton.gameObject.transform.localPosition + new Vector3(
-					WYDTextButton.gap.x,
-					0,
-					0
-				),
-				new UnityAction[] { Reset, title.GoBack }
-			);
+			//new WYDTextButton(
+			//	"resetMapToDefault", "Default", menu.transform,
+			//	backButton.gameObject.transform.localPosition + new Vector3(
+			//		WYDTextButton.gap.x,
+			//		0,
+			//		0
+			//	),
+			//	new UnityAction[] { Reset, title.GoBack }
+			//);
 
 			float height = Mathf.Clamp(Assets.levels.Count() - 1, 0f, 4f);
 			float width = Mathf.Floor((Assets.levels.Count() - 1) / 5f);

@@ -52,10 +52,13 @@ namespace HexaMod.Patches
 				AudioClip sound = m_FootstepSounds.Value[randomSound];
 
 				NetworkedSoundBehavior netSound = __instance.GetComponent<NetworkedSoundBehavior>();
-				netSound.Play(sound);
+				float baseSpeed = HexaMod.networkManager.isDad ? 4f : 1f;
+				netSound.Play(sound, Mathf.Clamp(m_CharacterController.Value.velocity.magnitude / baseSpeed, 0f, 1f));
 
 				m_FootstepSounds.Value[randomSound] = m_FootstepSounds.Value[0];
 				m_FootstepSounds.Value[0] = sound;
+
+				Traverse<Vector3> m_MoveDir = fields.Field<Vector3>("m_MoveDir");
 			}
 
 			return false;

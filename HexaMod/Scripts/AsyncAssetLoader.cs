@@ -36,6 +36,7 @@ namespace HexaMod
 				{
 					Mod.Print($"Found title level {level.levelNameReadable}");
 					Assets.titleLevel = level;
+					Assets.titleName = level.levelPrefab.name;
 				}
 
 				Assets.levels.Add(level);
