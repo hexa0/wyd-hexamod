@@ -110,7 +110,7 @@ namespace HexaMod
 				HexaLobbyState.onPlayersLoadedAction();
 			}
 
-			if (PhotonNetwork.room.IsOpen)
+			if (PhotonNetwork.room.IsOpen && info.sender != PhotonNetwork.masterClient)
 			{
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
 				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
