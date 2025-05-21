@@ -10,6 +10,7 @@ using HexaMod.Voice;
 using static HexaMod.UI.Util.Menu.Menus;
 using HexaMod.UI.Class;
 using HexaMod.SerializableObjects;
+using UnityEngine.SceneManagement;
 
 namespace HexaMod.UI
 {
@@ -239,12 +240,11 @@ namespace HexaMod.UI
 			mapInfo.text = "";
 
 			{ // HexaMod Options Menu
-				void MakeButton(Transform originalButton, MenuUtil menu)
+				void MakeButton(Button originalButton, MenuUtil menu)
 				{
 					originalButton.gameObject.SetActive(false);
 					WYDTextButton hexaModOptions = new WYDTextButton(
-						"hexaModOption", "HexaMod", originalButton.parent,
-						originalButton.localPosition,
+						"hexaModOptions", "HexaMod", originalButton,
 						new UnityAction[]
 						{
 							delegate ()
@@ -346,10 +346,33 @@ namespace HexaMod.UI
 					}
 				}
 
-				MakeButton(title.FindMenu("OptionsMenu").Find("SplitScreenOptions"), title);
-				MakeButton(inGame.FindMenu("OptionsMenu (1)").Find("SplitScreenOptions"), inGame);
+				MakeButton(title.FindMenu("OptionsMenu").Find("SplitScreenOptions").GetComponent<Button>(), title);
+				MakeButton(inGame.FindMenu("OptionsMenu (1)").Find("SplitScreenOptions").GetComponent<Button>(), inGame);
 				MakeMenu(title.NewMenu("HexaModOptions"), title);
 				MakeMenu(inGame.NewMenu("HexaModOptions"), inGame);
+			}
+			{ // Return To Lobby Override
+				if (PhotonNetwork.isMasterClient)
+				{
+					WYDTextButton hexaModOptions = new WYDTextButton(
+					"returnToLobby", "Return To\nLobby", inGame.FindMenu("OptionsMenu (1)").Find("ReturnToMenu").GetComponent<Button>(),
+					new UnityAction[]
+					{
+						() => {
+							if (PhotonNetwork.room != null)
+							{
+								HexaMod.hexaLobby.ReturnToLobby();
+							}
+							else
+							{
+								// something is very wrong??
+								// just try and reload the scene??
+								SceneManager.LoadScene(1);
+							}
+						}
+					}
+				);
+				}
 			}
 			{ // Title Screen
 				Mod.Print("edit title screen");

@@ -7,6 +7,8 @@ namespace HexaMod.Patches
 	[HarmonyPatch(typeof(RematchHelper))]
 	internal class RematchHelperDisable
 	{
+		 static GameObject last;
+
 		[HarmonyPatch("OnLevelWasLoaded")]
 		[HarmonyPrefix]
 		static bool OnLevelWasLoaded(ref RematchHelper __instance)
@@ -14,6 +16,20 @@ namespace HexaMod.Patches
 			HexaMod.rematchHelper = __instance;
 
 			return false;
+		}
+
+		[HarmonyPatch("Awake")]
+		[HarmonyPrefix]
+		static void Awake(ref RematchHelper __instance)
+		{
+			if (last != null)
+			{
+				Object.DestroyImmediate(last);
+				last = null;
+			}
+
+			HexaMod.rematchHelper = __instance;
+			last = __instance.gameObject;
 		}
 	}
 }

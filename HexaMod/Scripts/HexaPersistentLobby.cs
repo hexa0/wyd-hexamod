@@ -8,6 +8,19 @@ namespace HexaMod
 {
 	public class HexaPersistentLobby : MonoBehaviour
 	{
+		public void ResetRound()
+		{
+			lobbySettings.roundNumber = 0;
+			CommitChanges();
+		}
+
+		public void Reset()
+		{
+			dads.Clear();
+			lobbySettings.roundNumber = 0;
+			CommitChanges();
+		}
+
 		private LobbySettings lobbySettingsBackup;
 		public LobbySettings lobbySettings;
 		public Dictionary<int, bool> dads = new Dictionary<int, bool>();

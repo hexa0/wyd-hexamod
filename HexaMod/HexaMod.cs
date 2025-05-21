@@ -7,6 +7,7 @@ using HexaMod.Util;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using static HexaMod.UI.Util.Menu;
+using static System.Guid;
 
 namespace HexaMod
 {
@@ -86,9 +87,7 @@ namespace HexaMod
 
 				if (!PhotonNetwork.inRoom)
 				{
-					persistentLobby.lobbySettings.roundNumber = 0;
-					persistentLobby.dads.Clear();
-					persistentLobby.CommitChanges();
+					persistentLobby.Reset();
 				}
 			}
 		}
@@ -105,16 +104,18 @@ namespace HexaMod
 		{
 			PhotonNetwork.sendRate = sendRate;
 		}
-
+		public static string testGameGuid = NewGuid().ToString();
 		public static bool testGameWaitingForConn = false;
 		public static void MakeTestGame(bool spawnAsDad = true)
 		{
-			Menus.title.menuController.DeactivateAll();
 			networkManager.ConnectToPhoton();
-			testGameWaitingForConn = true;
+			networkManager.gameName = testGameGuid;
+			persistentLobby.Reset();
+			persistentLobby.dads[PhotonNetwork.player.ID] = spawnAsDad;
 			networkManager.isDad = spawnAsDad;
+			Menus.title.menuController.DeactivateAll();
+			testGameWaitingForConn = true;
 			networkManager.curGameMode = GameModes.named["familyGathering"].id;
-
 		}
 	}
 }

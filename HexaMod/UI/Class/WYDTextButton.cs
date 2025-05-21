@@ -18,6 +18,39 @@ namespace HexaMod.UI.Class
 		public Text label;
 		public Image image;
 
+		public static void ClearEvents(Button button)
+		{
+			button.onClick.RemoveAllListeners();
+			button.onClick = new Button.ButtonClickedEvent();
+		}
+
+		public void ClearEvents()
+		{
+			ClearEvents(button);
+		}
+
+		public WYDTextButton(string name, string text, Button toReplace, UnityAction[] actions)
+		{
+			gameObject = toReplace.gameObject;
+			rectTransform = gameObject.GetComponent<RectTransform>();
+			button = gameObject.GetComponent<Button>();
+			image = gameObject.GetComponent<Image>();
+			label = button.transform.GetChild(0).GetComponent<Text>();
+			label.fontSize = text.Length > 7 ? (int)FontSizes.Small : (int)FontSizes.Regular;
+			button.name = name;
+			label.text = text;
+
+			ClearEvents();
+			foreach (var action in actions)
+			{
+				button.onClick.AddListener(action);
+			}
+
+			button.gameObject.SetActive(true);
+
+			Init();
+		}
+
 		public WYDTextButton(string name, string text, Transform menu, Vector2 position, UnityAction[] actions)
 		{
 			gameObject = Object.Instantiate(UITemplates.buttonTemplate.gameObject, menu);
@@ -30,7 +63,7 @@ namespace HexaMod.UI.Class
 			button.transform.localPosition = position;
 			label.text = text;
 
-			button.onClick = new Button.ButtonClickedEvent();
+			ClearEvents();
 			foreach (var action in actions)
 			{
 				button.onClick.AddListener(action);

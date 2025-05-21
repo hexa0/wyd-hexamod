@@ -23,6 +23,7 @@ namespace HexaMod.Util
 		public string respawnRPC = "RespawnLotsOfPlayers";
 		public bool twoPlayer = false;
 		public bool canShuffle = true;
+		public bool hostDefaultTeamIsDad = false;
 		public bool defaultTeamIsDad = false;
 		public bool twoTeams = true;
 
@@ -66,13 +67,13 @@ namespace HexaMod.Util
 			{
 				var info = new GameMode();
 
-				info.id =		   (int)StockGameMode.regular;
-				info.internalName = "regular";
-				info.name =		 "Original";
-				info.description =  "regular desc";
-				info.tag =		  null;
-				info.hostMenuName = "WaitMenu-Original";
-				info.respawnRPC =   null;
+				info.id =			(int)StockGameMode.regular;
+				info.internalName =	"regular";
+				info.name =			"Original";
+				info.description =	"regular desc";
+				info.tag =			null;
+				info.hostMenuName =	"WaitMenu-Original";
+				info.respawnRPC =	null;
 				info.twoPlayer =	true;
 
 				DefineGameMode(info);
@@ -81,13 +82,14 @@ namespace HexaMod.Util
 			{
 				var info = new GameMode();
 
-				info.id =		   (int)StockGameMode.familyGathering;
-				info.internalName = "familyGathering";
-				info.name =		 "Family Gathering";
-				info.description =  "familyGathering desc";
-				info.tag =		  "FG";
-				info.hostMenuName = "Family Gathering-Host";
-				info.respawnRPC =   "RespawnLotsOfPlayers";
+				info.id =			(int)StockGameMode.familyGathering;
+				info.internalName =			"familyGathering";
+				info.name =					"Family Gathering";
+				info.description =			"familyGathering desc";
+				info.tag =					"FG";
+				info.hostMenuName =			"Family Gathering-Host";
+				info.respawnRPC =			"RespawnLotsOfPlayers";
+				info.hostDefaultTeamIsDad = true;
 
 				DefineGameMode(info);
 			}
@@ -95,15 +97,15 @@ namespace HexaMod.Util
 			{
 				var info = new GameMode();
 
-				info.id =		   (int)StockGameMode.hungryGames;
+				info.id =			(int)StockGameMode.hungryGames;
 				info.internalName = "hungryGames";
-				info.name =		 "The Hungry Games";
-				info.description =  "hungryGames desc";
-				info.tag =		  "THG";
+				info.name =			"The Hungry Games";
+				info.description =	"hungryGames desc";
+				info.tag =			"THG";
 				info.hostMenuName = "HungryGames";
-				info.respawnRPC =   "RespawnHungryPlayers";
-				info.canShuffle =   false;
-				info.twoTeams =	 false;
+				info.respawnRPC =	"RespawnHungryPlayers";
+				info.canShuffle =	false;
+				info.twoTeams =		false;
 
 				DefineGameMode(info);
 			}
@@ -111,16 +113,16 @@ namespace HexaMod.Util
 			{
 				var info = new GameMode();
 
-				info.id =			   (int)StockGameMode.dadlympics;
-				info.internalName =	 "dadlympics";
-				info.name =			 "The Great Dadlympics";
-				info.description =	  "dadlympics desc";
-				info.tag =			  "TGD";
-				info.hostMenuName =	 "Dadlympics";
-				info.respawnRPC =	   "RespawnDadlympians";
-				info.canShuffle =	   false;
+				info.id =				(int)StockGameMode.dadlympics;
+				info.internalName =		"dadlympics";
+				info.name =				"The Great Dadlympics";
+				info.description =		"dadlympics desc";
+				info.tag =				"TGD";
+				info.hostMenuName =		"Dadlympics";
+				info.respawnRPC =		"RespawnDadlympians";
+				info.canShuffle =		false;
 				info.defaultTeamIsDad = true;
-				info.twoTeams =		 false;
+				info.twoTeams =			false;
 
 				DefineGameMode(info);
 			}
@@ -128,13 +130,13 @@ namespace HexaMod.Util
 			{
 				var info = new GameMode();
 
-				info.id =		   (int)StockGameMode.daddysNightmare;
+				info.id =			(int)StockGameMode.daddysNightmare;
 				info.internalName = "daddysNightmare";
-				info.name =		 "Daddy's Nightmare";
-				info.description =  "daddysNightmare desc";
-				info.tag =		  "DNM";
+				info.name =			"Daddy's Nightmare";
+				info.description =	"daddysNightmare desc";
+				info.tag =			"DNM";
 				info.hostMenuName = "DaddysNightmare";
-				info.respawnRPC =   "RespawnLotsOfPlayers";
+				info.respawnRPC =	"RespawnLotsOfPlayers";
 
 				DefineGameMode(info);
 			}

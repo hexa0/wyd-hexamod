@@ -1,4 +1,5 @@
-﻿using HexaMod.Util;
+﻿using HexaMod.UI.Class;
+using HexaMod.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,7 +26,7 @@ namespace HexaMod.UI.Util
 				buttonTemplate = Object.Instantiate(playLocalButton).GetComponent<Button>();
 				buttonTemplate.name = "buttonTemplate";
 				buttonTemplate.GetComponentInChildren<Text>(true).text = "buttonTemplate";
-				buttonTemplate.onClick = new Button.ButtonClickedEvent();
+				WYDTextButton.ClearEvents(buttonTemplate);
 
 				buttonTemplate.gameObject.SetActive(false);
 			}

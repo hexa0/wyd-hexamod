@@ -26,6 +26,7 @@ namespace HexaMod.Patches
 		static void LeaveRoom()
 		{
 			HexaMod.persistentLobby.SetInOtherLobby(false);
+			HexaMod.persistentLobby.Reset();
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "Disconnect")]

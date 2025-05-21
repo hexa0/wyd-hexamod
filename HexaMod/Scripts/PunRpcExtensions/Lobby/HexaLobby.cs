@@ -30,7 +30,14 @@ namespace HexaMod
 
 			if (PhotonNetwork.inRoom)
 			{
-				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, new object[] { });
+				bool isDad = HexaMod.networkManager.isDad;
+
+				if (HexaMod.persistentLobby.dads.ContainsKey(PhotonNetwork.player.ID))
+				{
+					isDad = HexaMod.persistentLobby.dads[PhotonNetwork.player.ID];
+				}
+
+				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, isDad);
 				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
 			}
 
@@ -91,7 +98,7 @@ namespace HexaMod
 		}
 
 		[PunRPC]
-		public void PlayerLoadedRPC()
+		public void PlayerLoadedRPC(bool isDad, PhotonMessageInfo info)
 		{
 			HexaLobbyState.loadedPlayers++;
 
@@ -102,6 +109,22 @@ namespace HexaMod
 				Mod.Print("Got all players.");
 				HexaLobbyState.onPlayersLoadedAction();
 			}
+
+			if (PhotonNetwork.room.IsOpen)
+			{
+				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
+
+				if (isDad)
+				{
+					playerList.AddDaddy(HexaMod.networkManager.lobbyName, info.sender);
+				}
+				else
+				{
+					playerList.AddBaby(HexaMod.networkManager.lobbyName, info.sender);
+				}
+			}
 		}
 
 		public void WaitForPlayers(Action onPlayersLoaded, float timeoutSeconds = 5f)
@@ -110,7 +133,7 @@ namespace HexaMod
 
 			Mod.Print("Waiting for players.");
 
-			HexaLobbyState.onPlayersLoadedAction = delegate()
+			HexaLobbyState.onPlayersLoadedAction = delegate ()
 			{
 				if (HexaLobbyState.handledPlayersLoaded)
 				{
@@ -179,6 +202,7 @@ namespace HexaMod
 				}
 
 				Destroy(rematchHelper.gameObject);
+				HexaMod.rematchHelper = null;
 			}
 
 			rematchHelper.allowSpec = lobbySettings.allowSpectating && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
@@ -223,10 +247,9 @@ namespace HexaMod
 				{
 					networkManager.isDad = lobby.dads[PhotonNetwork.player.ID];
 				}
-
-				Menu.Menus.title.menuController.DeactivateAll();
 			}
 
+			Menu.Menus.title.menuController.DeactivateAll();
 			Destroy(HexaMod.rematchHelper);
 
 			if (PhotonNetwork.isMasterClient)
@@ -246,42 +269,116 @@ namespace HexaMod
 
 			Assets.InitScene();
 
-			if (HexaMod.rematchHelper != null && PhotonNetwork.inRoom) {
+			if (HexaMod.rematchHelper != null && PhotonNetwork.inRoom)
+			{
 				SetupMatch();
 			}
 		}
 
 		public void StartMatch()
 		{
-			netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { });
-
 			if (PhotonNetwork.isMasterClient)
 			{
+				netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { !PhotonNetwork.room.IsOpen });
+
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
 
-				if (mode.respawnRPC != null)
+				if (PhotonNetwork.room.IsOpen == false)
 				{
-					HexaMod.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
-				}
-				else
-				{
-					HexaMod.networkManager.RespawnPlayers();
+					if (mode.respawnRPC != null)
+					{
+						HexaMod.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
+					}
+					else
+					{
+						HexaMod.networkManager.RespawnPlayers();
+					}
 				}
 			}
 		}
 
 		[PunRPC]
-		public void HexaModMatchStarted()
+		public void HexaModMatchStarted(bool inGame)
 		{
+			var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+
 			HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
-			HexaMod.networkManager.fader.SendMessage("Fade");
-			if (HexaMod.networkManager.curGameMode == GameModes.named["daddysNightmare"].id)
+			if (inGame)
 			{
-				Countdown countdown = Menu.Menus.title.FindMenu("GameStart").Find("Countdown").gameObject.GetComponent<Countdown>();
-				
-				Instantiate(countdown.sound);
-				countdown.sky.SendMessage("Switch");
-				GameObject.Find("LightHolder").SendMessage("AllGoOut");
+				HexaMod.networkManager.fader.SendMessage("Fade");
+				if (mode.name == "daddysNightmare")
+				{
+					Countdown countdown = Menu.Menus.title.FindMenu("GameStart").Find("Countdown").gameObject.GetComponent<Countdown>();
+
+					Instantiate(countdown.sound);
+					countdown.sky.SendMessage("Switch");
+					GameObject.Find("LightHolder").SendMessage("AllGoOut");
+				}
+			}
+
+			if (!inGame)
+			{
+				var hostMenuId = Menu.Menus.title.GetMenuId(mode.hostMenuName);
+
+				Menu.Menus.title.menuController.ChangeToMenu(hostMenuId);
+
+				StartCoroutine(HexaModReturnedLobbyInit());
+			}
+		}
+
+		IEnumerator HexaModReturnedLobbyInit()
+		{
+			var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+			Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+
+			yield return new WaitForEndOfFrame();
+
+			PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
+
+			if (PhotonNetwork.isMasterClient)
+			{
+				if (!HexaMod.networkManager.isDad)
+				{
+					playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+				}
+				else
+				{
+					playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+				}
+			}
+		}
+
+		void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+		{
+			if (PhotonNetwork.isMasterClient)
+			{
+				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
+
+				if (mode.defaultTeamIsDad)
+				{
+					playerList.AddDaddy(HexaMod.networkManager.lobbyName, newPlayer);
+				}
+				else
+				{
+					playerList.AddBaby(HexaMod.networkManager.lobbyName, newPlayer);
+				}
+			}
+		}
+
+		[PunRPC]
+		public void ReturnToLobby()
+		{
+			HexaMod.persistentLobby.ResetRound();
+			HexaMod.persistentLobby.dads[PhotonNetwork.player.ID] = HexaMod.networkManager.isDad;
+
+			if (PhotonNetwork.isMasterClient)
+			{
+				PhotonNetwork.room.IsOpen = true;
+				PhotonNetwork.room.IsVisible = true;
+				netView.RPC("ReturnToLobby", PhotonTargets.Others);
+				HexaMod.networkManager.netView.RPC("Rematch", PhotonTargets.All);
 			}
 		}
 	}
