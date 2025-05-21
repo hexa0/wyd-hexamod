@@ -40,8 +40,6 @@ namespace HexaMod
 				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, isDad);
 				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
 			}
-
-			//StartCoroutine(LoadLobbyLevel());
 		}
 
 		public void Start()
@@ -265,8 +263,6 @@ namespace HexaMod
 
 		public void LoadLobbyLevel()
 		{
-			// yield return 0;
-
 			Assets.InitScene();
 
 			if (HexaMod.rematchHelper != null && PhotonNetwork.inRoom)

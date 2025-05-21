@@ -7,8 +7,6 @@ namespace HexaMod
 {
 	public class AsyncAssetLoader : MonoBehaviour
 	{
-		public UnityEvent loadCompleted;
-
 		public void LoadAsset(string filename, string file)
 		{
 			Mod.Print($"load asset bundle {filename}");
@@ -67,7 +65,6 @@ namespace HexaMod
 			{
 				Mod.Print("All Levels Loaded!");
 				Assets.loadedAssets = true;
-				// loadCompleted.Invoke();
 			}
 		}
 	}

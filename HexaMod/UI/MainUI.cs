@@ -574,23 +574,8 @@ namespace HexaMod.UI
 					new UnityAction[] { ButtonCallbacks.ChangeMapButton }
 				);
 
-				changeMapButton.button.interactable = false;
-
-				if (Assets.loadedAssets)
-				{
-					changeMapButton.button.interactable = Assets.levels.Count > 0;
-					OnLevelsLoaded();
-				}
-				else
-				{
-					HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", true);
-
-					HexaMod.asyncAssetLoader.loadCompleted.AddListener(delegate ()
-					{
-						OnLevelsLoaded();
-						changeMapButton.button.interactable = Assets.levels.Count > 0;
-					});
-				}
+				changeMapButton.button.interactable = Assets.levels.Count > 0;
+				OnLevelsLoaded();
 
 				Vector2 bottomLeft = new Vector2(0f, 200f);
 				float gap = 15f;

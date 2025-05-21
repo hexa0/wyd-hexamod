@@ -40,8 +40,6 @@ namespace HexaMapAssemblies
 			LightHolder lightHolder = FindObjectOfType<LightHolder>();
 
 			lightHolder.sunLight = RenderSettings.sun;
-			// lightHolder.ToggleLights(PlayerPrefs.GetInt("UseDL", 1) == 1);
-			// lightHolder.ToggleShadows(PlayerPrefs.GetInt("UseShadows", 0) == 1);
 			lightHolder.Start();
 		}
 	}
