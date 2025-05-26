@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using HexaMod.Patches;
+using HexaMod.Patches.Fixes;
 using HexaMod.SerializableObjects;
 using HexaMod.UI;
 using HexaMod.Util;

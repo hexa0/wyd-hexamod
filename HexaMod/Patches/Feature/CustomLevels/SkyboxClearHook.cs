@@ -2,7 +2,7 @@
 using HexaMapAssemblies;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature.CustomLevels
 {
 	[HarmonyPatch(typeof(SpecFXHelper))]
 	internal class SkyboxClearHook

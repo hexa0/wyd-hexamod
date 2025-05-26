@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(SmokeDectector))]
 	internal class BetterSmokeDetector

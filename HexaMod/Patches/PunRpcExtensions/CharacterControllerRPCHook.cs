@@ -5,7 +5,7 @@ using HexaMod.Voice;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.PunRpcExtensions
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class CharacterControllerRPCHook

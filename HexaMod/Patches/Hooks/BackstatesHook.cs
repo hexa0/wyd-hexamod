@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
 using HexaMod.UI.Util;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Hooks
 {
 	[HarmonyPatch]
-	internal class MenuControllerStatePatches
+	internal class BackstatesHook
 	{
 		[HarmonyPatch(typeof(MenuController), "ChangeToMenu")]
 		[HarmonyPrefix]

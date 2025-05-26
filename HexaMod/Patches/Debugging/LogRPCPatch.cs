@@ -1,7 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Debugging
 {
 	[HarmonyPatch(typeof(PhotonNetwork))]
 	internal class RPCLog

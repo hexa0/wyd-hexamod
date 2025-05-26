@@ -1,10 +1,10 @@
 ﻿using System;
 using HarmonyLib;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Hooks
 {
 	[HarmonyPatch]
-	internal class TrackRoomLoadingStates
+	internal class OnlineLoadingStateHook
 	{
 		[HarmonyPatch(typeof(PhotonNetwork), "CreateRoom", new Type[] { typeof(string), typeof(RoomOptions), typeof(TypedLobby)})]
 		[HarmonyPrefix]

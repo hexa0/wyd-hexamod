@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature.CustomLevels
 {
 	[HarmonyPatch(typeof(LightHolder))]
 	internal class SetCustomSunLightHook

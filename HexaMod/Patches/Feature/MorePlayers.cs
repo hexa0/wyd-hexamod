@@ -3,7 +3,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch]
 	internal class MorePlayers

@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
-using UnityEngine;
-using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(PhotonNetworkManager))]
 	internal class ConnectSpamFix

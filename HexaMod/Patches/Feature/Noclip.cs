@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
+using HexaMod.Patches.Fixes;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class Noclip

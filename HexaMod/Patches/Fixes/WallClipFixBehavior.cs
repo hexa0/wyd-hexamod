@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	internal class WallClipFixBehavior : MonoBehaviour
 	{

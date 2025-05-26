@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(NetworkMovementRB))]
 	internal class SharpPhysicsReplication

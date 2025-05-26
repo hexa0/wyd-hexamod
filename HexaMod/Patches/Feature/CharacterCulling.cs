@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class CharacterCulling
@@ -10,7 +10,7 @@ namespace HexaMod.Patches
 		[HarmonyPostfix]
 		static void Start(ref FirstPersonController __instance)
 		{
-			__instance.myCam.cullingMask = __instance.myCam.cullingMask ^ (1 << 12);
+			__instance.myCam.cullingMask ^= 1 << 12;
 		}
 	}
 }

@@ -3,7 +3,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityStandardAssets.Utility;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(LerpControlledBob))]
 	internal class SmootherBob

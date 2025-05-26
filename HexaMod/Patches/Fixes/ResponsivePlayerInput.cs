@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch]
 	internal class ResponsivePlayerInput

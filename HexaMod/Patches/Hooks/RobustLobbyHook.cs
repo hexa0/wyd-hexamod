@@ -5,10 +5,10 @@ using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Hooks
 {
 	[HarmonyPatch]
-	internal class RobustLobbyStartup
+	internal class RobustLobbyHook
 	{
 		[HarmonyPatch(typeof(PhotonNetworkManager), "RematchReady")]
 		[HarmonyPostfix]

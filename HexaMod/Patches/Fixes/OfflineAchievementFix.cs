@@ -3,7 +3,7 @@ using HarmonyLib;
 using Steamworks;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(AchievementManager))]
 	internal class OfflineAchievementFix

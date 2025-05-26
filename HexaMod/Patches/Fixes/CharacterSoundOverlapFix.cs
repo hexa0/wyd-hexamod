@@ -3,7 +3,7 @@ using HexaMod.Scripts;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class CharacterSoundOverlapFix

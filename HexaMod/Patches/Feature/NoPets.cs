@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(PetSpawner))]
 	internal class NoPets

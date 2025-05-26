@@ -313,8 +313,8 @@
     <Compile Include="Patches\Feature\Noclip.cs" />
     <Compile Include="Patches\Fixes\ConnectSpamFix.cs" />
     <Compile Include="Patches\Fixes\RematchHelperDisable.cs" />
-    <Compile Include="Patches\Hooks\MenuControllerStatePatches.cs" />
-    <Compile Include="Patches\Hooks\TrackRoomLoadingStates.cs" />
+    <Compile Include="Patches\Hooks\BackstatesHook.cs" />
+    <Compile Include="Patches\Hooks\OnlineLoadingStateHook.cs" />
     <Compile Include="Patches\Fixes\FpsDisplayFix.cs" />
     <Compile Include="Patches\Fixes\ItemDuplicationFix.cs" />
     <Compile Include="Patches\Fixes\PlayerTargetNameFix.cs" />
@@ -331,7 +331,7 @@
     <Compile Include="Patches\Fixes\LandSoundSpam.cs" />
     <Compile Include="Patches\Feature\MorePlayers.cs" />
     <Compile Include="Patches\Fixes\MusicVolumeFix.cs" />
-    <Compile Include="Patches\Fixes\RobustLobbyStartup.cs" />
+    <Compile Include="Patches\Hooks\RobustLobbyHook.cs" />
     <Compile Include="Patches\Feature\NoPets.cs" />
     <Compile Include="Patches\Feature\PickUpScrollWheel.cs" />
     <Compile Include="Patches\Fixes\RandomCamRigidBodyFix.cs" />

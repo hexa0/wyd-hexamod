@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature.CustomLevels
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class CustomSpawn

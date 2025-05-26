@@ -2,7 +2,7 @@
 using HexaMod.Util;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(RematchHelper))]
 	internal class RematchHelperDisable

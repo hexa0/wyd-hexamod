@@ -1,10 +1,9 @@
 ﻿using HarmonyLib;
-using HexaMapAssemblies;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.ImageEffects;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(OptionsController))]
 	internal class FixOptions

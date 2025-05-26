@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using HexaMod.UI.Util;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(ChallengeStarter))]
 	internal class FixStartingChallanges

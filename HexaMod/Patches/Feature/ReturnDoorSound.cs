@@ -2,7 +2,7 @@
 using HexaMapAssemblies;
 using UnityEngine;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(Door))]
 	internal class ReturnDoorSound

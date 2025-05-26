@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace HexaMod.Patches
+namespace HexaMod.Patches.Feature.CustomLevels
 {
 	[HarmonyPatch(typeof(HostControl))]
 	internal class HostControlDefaultFix
