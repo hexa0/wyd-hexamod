@@ -111,7 +111,8 @@ namespace HexaMod
 			networkManager.ConnectToPhoton();
 			networkManager.gameName = testGameGuid;
 			persistentLobby.Reset();
-			persistentLobby.dads[PhotonNetwork.player.ID] = spawnAsDad;
+			// PhotonNetwork.player.ID will be uninitialized at -1, 1 will always be our id in a test game so we set that
+			persistentLobby.dads[1] = spawnAsDad;
 			networkManager.isDad = spawnAsDad;
 			Menus.title.menuController.DeactivateAll();
 			testGameWaitingForConn = true;

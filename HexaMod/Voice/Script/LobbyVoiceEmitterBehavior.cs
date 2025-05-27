@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HexaMod.Util;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace HexaMod.Voice
@@ -39,13 +40,21 @@ namespace HexaMod.Voice
 			GameObject onNameItem(GameObject gameObject)
 			{
 				var kickPlayer = gameObject.transform.Find("KickPlayer").gameObject;
-				var speakingIndicator = Object.Instantiate(kickPlayer, gameObject.transform);
+				var speakingIndicator = Instantiate(kickPlayer, gameObject.transform);
 				speakingIndicator.name = "Speaking";
 
 				speakingIndicator.GetComponentInChildren<Button>().enabled = false;
 				speakingIndicator.GetComponentInChildren<Image>().enabled = false;
 
-				speakingIndicator.transform.localPosition = new Vector2(PhotonNetwork.isMasterClient ? 20f : 120f, speakingIndicator.transform.localPosition.y);
+				if (!gameObject.GetComponent<PlayerNameLobby>().hideButton)
+				{
+					speakingIndicator.transform.localPosition = new Vector2(PhotonNetwork.isMasterClient ? 20f : 120f, speakingIndicator.transform.localPosition.y);
+				}
+				else
+				{
+					speakingIndicator.transform.localPosition = new Vector2(PhotonNetwork.isMasterClient ? 70f : 120f, speakingIndicator.transform.localPosition.y);
+				}
+
 				speakingIndicator.GetComponentInChildren<Text>(true).text = "*";
 				speakingIndicator.SetActive(false);
 

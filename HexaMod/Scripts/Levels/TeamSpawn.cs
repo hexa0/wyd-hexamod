@@ -20,6 +20,11 @@ namespace HexaMapAssemblies
 			return spawnSpots[id];
 		}
 
+		public ushort GetSpawnCount()
+		{
+			return (ushort)spawnSpots.Count;
+		}
+
 		public void Init()
 		{
 			if (initialized)

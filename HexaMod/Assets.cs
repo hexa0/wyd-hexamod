@@ -3,8 +3,10 @@ using System.IO;
 using System.Reflection;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
+using HexaMod.Util;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
+using static HexaMod.HexaLobby;
 
 namespace HexaMod
 {
@@ -196,8 +198,8 @@ namespace HexaMod
 			}
 		}
 
-		private static DadSpawn dadSpawn;
-		private static BabySpawn babySpawn;
+		public static DadSpawn dadSpawn;
+		public static BabySpawn babySpawn;
 		private static LowSpawn lowSpawn;
 		private static MidSpawn midSpawn;
 		private static SpecialSpawn specialSpawn;
@@ -213,9 +215,15 @@ namespace HexaMod
 				Mod.Print($"handle player {player.name}");
 				TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
 
+				if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id)
+				{
+					spawn = babySpawn.hgSpawns;
+				}
+
 				Mod.Print($"teleport player {player.name}");
-				player.transform.position = spawn.GetSpawn(0).position;
-				player.transform.rotation = spawn.GetSpawn(0).rotation;
+				Transform spawnTransform = spawn.GetSpawn(HexaLobbyState.spawnIndex);
+				player.transform.position = spawnTransform.position;
+				player.transform.rotation = spawnTransform.rotation;
 			}
 		}
 

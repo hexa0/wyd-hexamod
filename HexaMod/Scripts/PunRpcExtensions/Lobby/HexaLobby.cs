@@ -13,6 +13,7 @@ namespace HexaMod
 	{
 		public static class HexaLobbyState
 		{
+			public static ushort spawnIndex;
 			public static int loadedPlayers = 0;
 			public static bool handledPlayersLoaded = false;
 			public static Action onPlayersLoadedAction;
@@ -275,7 +276,10 @@ namespace HexaMod
 		{
 			if (PhotonNetwork.isMasterClient)
 			{
-				netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { !PhotonNetwork.room.IsOpen });
+				MatchStartObject matchStartObject = new MatchStartObject()
+					.DetermineSpawns(HexaMod.persistentLobby.lobbySettings);
+
+				netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { !PhotonNetwork.room.IsOpen, MatchStartObject.serializer.Serialize(matchStartObject) });
 
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
 
@@ -294,8 +298,21 @@ namespace HexaMod
 		}
 
 		[PunRPC]
-		public void HexaModMatchStarted(bool inGame)
+		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
 		{
+			MatchStartObject matchStartObject = MatchStartObject.serializer.Deserialize(matchStartObjectData);
+
+			HexaLobbyState.spawnIndex = 0;
+
+			try
+			{
+				HexaLobbyState.spawnIndex = matchStartObject.spawns[(ushort)PhotonNetwork.player.ID];
+			}
+			catch (Exception e)
+			{
+				Mod.Warn("fail to set HexaLobbyState.spawnIndex:\n", e);
+			}
+
 			var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
 
 			HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
@@ -333,13 +350,27 @@ namespace HexaMod
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				if (!HexaMod.networkManager.isDad)
+				if (mode.canShuffle)
 				{
-					playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					if (!HexaMod.networkManager.isDad)
+					{
+						playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					}
+					else
+					{
+						playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					}
 				}
 				else
 				{
-					playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					if (HexaMod.networkManager.isDad)
+					{
+						playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					}
+					else
+					{
+						playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					}
 				}
 			}
 		}

@@ -26,6 +26,11 @@ namespace HexaMod.Util
 			return Encoding.Unicode.GetString(ReadSizedObject());
 		}
 
+		public uint ReadUint()
+		{
+			return BitConverter.ToUInt32(Read(4), 0);
+		}
+
 		public ushort ReadUshort()
 		{
 			return BitConverter.ToUInt16(Read(2), 0);

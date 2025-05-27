@@ -281,12 +281,14 @@
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\DrawerFactory.cs" />
+    <Compile Include="Scripts\Levels\HGHider.cs" />
     <Compile Include="Scripts\Levels\HGLevelSetup.cs" />
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
     <Compile Include="Scripts\Levels\TeamSpawn.cs" />
     <Compile Include="Scripts\Levels\VoidFailSafe.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
     <Compile Include="SerializableObjects\InitialPlayerState.cs" />
+    <Compile Include="SerializableObjects\MatchStartObject.cs" />
     <Compile Include="SerializableObjects\SerializableColor.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
     <Compile Include="UI\Class\WYDHexColorInputField.cs" />
@@ -299,6 +301,7 @@
     <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
     <Compile Include="Util\SerializationHelper.cs" />
     <Compile Include="Util\GetGameObjectChildren.cs" />
+    <Compile Include="Util\Shuffle.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\QuitFix.cs" />
