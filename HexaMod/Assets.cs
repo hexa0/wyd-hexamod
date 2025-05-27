@@ -208,22 +208,30 @@ namespace HexaMod
 		public static Transform loadedLevelInstance;
 		public static ModLevel loadedLevel;
 
+		public static Transform GetSpawnTransform(FirstPersonController player)
+		{
+			TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
+
+			if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id)
+			{
+				spawn = babySpawn.hgSpawns;
+			}
+
+			return spawn.GetSpawn(HexaLobbyState.spawnIndex);
+		}
+
 		public static void HandleSpawnTeleport(FirstPersonController player)
 		{
 			if (dadSpawn && babySpawn)
 			{
 				Mod.Print($"handle player {player.name}");
-				TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
 
-				if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id)
-				{
-					spawn = babySpawn.hgSpawns;
-				}
-
+				Transform spawnTransform = GetSpawnTransform(player);
 				Mod.Print($"teleport player {player.name}");
-				Transform spawnTransform = spawn.GetSpawn(HexaLobbyState.spawnIndex);
+
 				player.transform.position = spawnTransform.position;
 				player.transform.rotation = spawnTransform.rotation;
+				player.m_MouseLook.Init(player.transform, player.myCam.transform); // required or else character rotation isn't applied
 			}
 		}
 

@@ -32,7 +32,7 @@ namespace HexaMod
 			public LobbySettings oldSettings;
 			public LobbySettings newSettings;
 		};
-
+		public bool lobbySettingsFailed = false;
 		public void Init()
 		{
 			lobbySettings = new LobbySettings();
@@ -78,6 +78,7 @@ namespace HexaMod
 			catch (Exception e)
 			{
 				Mod.Error($"LobbySettings failed to load:\n{e}");
+				lobbySettingsFailed = true;
 			}
 		}
 

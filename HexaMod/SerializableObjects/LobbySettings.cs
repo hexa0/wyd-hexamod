@@ -11,12 +11,20 @@ namespace HexaMod.SerializableObjects
 		Shuffle,
 	}
 
+	public enum SpawnLocationMode : byte
+	{
+		Vanilla,
+		Ideal,
+		All,
+	}
+
 	// [XmlRoot("LobbySettings", Namespace = "https://hexa.blueberry.coffee/hexa-mod/")]
 	public class LobbySettings
 	{
 		public bool allMustDie = true; // TODO: make this a percentage for more customization, needs a UI component first though
 		public bool allowSpectating = true;
 		public ShufflePlayersMode shufflePlayers = ShufflePlayersMode.Alternate;
+		public SpawnLocationMode spawnMode = SpawnLocationMode.Ideal;
 		public bool disablePets = true;
 		public bool doorSounds = true;
 		public bool ventSounds = true;
@@ -48,6 +56,27 @@ namespace HexaMod.SerializableObjects
 			}
 		};
 
+		public static WYDSwitchOption<SpawnLocationMode>[] spawnOptions = new WYDSwitchOption<SpawnLocationMode>[]
+{
+			new WYDSwitchOption<SpawnLocationMode>()
+			{
+				name = "Vanilla Spawns",
+				value = SpawnLocationMode.Vanilla
+			},
+
+			new WYDSwitchOption<SpawnLocationMode>()
+			{
+				name = "Ideal Spawns",
+				value = SpawnLocationMode.Ideal
+			},
+
+			new WYDSwitchOption<SpawnLocationMode>()
+			{
+				name = "All Spawns",
+				value = SpawnLocationMode.All
+			}
+};
+
 		public static LobbySettingsSerializer serializer = new LobbySettingsSerializer();
 	}
 
@@ -73,6 +102,7 @@ namespace HexaMod.SerializableObjects
 			writer.Write(lobby.mapName);
 			writer.Write(lobby.relay);
 			writer.Write(lobby.roundNumber);
+			writer.Write((byte)lobby.spawnMode);
 
 			return writer.data.ToArray();
 		}
@@ -101,6 +131,7 @@ namespace HexaMod.SerializableObjects
 			lobby.mapName = reader.ReadString();
 			lobby.relay = reader.ReadString();
 			lobby.roundNumber = reader.ReadUshort();
+			lobby.spawnMode = (SpawnLocationMode)reader.Read();
 
 			return lobby;
 		}

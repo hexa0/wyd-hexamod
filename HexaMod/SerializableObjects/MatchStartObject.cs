@@ -57,6 +57,17 @@ namespace HexaMod.SerializableObjects
 				babySpawnObject = Assets.babySpawn.hgSpawns;
 			}
 
+			// respect the settings for spawns
+
+			if (lobby.spawnMode == SpawnLocationMode.Vanilla)
+			{
+				idealUniqueSpawns = 1;
+			}
+			else if (lobby.spawnMode == SpawnLocationMode.All)
+			{
+				idealUniqueSpawns = Math.Max(dadSpawnObject.GetSpawnCount(), babySpawnObject.GetSpawnCount());
+			}
+
 			Transform[] dadSpawns = new Transform[Math.Min(dadSpawnObject.GetSpawnCount(), idealUniqueSpawns)];
 			Transform[] babySpawns = new Transform[Math.Min(babySpawnObject.GetSpawnCount(), idealUniqueSpawns)];
 
@@ -110,7 +121,6 @@ namespace HexaMod.SerializableObjects
 			writer.Write((ushort)state.spawns.Count);
 			foreach (var item in state.spawns)
 			{
-				Mod.Warn(item.Key, " > ", item.Value);
 				writer.Write(item.Key);
 				writer.Write(item.Value);
 			}

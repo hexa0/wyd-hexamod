@@ -11,6 +11,7 @@ using static HexaMod.UI.Util.Menu.Menus;
 using HexaMod.UI.Class;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace HexaMod.UI
 {
@@ -594,6 +595,17 @@ namespace HexaMod.UI
 						}
 					),
 
+					new WYDSwitchInput<SpawnLocationMode>(
+						"shufflePlayers", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
+						menu.transform, new Vector2(45f, 0f),
+						new UnityAction<WYDSwitchOption<SpawnLocationMode>>[] {
+							delegate (WYDSwitchOption<SpawnLocationMode> option) {
+								HexaMod.persistentLobby.lobbySettings.spawnMode = option.value;
+								HexaMod.persistentLobby.CommitChanges();
+							}
+						}
+					),
+
 					// TODO: move this into a map specific settings menu
 					new WYDBooleanControl(
 						"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
@@ -695,9 +707,37 @@ namespace HexaMod.UI
 					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
 					bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
 				}
+
+				// rob the title screen text because it's easier this way lmao
+				GameObject titleText = Instantiate(title.FindMenu("SplashMenu").Find("Text").gameObject, menu.transform, true);
+				titleText.name = "MatchSettingsActionText";
+				Text titleTextComponent = titleText.GetComponent<Text>();
+				titleTextComponent.text = "";
+				titleTextComponent.fontSize = 25;
+				titleText.AddComponent<ActionText>();
 			}
 
 			UpdateUIForLobbyState();
+		}
+
+		void Start()
+		{
+			StartCoroutine(DelayedStart());
+		}
+
+		IEnumerator DelayedStart()
+		{
+			yield return new WaitForSeconds(0.1f);
+
+			if (HexaMod.persistentLobby.lobbySettingsFailed == true)
+			{
+				HexaMod.persistentLobby.lobbySettingsFailed = false;
+
+				Mod.Warn("lobbySettingsFailed was true, switch to the lobby settings menus");
+				title.menuController.ChangeToMenu(title.GetMenuId("MatchSettings"));
+				yield return new WaitForSeconds(0.1f);
+				title.FindMenu("MatchSettings").GetComponentInChildren<ActionText>().SendMessage("ActionDone", "Failed to load LobbySettings,\nPlease re-apply your settings here.");
+			}
 		}
 
 		public static string GetCurrentShirtColorHex()
