@@ -125,6 +125,7 @@ namespace HexaMod
 					int index = playerList.daddyPlayerIds.FindIndex(sender => sender == info.sender);
 					playerList.daddyPlayerNames[index] = player.username;
 					playerList.RefreshNameList();
+					playerList.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.All, playerList.daddyPlayerNames.ToArray(), playerList.daddyPlayerIds.ToArray(), playerList.babyPlayerNames.ToArray(), playerList.babyPlayerIds.ToArray());
 					return;
 				}
 
@@ -133,6 +134,7 @@ namespace HexaMod
 					int index = playerList.babyPlayerIds.FindIndex(sender => sender == info.sender);
 					playerList.babyPlayerNames[index] = player.username;
 					playerList.RefreshNameList();
+					playerList.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.All, playerList.daddyPlayerNames.ToArray(), playerList.daddyPlayerIds.ToArray(), playerList.babyPlayerNames.ToArray(), playerList.babyPlayerIds.ToArray());
 					return;
 				}
 
