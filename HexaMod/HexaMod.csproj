@@ -289,6 +289,7 @@
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
     <Compile Include="SerializableObjects\InitialPlayerState.cs" />
     <Compile Include="SerializableObjects\MatchStartObject.cs" />
+    <Compile Include="SerializableObjects\PlayerConnectedObject.cs" />
     <Compile Include="SerializableObjects\SerializableColor.cs" />
     <Compile Include="UI\Class\WYDBooleanControl.cs" />
     <Compile Include="UI\Class\WYDHexColorInputField.cs" />

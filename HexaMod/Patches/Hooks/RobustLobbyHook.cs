@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using HarmonyLib;
+using HexaMod.SerializableObjects;
 using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
@@ -118,6 +119,12 @@ namespace HexaMod.Patches.Hooks
 				{
 					playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
 				}
+			}
+			else
+			{
+				PlayerConnectedObject player = new PlayerConnectedObject();
+
+				HexaMod.hexaLobby.netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
 			}
 
 			return false;
