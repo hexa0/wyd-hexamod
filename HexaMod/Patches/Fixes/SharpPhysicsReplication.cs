@@ -13,6 +13,24 @@ namespace HexaMod.Patches.Fixes
 			return false;
 		}
 
+		[HarmonyPatch("Start")]
+		[HarmonyPrefix]
+		static bool Start(ref NetworkMovementRB __instance)
+		{
+			Traverse fields = Traverse.Create(__instance);
+			__instance.timer = 0f;
+			PhotonView netView = __instance.GetComponent<PhotonView>();
+			fields.Field<PhotonView>("netView").Value = netView;
+			fields.Field<Rigidbody>("rb").Value = __instance.GetComponent<Rigidbody>();
+			netView.ObservedComponents.Add(__instance);
+			netView.synchronization = ViewSynchronization.UnreliableOnChange;
+			fields.Field<PickUp>("pickUpScript").Value = __instance.GetComponent<PickUp>();
+			fields.Field<Vector3>("syncEndPosition").Value = __instance.transform.position;
+			fields.Field<Quaternion>("syncEndRotation").Value = __instance.transform.rotation;
+
+			return false;
+		}
+
 		[HarmonyPatch("OnPhotonSerializeView")]
 		[HarmonyPostfix]
 		static void OnPhotonSerializeView(ref NetworkMovementRB __instance)
