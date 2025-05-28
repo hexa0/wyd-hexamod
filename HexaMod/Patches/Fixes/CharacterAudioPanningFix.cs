@@ -24,6 +24,8 @@ namespace HexaMod.Patches.Fixes
 			}
 			else
 			{
+				audioEmitter.panStereo = 0f;
+				audioEmitter.bypassEffects = true;
 				audioEmitter.spatialBlend = 1f;
 				audioEmitter.spatialize = true;
 			}
