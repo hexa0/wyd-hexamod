@@ -101,7 +101,6 @@ namespace HexaMod.Patches.Hooks
 		{
 			if (PhotonNetwork.room.Name.Contains(HexaMod.testGameGuid))
 			{
-				Mod.Warn("OnJoinedRoom Cancelled");
 				return false;
 			}
 

@@ -35,7 +35,6 @@ namespace HexaMod.Patches.Hooks
 
 				if ((Time.time - DeathHook.lastExplosionTime) < 1f)
 				{
-					Mod.Warn("explosion happened");
 					float multiplier = DeathHook.lastExplosion.GetComponent<ParticleSystemMultiplier>().multiplier;
 					float radius = 20f * multiplier;
 					Vector3 underBabyExplosionPosition = DeathHook.lastExplosion.transform.position;
@@ -89,7 +88,6 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void ExplosionPhysicsForceStart(ref ExplosionPhysicsForce __instance)
 		{
-			Mod.Warn("explosion force activated");
 			lastExplosion = __instance;
 			lastExplosionTime = Time.time;
 		}
