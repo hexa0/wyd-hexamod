@@ -1,7 +1,8 @@
-﻿using HarmonyLib;
+﻿using System.Collections;
+using HarmonyLib;
 using HexaMapAssemblies;
 using UnityEngine;
-using UnityStandardAssets.Characters.FirstPerson;
+using UnityStandardAssets.Effects;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -9,31 +10,48 @@ namespace HexaMod.Patches.Hooks
 	{
 		bool isDead = false;
 		[PunRPC]
-		public void DeadRPC()
+		public IEnumerator DeadRPC()
 		{
-			if (isDead) return;
-			isDead = true;
+			if (!isDead)
+			{
+				isDead = true;
 
-			gameObject.name = "Dead Baby";
-			Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
-			rigidBody.interpolation = RigidbodyInterpolation.Interpolate;
-			rigidBody.isKinematic = false;
-			rigidBody.useGravity = true;
-			DestroyImmediate(gameObject.GetComponent<NetworkMovement>());
-			gameObject.AddComponent<NetworkMovementRB>();
-			BoxCollider collider = gameObject.GetComponent<BoxCollider>();
-			collider.isTrigger = false;
-			collider.center = new Vector3(0f, -0.13f, -0.3f);
-			collider.size = new Vector3(0.5f, 0.2f, 1.2f);
-			PickUpFactory pickup = gameObject.AddComponent<PickUpFactory>();
-			pickup.babyCannotGrab = true;
-			gameObject.tag = "Untagged";
+				gameObject.name = "Dead Baby";
+				Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
+				rigidBody.interpolation = RigidbodyInterpolation.Interpolate;
+				rigidBody.isKinematic = false;
+				rigidBody.useGravity = true;
+				DestroyImmediate(gameObject.GetComponent<NetworkMovement>());
+				gameObject.AddComponent<NetworkMovementRB>();
+				BoxCollider collider = gameObject.GetComponent<BoxCollider>();
+				collider.isTrigger = false;
+				collider.center = new Vector3(0f, -0.13f, -0.3f);
+				collider.size = new Vector3(0.5f, 0.2f, 1.2f);
+				PickUpFactory pickup = gameObject.AddComponent<PickUpFactory>();
+				pickup.babyCannotGrab = true;
+				gameObject.tag = "Untagged";
+
+				yield return new WaitForEndOfFrame();
+
+				if ((Time.time - DeathHook.lastExplosionTime) < 1f)
+				{
+					Mod.Warn("explosion happened");
+					float multiplier = DeathHook.lastExplosion.GetComponent<ParticleSystemMultiplier>().multiplier;
+					float radius = 20f * multiplier;
+					Vector3 underBabyExplosionPosition = DeathHook.lastExplosion.transform.position;
+					underBabyExplosionPosition.y = rigidBody.position.y - 5f;
+					rigidBody.AddExplosionForce((DeathHook.lastExplosion.explosionForce * 15f) * multiplier, underBabyExplosionPosition, radius, 1f * multiplier, ForceMode.Impulse);
+				}
+			}
 		}
 	}
 
 	[HarmonyPatch]
 	internal class DeathHook
 	{
+		internal static ExplosionPhysicsForce lastExplosion;
+		internal static float lastExplosionTime = 0f;
+
 		[HarmonyPatch(typeof(BabyStats), "Start")]
 		[HarmonyPostfix]
 		static void Start(ref BabyStats __instance)
@@ -46,6 +64,34 @@ namespace HexaMod.Patches.Hooks
 		static void Dead(ref BabyStats __instance)
 		{
 			__instance.GetComponent<PhotonView>().RPC("DeadRPC", PhotonTargets.All);
+		}
+
+		[HarmonyPatch(typeof(BabyStats), "ShockedRPC")]
+		[HarmonyPrefix]
+		static bool ShockedRPC(ref BabyStats __instance)
+		{
+			__instance.heat = 200f;
+			__instance.cooking = true;
+			__instance.Dead();
+
+			return false;
+		}
+
+		[HarmonyPatch(typeof(BabyStats), "Shocked")]
+		[HarmonyPrefix]
+		static bool Shocked(ref BabyStats __instance)
+		{
+			__instance.GetComponent<PhotonView>().RPC("ShockedRPC", PhotonTargets.All);
+			return false;
+		}
+
+		[HarmonyPatch(typeof(ExplosionPhysicsForce), "Start")]
+		[HarmonyPrefix]
+		static void ExplosionPhysicsForceStart(ref ExplosionPhysicsForce __instance)
+		{
+			Mod.Warn("explosion force activated");
+			lastExplosion = __instance;
+			lastExplosionTime = Time.time;
 		}
 	}
 }

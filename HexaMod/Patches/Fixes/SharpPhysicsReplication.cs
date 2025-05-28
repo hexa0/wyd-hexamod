@@ -18,7 +18,7 @@ namespace HexaMod.Patches.Fixes
 		static bool Start(ref NetworkMovementRB __instance)
 		{
 			Traverse fields = Traverse.Create(__instance);
-			__instance.timer = 0f;
+			__instance.timer = 5f;
 			PhotonView netView = __instance.GetComponent<PhotonView>();
 			fields.Field<PhotonView>("netView").Value = netView;
 			fields.Field<Rigidbody>("rb").Value = __instance.GetComponent<Rigidbody>();
