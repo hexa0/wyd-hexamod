@@ -267,6 +267,7 @@
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
     <Compile Include="Patches\Fixes\ExplosionShadowFix.cs" />
     <Compile Include="Patches\Fixes\FixOptions.cs" />
+    <Compile Include="Patches\Fixes\FloatyFix.cs" />
     <Compile Include="Patches\Fixes\ItemTargetingNameSizeFix.cs" />
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
