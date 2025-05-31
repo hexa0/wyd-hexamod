@@ -23,7 +23,7 @@ namespace VoiceChatHost
 		private bool isSpeaking = false;
 		private double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
 		private ulong clientId = (ulong)Process.GetCurrentProcess().Id;
-		private static long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		private static long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 20;
 		private static float shortMaxValueMul = 1f / short.MaxValue;
 		private static float shortMinValueMul = 1f / short.MinValue;
 		private static bool doDenoise = true;
