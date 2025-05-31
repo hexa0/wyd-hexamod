@@ -272,6 +272,7 @@
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
+    <Compile Include="Patches\Fixes\PictureNetworkingFix.cs" />
     <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
     <Compile Include="Patches\Fixes\SmootherBob.cs" />
     <Compile Include="Patches\Fixes\UpsideDownMirrorFix.cs" />

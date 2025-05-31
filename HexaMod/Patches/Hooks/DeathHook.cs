@@ -22,7 +22,8 @@ namespace HexaMod.Patches.Hooks
 				rigidBody.isKinematic = false;
 				rigidBody.useGravity = true;
 				DestroyImmediate(gameObject.GetComponent<NetworkMovement>());
-				gameObject.AddComponent<NetworkMovementRB>();
+				NetworkMovementRB networkMovement = gameObject.AddComponent<NetworkMovementRB>();
+				networkMovement.timer = 5f;
 				BoxCollider collider = gameObject.GetComponent<BoxCollider>();
 				collider.isTrigger = false;
 				collider.center = new Vector3(0f, -0.13f, -0.3f);

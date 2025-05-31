@@ -56,6 +56,8 @@ namespace HexaMod
 					return;
 				}
 
+				FixDefaultLevel();
+
 				Mod.Print($"caching static WYD assets.");
 
 				// run before we clean up the default map
@@ -108,6 +110,24 @@ namespace HexaMod
 		}
 
 		public static List<GameObject> defaultLevelObjects = new List<GameObject>();
+
+		public static void FixDefaultLevel()
+		{
+			//Rigidbody[] rigidbodies = Object.FindObjectsOfType<Rigidbody>();
+
+			//foreach (var rigidbody in rigidbodies)
+			//{
+			//	if (rigidbody.GetComponent<NetworkMovementRB>() == null)
+			//	{
+			//		rigidbody.gameObject.AddComponent<NetworkMovementRB>();
+			//	}
+
+			//	if (rigidbody.GetComponent<PhotonView>() == null)
+			//	{
+			//		GlobalPhotonFactory.Register(rigidbody.gameObject, true);
+			//	}
+			//}
+		}
 
 		public static void ActivateDefaultLevel()
 		{

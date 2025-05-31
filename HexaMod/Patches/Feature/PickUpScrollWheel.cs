@@ -49,7 +49,7 @@ namespace HexaMod.Patches.Feature
 					// 15f, 10f
 					rb.velocity = Vector3.ClampMagnitude((__instance.target.position + __instance.target.forward * grabbedDis - rb.position) * 15f, 50f);
 
-					if (Vector3.Distance(__instance.transform.position, __instance.target.position) > 5f)
+					if (__instance.GetComponent<PhotonView>().isMine && Vector3.Distance(__instance.transform.position, __instance.target.position) > 5f)
 					{
 						var holder = GameObject.Find(__instance.holding);
 

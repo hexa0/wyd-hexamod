@@ -18,7 +18,7 @@ namespace HexaMod.Patches.Fixes
 		static bool Start(ref NetworkMovementRB __instance)
 		{
 			Traverse fields = Traverse.Create(__instance);
-			__instance.timer = 5f;
+			__instance.timer = 4.5f;
 			PhotonView netView = __instance.GetComponent<PhotonView>();
 			fields.Field<PhotonView>("netView").Value = netView;
 			fields.Field<Rigidbody>("rb").Value = __instance.GetComponent<Rigidbody>();
@@ -29,6 +29,13 @@ namespace HexaMod.Patches.Fixes
 			fields.Field<Quaternion>("syncEndRotation").Value = __instance.transform.rotation;
 
 			return false;
+		}
+
+		[HarmonyPatch("OnPhotonSerializeView")]
+		[HarmonyPrefix]
+		static bool OnPhotonSerializeViewTestLoaded(ref NetworkMovementRB __instance)
+		{
+			return HexaLobby.HexaLobbyState.handledPlayersLoaded;
 		}
 
 		[HarmonyPatch("OnPhotonSerializeView")]

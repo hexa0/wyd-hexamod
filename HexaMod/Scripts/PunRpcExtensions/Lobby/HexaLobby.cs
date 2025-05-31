@@ -323,6 +323,9 @@ namespace HexaMod
 		[PunRPC]
 		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
 		{
+			HexaLobbyState.loadedPlayers = PhotonNetwork.room.PlayerCount;
+			HexaLobbyState.handledPlayersLoaded = true;
+
 			MatchStartObject matchStartObject = MatchStartObject.serializer.Deserialize(matchStartObjectData);
 
 			HexaLobbyState.spawnIndex = 0;
