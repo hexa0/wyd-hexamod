@@ -29,7 +29,6 @@ namespace HexaMod.Patches.Hooks
 				collider.center = new Vector3(0f, -0.13f, -0.3f);
 				collider.size = new Vector3(0.5f, 0.2f, 1.2f);
 				PickUpFactory pickup = gameObject.AddComponent<PickUpFactory>();
-				pickup.babyCannotGrab = true;
 				gameObject.tag = "Untagged";
 
 				yield return new WaitForEndOfFrame();
