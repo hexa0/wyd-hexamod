@@ -19,7 +19,6 @@ namespace HexaMod
 			netView = GetComponent<PhotonView>();
 			initialState = new InitialPlayerState()
 			{
-				username = PlayerPrefs.GetString("LobbyName", "Player"),
 				clientId = (ulong)PhotonNetwork.player.ID,
 				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
 				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
@@ -37,7 +36,7 @@ namespace HexaMod
 			}
 
 			processedInitialState = true;
-			GetComponent<FirstPersonController>().playerName = initialState.username;
+			GetComponent<FirstPersonController>().playerName = netView.owner.NickName;
 			GetComponent<CharacterModelSwapper>().SetShirtColor(initialState.shirtColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);

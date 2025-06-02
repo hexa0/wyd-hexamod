@@ -281,6 +281,7 @@
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
     <Compile Include="Patches\Fixes\FixStartingChallanges.cs" />
     <Compile Include="Patches\Hooks\DeathHook.cs" />
+    <Compile Include="Patches\Hooks\UsePhotonNameSystem.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />

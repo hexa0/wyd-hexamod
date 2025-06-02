@@ -112,18 +112,12 @@ namespace HexaMod.Patches.Hooks
 
 				if (mode.hostDefaultTeamIsDad)
 				{
-					playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 				}
 				else
 				{
-					playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+					playerList.AddBaby(PhotonNetwork.playerName, PhotonNetwork.player);
 				}
-			}
-			else
-			{
-				PlayerConnectedObject player = new PlayerConnectedObject();
-
-				HexaMod.hexaLobby.netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
 			}
 
 			return false;

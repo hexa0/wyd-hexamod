@@ -40,7 +40,7 @@ namespace HexaMod
 					player.isDad = HexaMod.persistentLobby.dads[PhotonNetwork.player.ID];
 				}
 
-				player.username = PlayerPrefs.GetString("LobbyName", HexaMod.networkManager.dadNames[UnityEngine.Random.Range(0, HexaMod.networkManager.dadNames.Length)]);
+				//player.username = PlayerPrefs.GetString("LobbyName", HexaMod.networkManager.dadNames[UnityEngine.Random.Range(0, HexaMod.networkManager.dadNames.Length)]);
 
 				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
 				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
@@ -106,7 +106,7 @@ namespace HexaMod
 			PlayerConnectedObject player = PlayerConnectedObject.serializer.Deserialize(playerConnectedData);
 			HexaLobbyState.loadedPlayers++;
 
-			Mod.Print($"got new connected player with name \"{player.username}\" and isDad = {player.isDad} {HexaLobbyState.loadedPlayers}/{PhotonNetwork.room.PlayerCount}");
+			Mod.Print($"got new ready player with name \"{info.sender.NickName}\" and isDad = {player.isDad} {HexaLobbyState.loadedPlayers}/{PhotonNetwork.room.PlayerCount}");
 
 			if (HexaLobbyState.onPlayersLoadedAction != null && !HexaLobbyState.handledPlayersLoaded && HexaLobbyState.loadedPlayers == PhotonNetwork.room.PlayerCount)
 			{
@@ -120,31 +120,18 @@ namespace HexaMod
 				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
-				if (playerList.daddyPlayerIds.Contains(info.sender))
+				if (playerList.daddyPlayerIds.Contains(info.sender) || playerList.babyPlayerIds.Contains(info.sender))
 				{
-					int index = playerList.daddyPlayerIds.FindIndex(sender => sender == info.sender);
-					playerList.daddyPlayerNames[index] = player.username;
-					playerList.RefreshNameList();
-					playerList.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.All, playerList.daddyPlayerNames.ToArray(), playerList.daddyPlayerIds.ToArray(), playerList.babyPlayerNames.ToArray(), playerList.babyPlayerIds.ToArray());
-					return;
-				}
-
-				if (playerList.babyPlayerIds.Contains(info.sender))
-				{
-					int index = playerList.babyPlayerIds.FindIndex(sender => sender == info.sender);
-					playerList.babyPlayerNames[index] = player.username;
-					playerList.RefreshNameList();
-					playerList.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.All, playerList.daddyPlayerNames.ToArray(), playerList.daddyPlayerIds.ToArray(), playerList.babyPlayerNames.ToArray(), playerList.babyPlayerIds.ToArray());
 					return;
 				}
 
 				if (player.isDad)
 				{
-					playerList.AddDaddy(player.username, info.sender);
+					playerList.AddDaddy(info.sender.NickName, info.sender);
 				}
 				else
 				{
-					playerList.AddBaby(player.username, info.sender);
+					playerList.AddBaby(info.sender.NickName, info.sender);
 				}
 			}
 		}
@@ -380,22 +367,22 @@ namespace HexaMod
 				{
 					if (!HexaMod.networkManager.isDad)
 					{
-						playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+						playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
 					else
 					{
-						playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+						playerList.AddBaby(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
 				}
 				else
 				{
 					if (HexaMod.networkManager.isDad)
 					{
-						playerList.AddDaddy(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+						playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
 					else
 					{
-						playerList.AddBaby(HexaMod.networkManager.lobbyName, PhotonNetwork.player);
+						playerList.AddBaby(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
 				}
 			}
@@ -403,6 +390,8 @@ namespace HexaMod
 
 		void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
 		{
+			Mod.Print($"player \"{newPlayer.NickName}\" joined the lobby");
+
 			if (PhotonNetwork.isMasterClient)
 			{
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
@@ -411,13 +400,18 @@ namespace HexaMod
 
 				if (mode.defaultTeamIsDad)
 				{
-					playerList.AddDaddy($"peer {newPlayer.ID}", newPlayer);
+					playerList.AddDaddy(newPlayer.NickName, newPlayer);
 				}
 				else
 				{
-					playerList.AddBaby($"peer {newPlayer.ID}", newPlayer);
+					playerList.AddBaby(newPlayer.NickName, newPlayer);
 				}
 			}
+		}
+
+		void OnPhotonPlayerDisconnected(PhotonPlayer oldPlayer)
+		{
+			Mod.Print($"player \"{oldPlayer.NickName}\" left the lobby");
 		}
 
 		[PunRPC]

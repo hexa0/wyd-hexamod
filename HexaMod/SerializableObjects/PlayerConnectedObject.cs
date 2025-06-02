@@ -8,14 +8,8 @@ namespace HexaMod.SerializableObjects
 	public class PlayerConnectedObject
 	{
 		public bool isDad;
-		public string username;
 
 		public static PlayerConnectedObjectSerializer serializer = new PlayerConnectedObjectSerializer();
-
-		public PlayerConnectedObject()
-		{
-			username = PlayerPrefs.GetString("LobbyName", HexaMod.networkManager.dadNames[Random.Range(0, HexaMod.networkManager.dadNames.Length)]);
-		}
 	}
 
 	public class PlayerConnectedObjectSerializer
@@ -28,8 +22,6 @@ namespace HexaMod.SerializableObjects
 			{
 				player.isDad
 			});
-
-			writer.Write(player.username);
 
 			return writer.data.ToArray();
 		}
@@ -46,7 +38,6 @@ namespace HexaMod.SerializableObjects
 			bool[] booleanBlock = reader.ReadBooleanBlock();
 
 			state.isDad = booleanBlock[0];
-			state.username = reader.ReadString();
 
 			return state;
 		}
