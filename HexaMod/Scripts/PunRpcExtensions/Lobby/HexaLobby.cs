@@ -419,6 +419,17 @@ namespace HexaMod
 		{
 			HexaMod.persistentLobby.ResetRound();
 			HexaMod.persistentLobby.dads[PhotonNetwork.player.ID] = HexaMod.networkManager.isDad;
+			GameObject menuCamera = GameObject.Find("BackendObjects").transform.Find("MenuCamera").gameObject;
+			menuCamera.SetActive(true);
+			Camera currentCamera = Camera.current;
+			Camera menuCameraComponent = menuCamera.GetComponent<Camera>();
+			menuCameraComponent.enabled = true;
+			menuCameraComponent.fieldOfView = currentCamera.fieldOfView;
+			menuCameraComponent.farClipPlane = currentCamera.farClipPlane;
+			menuCameraComponent.nearClipPlane = currentCamera.nearClipPlane;
+			menuCameraComponent.orthographic = currentCamera.orthographic;
+			menuCamera.transform.position = currentCamera.transform.position;
+			menuCamera.transform.rotation = currentCamera.transform.rotation;
 
 			if (PhotonNetwork.isMasterClient)
 			{
@@ -426,6 +437,7 @@ namespace HexaMod
 				PhotonNetwork.room.IsVisible = true;
 				netView.RPC("ReturnToLobby", PhotonTargets.Others);
 				HexaMod.networkManager.netView.RPC("Rematch", PhotonTargets.All);
+				PhotonNetwork.DestroyAll();
 			}
 		}
 	}
