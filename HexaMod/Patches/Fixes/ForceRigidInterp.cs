@@ -3,68 +3,54 @@ using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
-	[HarmonyPatch(typeof(VelocityBreak))]
-	internal class ForceRigidInterpGlassCups
+	[HarmonyPatch]
+	internal class ForceRigidInterp
 	{
-		[HarmonyPatch("RPCDestroy")]
+		[HarmonyPatch(typeof(VelocityBreak), "Main")]
 		[HarmonyPostfix]
-		static void MakeRigidbodyInterpolated()
+		static void Main(ref VelocityBreak __instance)
 		{
-			HexaMod.FixRigidBodies();
-		}
-	}
+			foreach (var rigidbody in __instance.breakObj.GetComponentsInChildren<Rigidbody>())
+			{
+				rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-	[HarmonyPatch(typeof(GlassTable))]
-	internal class ForceRigidInterpGlassTable
-	{
-		[HarmonyPatch("RPCUseInteract")]
+				if (rigidbody.GetComponent<NetworkMovementRB>() == null)
+				{
+					rigidbody.gameObject.AddComponent<NetworkMovementRB>();
+				}
+			}
+		}
+
+		[HarmonyPatch(typeof(GlassTable), "Start")]
 		[HarmonyPostfix]
-		static void MakeRigidbodyInterpolated()
+		static void Start(ref GlassTable __instance)
 		{
-			HexaMod.FixRigidBodies();
-		}
-	}
+			foreach (var rigidbody in __instance.brokenTable.GetComponentsInChildren<Rigidbody>())
+			{
+				rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-	[HarmonyPatch(typeof(PianoKey))]
-	internal class PianoKeyFix
-	{
-		[HarmonyPatch("Update")]
+				if (rigidbody.GetComponent<NetworkMovementRB>() == null)
+				{
+					rigidbody.gameObject.AddComponent<NetworkMovementRB>();
+				}
+			}
+		}
+
+		[HarmonyPatch(typeof(PianoKey), "Start")]
 		[HarmonyPostfix]
-		static void Update(ref PianoKey __instance)
+		static void Start(ref PianoKey __instance)
 		{
 			__instance.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
 		}
-	}
 
-	[HarmonyPatch(typeof(BlasterFix))]
-	internal class BlasterFix
-	{
-		[HarmonyPatch("ShootRPC")]
+		[HarmonyPatch(typeof(Blaster), "Start")]
 		[HarmonyPostfix]
-		static void ShootRPC()
+		static void Start(ref Blaster __instance)
 		{
-			HexaMod.FixRigidBodies();
+			__instance.bullet.gameObject.GetComponentInChildren<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
 		}
 
-		[HarmonyPatch("Shoot")]
-		[HarmonyPostfix]
-		static void Shoot()
-		{
-			HexaMod.FixRigidBodies();
-		}
-
-		[HarmonyPatch("Fire")]
-		[HarmonyPostfix]
-		static void Fire()
-		{
-			HexaMod.FixRigidBodies();
-		}
-	}
-
-	[HarmonyPatch(typeof(ToiletLid))]
-	internal class GrillFix
-	{
-		[HarmonyPatch("Start")]
+		[HarmonyPatch(typeof(ToiletLid), "Start")]
 		[HarmonyPostfix]
 		static void Start(ref ToiletLid __instance)
 		{
@@ -75,16 +61,19 @@ namespace HexaMod.Patches.Fixes
 				Object.Destroy(__instance);
 			}
 		}
-	}
 
-	[HarmonyPatch(typeof(Ball))]
-	internal class BallFix
-	{
-		[HarmonyPatch("Start")]
+		[HarmonyPatch(typeof(Radio), "Start")]
 		[HarmonyPostfix]
-		static void Start(ref ToiletLid __instance)
+		static void Start(ref Radio __instance)
 		{
-			HexaMod.FixRigidBodies();
+			__instance.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
+		}
+
+		[HarmonyPatch(typeof(Ball), "Start")]
+		[HarmonyPostfix]
+		static void Start(ref Ball __instance)
+		{
+			__instance.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
 		}
 	}
 }

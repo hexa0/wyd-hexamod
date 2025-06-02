@@ -50,6 +50,7 @@ namespace HexaMod.Patches.Fixes
 			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
 			var syncVel = privateFields.Field<Vector3>("syncVel");
 			var syncAngVel = privateFields.Field<Vector3>("syncAngVel");
+			var lastSynchronizationTime = privateFields.Field<float>("lastSynchronizationTime");
 
 			if (!netView.Value.isMine && __instance.updated)
 			{
@@ -58,6 +59,7 @@ namespace HexaMod.Patches.Fixes
 				rigidBody.velocity = syncVel.Value;
 				rigidBody.angularVelocity = syncAngVel.Value;
 			}
+
 			if (syncPosition.Value != null && syncPosition.Value != Vector3.zero && !netView.Value.isMine && (rigidBody.IsSleeping() || (rigidBody.position - syncPosition.Value).magnitude > 3f))
 			{
 				rigidBody.position = syncPosition.Value;
@@ -65,6 +67,8 @@ namespace HexaMod.Patches.Fixes
 				rigidBody.velocity = syncVel.Value;
 				rigidBody.angularVelocity = syncAngVel.Value;
 			}
+
+			lastSynchronizationTime.Value = Time.time;
 		}
 
 		[HarmonyPatch("FixedUpdate")]
@@ -79,8 +83,9 @@ namespace HexaMod.Patches.Fixes
 			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
 			var syncVel = privateFields.Field<Vector3>("syncVel");
 			var syncAngVel = privateFields.Field<Vector3>("syncAngVel");
+			var lastSynchronizationTime = privateFields.Field<float>("lastSynchronizationTime");
 
-			if (syncPosition.Value != null && syncPosition.Value != Vector3.zero && !netView.Value.isMine && (rigidBody.IsSleeping() || (rigidBody.position - syncPosition.Value).magnitude > 3f))
+			if (syncPosition.Value != null && syncPosition.Value != Vector3.zero && !netView.Value.isMine && (rigidBody.IsSleeping() || (rigidBody.position - syncPosition.Value).magnitude > 3f || ((Time.time - lastSynchronizationTime.Value) > 1f)))
 			{
 				rigidBody.position = syncPosition.Value;
 				rigidBody.rotation = syncRotation.Value;
