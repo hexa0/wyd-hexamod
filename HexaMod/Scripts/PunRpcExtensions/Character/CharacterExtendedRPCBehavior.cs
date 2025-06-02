@@ -48,7 +48,9 @@ namespace HexaMod
 			{
 				yield return 0;
 
-				for (int i = 0; i < 10; i++) // when this delay is short sometimes people wouldn't have voice chat due to the event missing, although that might've been other stability issues i'm not taking chances so this is repeated to make sure the other clients actually recieve it
+				// this still sometimes drops and there's no way to send a reliable RPC event
+
+				for (int i = 0; i < 5; i++)
 				{
 					SetInitialStateForOthers();
 					yield return new WaitForSeconds(0.1f);
