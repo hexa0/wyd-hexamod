@@ -19,7 +19,6 @@ namespace HexaMod
 			netView = GetComponent<PhotonView>();
 			initialState = new InitialPlayerState()
 			{
-				clientId = (ulong)PhotonNetwork.player.ID,
 				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
 				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
 				characterModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default")
@@ -40,7 +39,7 @@ namespace HexaMod
 			GetComponent<CharacterModelSwapper>().SetShirtColor(initialState.shirtColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);
-			GetComponent<PlayerVoiceEmitterRPC>().SetVoiceId(initialState.clientId);
+			GetComponent<PlayerVoiceEmitterRPC>().SetVoiceId((ulong)netView.owner.ID);
 		}
 
 		IEnumerator SendInitalState()
