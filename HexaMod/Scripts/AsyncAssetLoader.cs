@@ -1,7 +1,8 @@
 ﻿using System.Collections;
+using System.IO;
+using System.Linq.Expressions;
 using HexaMod.ScriptableObjects;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace HexaMod
 {
@@ -17,6 +18,9 @@ namespace HexaMod
 
 		private IEnumerator LoadAssetsAsync(string filename, string file)
 		{
+			string type = Path.GetFileName(Path.GetDirectoryName(file));
+			string from = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(file)));
+			string withoutExtension = Path.GetFileNameWithoutExtension(filename);
 			AssetBundleCreateRequest bundleLoadRequest = AssetBundle.LoadFromFileAsync(file);
 
 			yield return bundleLoadRequest;
@@ -25,39 +29,57 @@ namespace HexaMod
 			Assets.assetBundles.Add(filename, bundle);
 			Mod.Print($"Loaded Asset Bundle {filename}");
 
-			var allLevels = bundle.LoadAllAssetsAsync<ModLevel>();
-			yield return allLevels;
-
-			foreach (ModLevel level in allLevels.allAssets)
+			switch (type)
 			{
-				if (filename == "title_screen")
-				{
-					Mod.Print($"Found title level {level.levelNameReadable}");
-					Assets.titleLevel = level;
-					Assets.titleName = level.levelPrefab.name;
-				}
+				case "level":
+					var allLevels = bundle.LoadAllAssetsAsync<ModLevel>();
+					yield return allLevels;
 
-				Assets.levels.Add(level);
-				Mod.Print($"Found level {level.levelNameReadable}");
-			};
+					foreach (ModLevel level in allLevels.allAssets)
+					{
+						if (from == "core" && withoutExtension == "default")
+						{
+							Mod.Print($"Found default level {level.levelNameReadable}");
+							Assets.titleLevel = level;
+							Assets.titleName = level.levelPrefab.name;
+						}
 
-			var allCharacterModels = bundle.LoadAllAssetsAsync<ModCharacterModel>();
-			yield return allCharacterModels;
+						Assets.levels.Add(level);
+						Mod.Print($"Found level {level.levelNameReadable}");
+					}
 
-			foreach (ModCharacterModel model in allCharacterModels.allAssets)
-			{
-				Assets.characterModels.Add(model);
-				if (model.isDad)
-				{
-					Assets.dadCharacterModels.Add(model);
-				}
-				else
-				{
-					Assets.babyCharacterModels.Add(model);
-				}
-				Mod.Print($"Found model {model.modelNameReadable}");
+					break;
+				case "avatar":
+					var allCharacterModels = bundle.LoadAllAssetsAsync<ModCharacterModel>();
+					yield return allCharacterModels;
+
+					foreach (ModCharacterModel model in allCharacterModels.allAssets)
+					{
+						Assets.characterModels.Add(model);
+						if (model.isDad)
+						{
+							Assets.dadCharacterModels.Add(model);
+						}
+						else
+						{
+							Assets.babyCharacterModels.Add(model);
+						}
+						Mod.Print($"Found model {model.modelNameReadable}");
+					}
+
+					break;
+				case "radio":
+					var allRadioTracks = bundle.LoadAllAssetsAsync<ModRadioTrack>();
+					yield return allRadioTracks;
+
+					foreach (ModRadioTrack track in allRadioTracks.allAssets)
+					{
+						Assets.radioTracks.Add(track);
+						Mod.Print($"Found radio track {track.name}");
+					}
+
+					break;
 			}
-			;
 
 			Assets.loadedBundles++;
 

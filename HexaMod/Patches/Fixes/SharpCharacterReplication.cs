@@ -17,8 +17,8 @@ namespace HexaMod.Patches.Fixes
 			var syncEndRotation = privateFields.Field<Quaternion>("syncEndRotation");
 
 			syncTime.Value += Time.deltaTime;
-			__instance.transform.position = Vector3.Lerp(__instance.transform.position, syncEndPosition.Value, Mathf.Min(Time.smoothDeltaTime * 60f, 1f));
-			__instance.transform.rotation = Quaternion.Lerp(__instance.transform.rotation, syncEndRotation.Value, Mathf.Min(Time.smoothDeltaTime * 60f, 1f));
+			__instance.transform.position = Vector3.Lerp(__instance.transform.position, syncEndPosition.Value, Mathf.Min(Time.smoothDeltaTime * 45f, 1f));
+			__instance.transform.rotation = Quaternion.Lerp(__instance.transform.rotation, syncEndRotation.Value, Mathf.Min(Time.smoothDeltaTime * 45f, 1f));
 
 			return false;
 		}

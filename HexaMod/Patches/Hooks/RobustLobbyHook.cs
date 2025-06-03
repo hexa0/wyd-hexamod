@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections;
 using HarmonyLib;
-using HexaMod.SerializableObjects;
 using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
 
 namespace HexaMod.Patches.Hooks
 {
+	internal class LobbyKickedFix : MonoBehaviour
+	{
+		void OnLeftRoom()
+		{
+			GetComponent<PlayerNames>().backButton.onClick.Invoke();
+		}
+	}
+
 	[HarmonyPatch]
 	internal class RobustLobbyHook
 	{
@@ -38,6 +45,13 @@ namespace HexaMod.Patches.Hooks
 			return false;
 		}
 
+		[HarmonyPatch(typeof(PlayerNames), "Start")]
+		[HarmonyPrefix]
+		static void Start(ref PlayerNames __instance)
+		{
+			__instance.gameObject.AddComponent<LobbyKickedFix>();
+		}
+
 		[HarmonyPatch(typeof(PlayerNames), "SendPlayerLists")]
 		[HarmonyPrefix]
 		static bool SendPlayerLists()
@@ -51,6 +65,22 @@ namespace HexaMod.Patches.Hooks
 		{
 			PhotonPlayer player = __instance.daddyPlayerIds[oldSpot];
 			HexaMod.persistentLobby.dads[player.ID] = false;
+		}
+
+		[HarmonyPatch(typeof(PlayerNames), "KickDadPlayer")]
+		[HarmonyPrefix]
+		static bool KickDadPlayer(int input, ref PlayerNames __instance)
+		{
+			PhotonNetwork.CloseConnection(__instance.daddyPlayerIds[input]);
+			return false;
+		}
+
+		[HarmonyPatch(typeof(PlayerNames), "KickBabyPlayer")]
+		[HarmonyPrefix]
+		static bool KickBabyPlayer(int input, ref PlayerNames __instance)
+		{
+			PhotonNetwork.CloseConnection(__instance.babyPlayerIds[input]);
+			return false;
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "MoveBaby")]

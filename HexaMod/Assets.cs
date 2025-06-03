@@ -4,6 +4,7 @@ using System.Reflection;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
 using HexaMod.Util;
+using NAudio.Gui;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using static HexaMod.HexaLobby;
@@ -16,6 +17,7 @@ namespace HexaMod
 		internal static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
 
 		internal static List<ModLevel> levels = new List<ModLevel>();
+		internal static List<ModRadioTrack> radioTracks = new List<ModRadioTrack>();
 		internal static List<ModCharacterModel> characterModels = new List<ModCharacterModel>();
 		internal static List<ModCharacterModel> dadCharacterModels = new List<ModCharacterModel>();
 		internal static List<ModCharacterModel> babyCharacterModels = new List<ModCharacterModel>();
@@ -99,14 +101,24 @@ namespace HexaMod
 
 		static bool gameStarted = false;
 
-		public static void Init()
+		public static void ScanForAssets(string directory)
 		{
-			foreach (string file in Directory.GetFiles(assetsDir))
+			foreach (string file in Directory.GetFiles(directory))
 			{
-				string filename = file.Substring(assetsDir.Length + 1);
+				string filename = Path.GetFileName(file);
 
 				HexaMod.asyncAssetLoader.LoadAsset(filename, file);
 			}
+
+			foreach (string subDirectory in Directory.GetDirectories(directory))
+			{
+				ScanForAssets(subDirectory);
+			}
+		}
+
+		public static void Init()
+		{
+			ScanForAssets(assetsDir);
 		}
 
 		public static List<GameObject> defaultLevelObjects = new List<GameObject>();

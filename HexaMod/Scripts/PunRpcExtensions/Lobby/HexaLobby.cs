@@ -261,6 +261,8 @@ namespace HexaMod
 			Menu.Menus.title.menuController.DeactivateAll();
 			Destroy(HexaMod.rematchHelper);
 
+			HexaMod.networkManager.fader.SendMessage("Fade");
+
 			if (PhotonNetwork.isMasterClient)
 			{
 				HexaMod.hexaLobby.enabled = true;
@@ -310,6 +312,8 @@ namespace HexaMod
 		[PunRPC]
 		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
 		{
+			HexaMod.networkManager.fader.SendMessage("Fade");
+
 			HexaLobbyState.loadedPlayers = PhotonNetwork.room.PlayerCount;
 			HexaLobbyState.handledPlayersLoaded = true;
 

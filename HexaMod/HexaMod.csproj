@@ -260,6 +260,7 @@
     <Compile Include="Patches\Feature\CharacterCulling.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
+    <Compile Include="Patches\Feature\CustomRadio.cs" />
     <Compile Include="Patches\Feature\VentSound.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
@@ -277,6 +278,7 @@
     <Compile Include="Patches\Fixes\PictureNetworkingFix.cs" />
     <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
     <Compile Include="Patches\Fixes\SmootherBob.cs" />
+    <Compile Include="Patches\Fixes\SmootherImageFader.cs" />
     <Compile Include="Patches\Fixes\UpsideDownMirrorFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
@@ -284,6 +286,7 @@
     <Compile Include="Patches\Hooks\DeathHook.cs" />
     <Compile Include="Patches\Hooks\UsePhotonNameSystem.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
+    <Compile Include="ScriptableObjects\ModRadioTrack.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\DrawerFactory.cs" />
