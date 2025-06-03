@@ -279,6 +279,7 @@
     <Compile Include="Patches\Fixes\ResponsivePlayerInput.cs" />
     <Compile Include="Patches\Fixes\SmootherBob.cs" />
     <Compile Include="Patches\Fixes\SmootherImageFader.cs" />
+    <Compile Include="Patches\Fixes\StartClickFix.cs" />
     <Compile Include="Patches\Fixes\UpsideDownMirrorFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFix.cs" />
     <Compile Include="Patches\Fixes\WallClipFixBehavior.cs" />
