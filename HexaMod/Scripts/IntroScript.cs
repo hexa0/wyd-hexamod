@@ -14,7 +14,7 @@ namespace HexaMod
 		{
 			// lower fps for the loading screen
 			QualitySettings.vSyncCount = 0;
-			Application.targetFrameRate = 240;
+			Application.targetFrameRate = 60;
 
 			// setup scene loaded hook
 			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
@@ -109,6 +109,7 @@ namespace HexaMod
 
 		IEnumerator Load()
 		{
+			Application.backgroundLoadingPriority = ThreadPriority.High;
 			ActionText("Loading HexaModInitResourcesBundle");
 			yield return 0;
 			HexaMod.InitStartupBundle();
@@ -119,6 +120,7 @@ namespace HexaMod
 			{
 				ActionText("Init VoiceChat\n(Transcode Process)");
 				yield return 0;
+				VoiceChat.InitUnityForVoiceChat(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
 				VoiceChat.InitTranscodeServerProcess();
 			}
 			ActionText("Loading HexaModCoreResourcesBundle");
@@ -139,7 +141,6 @@ namespace HexaMod
 			}
 			ActionText("Start Scene Load");
 			yield return 0;
-			VoiceChat.InitUnityForVoiceChat(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
 			sceneLoadOperation = SceneManager.LoadSceneAsync(1);
 			sceneLoadOperation.allowSceneActivation = false;
 			ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
