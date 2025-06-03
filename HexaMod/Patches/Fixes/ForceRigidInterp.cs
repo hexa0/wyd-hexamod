@@ -60,6 +60,16 @@ namespace HexaMod.Patches.Fixes
 				// this causes them to stutter and also (even worse) go backwards with interpolation on
 				Object.Destroy(__instance);
 			}
+			else
+			{
+				// fixes toilet lids not closing
+				Rigidbody rigidbody = __instance.GetComponent<Rigidbody>();
+
+				if (rigidbody)
+				{
+					Object.Destroy(rigidbody);
+				}
+			}
 		}
 
 		[HarmonyPatch(typeof(Radio), "Start")]
