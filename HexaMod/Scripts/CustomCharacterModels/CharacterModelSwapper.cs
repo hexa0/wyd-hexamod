@@ -14,7 +14,11 @@ namespace HexaMod.Util
 		private Color currentShirtColor = HexToColor.GetColorFromHex("#E76F3D");
 		private Color currentSkinColor = HexToColor.GetColorFromHex("#CC9485");
 
+		public string currentShirtMaterial = "default";
+		public bool currentShirtRecolorable = true;
+
 		public string initModel = "default";
+		public string initShirt = "default";
 
 		public Color initShirtColor = HexToColor.GetColorFromHex("#E76F3D");
 		public Color initSkinColor = HexToColor.GetColorFromHex("#CC9485");
@@ -48,6 +52,7 @@ namespace HexaMod.Util
 			currentShirtColor = initShirtColor;
 			currentSkinColor = initSkinColor;
 			SetCharacterModel(initModel);
+			SetShirt(initShirt);
 		}
 
 		public void SetCharacterModel(string modelName)
@@ -105,13 +110,56 @@ namespace HexaMod.Util
 
 			SetShirtColor(currentShirtColor);
 			SetSkinColor(currentSkinColor);
+			SetShirt(currentShirtMaterial);
+		}
+
+		public void SetShirt(string shirtName)
+		{
+			currentShirtMaterial = shirtName;
+
+			if (isDad)
+			{
+				bool foundMatch = false;
+
+				foreach (ModShirt shirt in Assets.shirts)
+				{
+					if (shirt.name == shirtName)
+					{
+						foundMatch = true;
+
+						if (shirtMaterialIndex >= 0)
+						{
+							Material[] bodyMaterials = body.materials;
+							bodyMaterials[shirtMaterialIndex] = shirt.shirtMaterial;
+							body.materials = bodyMaterials;
+
+							currentShirtRecolorable = shirt.Recolorable;
+						}
+					}
+				}
+
+				if (!foundMatch)
+				{
+					currentShirtRecolorable = true;
+
+					if (shirtMaterialIndex > 0)
+					{
+						Material[] bodyMaterials = body.materials;
+						bodyMaterials[shirtMaterialIndex] = Assets.defaultShirt.shirtMaterial;
+						body.materials = bodyMaterials;
+					}
+				}
+
+				SetShirtColor(currentShirtColor);
+				SetSkinColor(currentSkinColor);
+			}
 		}
 
 		public void SetShirtColor(Color shirtColor)
 		{
 			currentShirtColor = shirtColor;
 
-			if (shirtMaterialIndex >= 0 && shirtMaterialIndex < body.materials.Length)
+			if (currentShirtRecolorable && shirtMaterialIndex >= 0 && shirtMaterialIndex < body.materials.Length)
 			{
 				if (isDad)
 				{

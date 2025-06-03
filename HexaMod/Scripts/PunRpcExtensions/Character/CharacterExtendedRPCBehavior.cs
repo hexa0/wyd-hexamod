@@ -21,7 +21,8 @@ namespace HexaMod
 			{
 				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
 				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
-				characterModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default")
+				characterModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default"),
+				shirtMaterial = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default")
 			};
 
 			StartCoroutine(SendInitalState());
@@ -39,6 +40,7 @@ namespace HexaMod
 			GetComponent<CharacterModelSwapper>().SetShirtColor(initialState.shirtColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);
+			GetComponent<CharacterModelSwapper>().SetShirt(initialState.shirtMaterial);
 			GetComponent<PlayerVoiceEmitterRPC>().SetVoiceId((ulong)netView.owner.ID);
 		}
 

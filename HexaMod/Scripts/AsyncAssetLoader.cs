@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.IO;
-using System.Linq.Expressions;
 using HexaMod.ScriptableObjects;
 using UnityEngine;
 
@@ -37,11 +36,11 @@ namespace HexaMod
 
 					foreach (ModLevel level in allLevels.allAssets)
 					{
-						if (from == "core" && withoutExtension == "default")
+						if (withoutExtension == "default_level" && from == "core")
 						{
 							Mod.Print($"Found default level {level.levelNameReadable}");
-							Assets.titleLevel = level;
-							Assets.titleName = level.levelPrefab.name;
+							Assets.defaultLevel = level;
+							Assets.defaultLevelName = level.levelPrefab.name;
 						}
 
 						Assets.levels.Add(level);
@@ -76,6 +75,25 @@ namespace HexaMod
 					{
 						Assets.radioTracks.Add(track);
 						Mod.Print($"Found radio track {track.name}");
+					}
+
+					break;
+				case "shirt":
+					var allShirts = bundle.LoadAllAssetsAsync<ModShirt>();
+					yield return allShirts;
+
+					foreach (ModShirt shirt in allShirts.allAssets)
+					{
+						if (withoutExtension == "default_shirt" && from == "core")
+						{
+							Mod.Print($"Found default shirt {shirt.name}");
+							Assets.defaultShirt = shirt;
+						}
+						else
+						{
+							Mod.Print($"Found shirt {shirt.name}");
+							Assets.shirts.Add(shirt);
+						}
 					}
 
 					break;

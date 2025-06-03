@@ -10,7 +10,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPostfix]
 		static void Start(ref SmokeDectector __instance)
 		{
-			if (Assets.loadedLevel != null && Assets.loadedLevel == Assets.titleLevel)
+			if (Assets.loadedLevel != null && Assets.loadedLevel == Assets.defaultLevel)
 			{
 				__instance.beepSound.GetComponent<AudioSource>().clip = HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/SmokeDetector.wav");
 			}

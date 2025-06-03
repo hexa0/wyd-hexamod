@@ -4,7 +4,6 @@ using System.Reflection;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
 using HexaMod.Util;
-using NAudio.Gui;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using static HexaMod.HexaLobby;
@@ -18,12 +17,15 @@ namespace HexaMod
 
 		internal static List<ModLevel> levels = new List<ModLevel>();
 		internal static List<ModRadioTrack> radioTracks = new List<ModRadioTrack>();
+		internal static List<ModShirt> shirts = new List<ModShirt>();
 		internal static List<ModCharacterModel> characterModels = new List<ModCharacterModel>();
 		internal static List<ModCharacterModel> dadCharacterModels = new List<ModCharacterModel>();
 		internal static List<ModCharacterModel> babyCharacterModels = new List<ModCharacterModel>();
 
-		internal static ModLevel titleLevel;
-		internal static string titleName = "compiled_Default";
+		internal static ModLevel defaultLevel;
+		internal static string defaultLevelName = "compiled_Default";
+
+		internal static ModShirt defaultShirt;
 
 		public static bool loadedAssets = false;
 		public static uint bundlesToLoad = 0;
@@ -284,7 +286,7 @@ namespace HexaMod
 			GlobalPhotonFactory.Reset();
 			Mod.Print($"attempting to load map {level.name}");
 
-			if (level != titleLevel)
+			if (level != defaultLevel)
 			{
 				Mod.Print("clearing default level.");
 
@@ -352,7 +354,7 @@ namespace HexaMod
 				itemSpawner.ShuffleOrder(itemSpawner.midTierPos);
 			}
 
-			if (level != titleLevel)
+			if (level != defaultLevel)
 			{
 				// prevent StartClocks from throwing an error
 

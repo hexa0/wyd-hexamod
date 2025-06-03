@@ -9,6 +9,7 @@ namespace HexaMod.SerializableObjects
 		public SerializableColor shirtColor;
 		public SerializableColor skinColor;
 		public string characterModel;
+		public string shirtMaterial;
 
 		public static InitialPlayerStateSerializer serializer = new InitialPlayerStateSerializer();
 	}
@@ -22,6 +23,7 @@ namespace HexaMod.SerializableObjects
 			writer.WriteSizedObject(SerializableColor.serializer.Serialize(state.shirtColor));
 			writer.WriteSizedObject(SerializableColor.serializer.Serialize(state.skinColor));
 			writer.Write(state.characterModel);
+			writer.Write(state.shirtMaterial);
 
 			return writer.data.ToArray();
 		}
@@ -38,6 +40,7 @@ namespace HexaMod.SerializableObjects
 			state.shirtColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject());
 			state.skinColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject());
 			state.characterModel = reader.ReadString();
+			state.shirtMaterial = reader.ReadString();
 
 			return state;
 		}

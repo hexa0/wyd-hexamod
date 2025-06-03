@@ -67,9 +67,19 @@ namespace HexaMod.UI
 				dadModelSwapper.SetCharacterModel(modelName);
 			}
 
+			public static void SetDadShirt(string shirtName)
+			{
+				dadModelSwapper.SetShirt(shirtName);
+			}
+
 			public static void SaveDadModel(string modelName)
 			{
 				PlayerPrefs.SetString("HMV2_DadCharacterModel", modelName);
+			}
+
+			public static void SaveDadShirt(string materialName)
+			{
+				PlayerPrefs.SetString("HMV2_DadShirtMaterial", materialName);
 			}
 
 			public static void ChangeLevel(string mapName)
@@ -84,7 +94,7 @@ namespace HexaMod.UI
 
 		public void UpdateUIForLobbyState()
 		{
-			ModLevel foundLevel = Assets.titleLevel;
+			ModLevel foundLevel = Assets.defaultLevel;
 
 			foreach (var level in Assets.levels)
 			{
@@ -428,6 +438,7 @@ namespace HexaMod.UI
 				dadModelSwapper = characterPreviewCanvas.transform.Find("Dad").gameObject.AddComponent<CharacterModelSwapper>();
 				babyModelSwapper = characterPreviewCanvas.transform.Find("Baby001").gameObject.AddComponent<CharacterModelSwapper>();
 				dadModelSwapper.initModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default");
+				dadModelSwapper.initShirt = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default");
 				dadModelSwapper.initShirtColor = HexToColor.GetColorFromHex(GetCurrentShirtColorHex());
 				dadModelSwapper.initSkinColor = HexToColor.GetColorFromHex(GetCurrentSkinColorHex());
 				babyModelSwapper.initModel = PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default");
@@ -440,6 +451,8 @@ namespace HexaMod.UI
 				float gap = 15f;
 
 				WYDSwitchOption<string>[] dadModelOptions = new WYDSwitchOption<string>[Assets.dadCharacterModels.Count + 1];
+				WYDSwitchOption<Material>[] dadShirtOptions = new WYDSwitchOption<Material>[Assets.shirts.Count + 1];
+
 				WYDSwitchOption<string>[] babyModelOptions = new WYDSwitchOption<string>[Assets.babyCharacterModels.Count + 1];
 
 				dadModelOptions[0] = new WYDSwitchOption<string>
@@ -448,6 +461,13 @@ namespace HexaMod.UI
 					value = "default"
 				};
 
+				dadShirtOptions[0] = new WYDSwitchOption<Material>
+				{
+					name = "Solid Color Shirt",
+					value = Assets.defaultShirt.shirtMaterial
+				};
+
+
 				babyModelOptions[0] = new WYDSwitchOption<string>
 				{
 					name = "Baby (Original)",
@@ -455,6 +475,8 @@ namespace HexaMod.UI
 				};
 
 				int dadCharacterDefault = 0;
+				int dadShirtDefault = 0;
+
 				int babyCharacterDefault = 0;
 
 				for (int i = 0; i < Assets.dadCharacterModels.Count; i++)
@@ -470,6 +492,21 @@ namespace HexaMod.UI
 						dadCharacterDefault = i + 1;
 					}
 				}
+
+				for (int i = 0; i < Assets.shirts.Count; i++)
+				{
+					dadShirtOptions[i + 1] = new WYDSwitchOption<Material>
+					{
+						name = Assets.shirts[i].name,
+						value = Assets.shirts[i].shirtMaterial
+					};
+
+					if (Assets.shirts[i].name == dadModelSwapper.initShirt)
+					{
+						dadShirtDefault = i + 1;
+					}
+				}
+
 
 				for (int i = 0; i < Assets.babyCharacterModels.Count; i++)
 				{
@@ -496,13 +533,26 @@ namespace HexaMod.UI
 						new UnityAction<Color, string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.SetShirtColor }
 					),
 					new WYDHexColorInputField(
-						"ShirtColor", "Skin Color (Hex)", GetCurrentSkinColorHex(), characterCustomizationMenu,
+						"SkinColor", "Skin Color (Hex)", GetCurrentSkinColorHex(), characterCustomizationMenu,
 						new Vector2(
 							-468.4f,
 							0f
 						),
 						new UnityAction<Color, string>[] { ButtonCallbacks.SetSkinColor },
 						new UnityAction<Color, string>[] { ButtonCallbacks.SaveSkinColor, ButtonCallbacks.SetSkinColor }
+					),
+					new WYDSwitchInput<Material>(
+						"DadShirtMaterial", "", dadShirtDefault,
+						dadShirtOptions,
+						characterCustomizationMenu,
+						new Vector2(
+							-880,
+							0f
+						),
+						new UnityAction<WYDSwitchOption<Material>>[] { (WYDSwitchOption<Material> option) => {
+							ButtonCallbacks.SetDadShirt(option.name);
+							ButtonCallbacks.SaveDadShirt(option.name);
+						}}
 					),
 					new WYDSwitchInput<string>(
 						"DadCharacterModel", "", dadCharacterDefault,
