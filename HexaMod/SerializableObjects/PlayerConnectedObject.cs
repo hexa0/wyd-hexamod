@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using HexaMod.Util;
-using UnityEngine;
 
 namespace HexaMod.SerializableObjects
 {

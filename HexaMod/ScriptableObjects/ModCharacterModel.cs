@@ -17,6 +17,7 @@ namespace HexaMod.ScriptableObjects
 		public bool skinMaterialEditable = true;
 		public int shirtMaterialId = 0;
 		public int skinMaterialId = 0;
+		public bool selfCulling = true;
 		public Material[] materials;
 	}
 }

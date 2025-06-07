@@ -78,7 +78,7 @@ namespace HexaMod
 				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
 				hexaLobby.enabled = true;
 
-				FixRigidBodies();
+				EnableInterpolationForAll();
 				SnappierReplication();
 
 				Menu.Init();
@@ -92,7 +92,7 @@ namespace HexaMod
 			}
 		}
 
-		public static void FixRigidBodies()
+		public static void EnableInterpolationForAll()
 		{
 			foreach (var rigidbody in Object.FindObjectsOfType<Rigidbody>())
 			{

@@ -40,8 +40,6 @@ namespace HexaMod
 					player.isDad = HexaMod.persistentLobby.dads[PhotonNetwork.player.ID];
 				}
 
-				//player.username = PlayerPrefs.GetString("LobbyName", HexaMod.networkManager.dadNames[UnityEngine.Random.Range(0, HexaMod.networkManager.dadNames.Length)]);
-
 				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
 				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
 			}

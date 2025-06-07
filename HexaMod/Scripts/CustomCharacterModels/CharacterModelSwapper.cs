@@ -30,6 +30,10 @@ namespace HexaMod.Util
 		public void Start()
 		{
 			isSelf = HexaMod.networkManager.playerObj == transform.gameObject;
+			if (PhotonNetwork.offlineMode)
+			{
+				isSelf = false;
+			}
 			var dadModel = transform.name == "Dad" ? transform : transform.Find("DadModel");
 			if (dadModel)
 			{
@@ -74,7 +78,21 @@ namespace HexaMod.Util
 						if (isSelf)
 						{
 							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-							body.gameObject.layer = 12;
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+							{
+								renderer.gameObject.layer = 12;
+							}
+							if (!model.selfCulling)
+							{
+								body.gameObject.layer = 1;
+							}
+						}
+						else
+						{
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+							{
+								renderer.gameObject.layer = 0;
+							}
 						}
 
 						if (model.materials.Length > 0)

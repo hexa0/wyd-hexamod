@@ -253,9 +253,9 @@ namespace HexaMod.UI
 			{ // HexaMod Options Menu
 				void MakeButton(Button originalButton, MenuUtil menu)
 				{
-					originalButton.gameObject.SetActive(false);
+					// originalButton.gameObject.SetActive(false);
 					WYDTextButton hexaModOptions = new WYDTextButton(
-						"hexaModOptions", "HexaMod", originalButton,
+						"hexaModOptions", "Hexa Mod", originalButton.transform.parent, new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * 0.95f, 0f),
 						new UnityAction[]
 						{
 							delegate ()
@@ -264,7 +264,21 @@ namespace HexaMod.UI
 							}
 						}
 					);
+
 					hexaModOptions.label.fontSize = (int)WYDTextButton.FontSizes.Small;
+
+					WYDTextButton matchOptions = new WYDTextButton(
+						"inGameMatchOptions", "Match\nSettings", originalButton.transform.parent, new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * -0.95f, 0f),
+						new UnityAction[]
+						{
+							delegate ()
+							{
+								menu.menuController.ChangeToMenu(menu.GetMenuId("MatchSettings"));
+							}
+						}
+					);
+
+					matchOptions.button.interactable = PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom;
 				}
 
 				HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = PlayerPrefs.GetInt("HMV2_TabOutMute", 1) == 1;
@@ -608,163 +622,190 @@ namespace HexaMod.UI
 				}
 			}
 			{ // Match Settings
-				Mod.Print("make MatchSettings menu");
+				Mod.Print("make MatchSettings menus");
 
-				GameObject menu = title.NewMenu("MatchSettings");
-				int menuId = title.GetMenuId(menu.name);
-				WYDTextButton backButton = WYDTextButton.MakeBackButton(title, menu.transform);
-				title.menuController.startBtn[menuId] = backButton.gameObject;
-
-				WYDTextButton changeMapButton = new WYDTextButton(
-					"changeMap", "Map", menu.transform,
-					backButton.gameObject.transform.localPosition + new Vector3(
-						WYDTextButton.gap.x,
-						0,
-						0
-					),
-					new UnityAction[] { ButtonCallbacks.ChangeMapButton }
-				);
-
-				changeMapButton.button.interactable = Assets.levels.Count > 0;
-				OnLevelsLoaded();
-
-				Vector2 bottomLeft = new Vector2(0f, 200f);
-				float gap = 15f;
-
-				LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
-
-				WYDUIElement[] options = {
-					new WYDSwitchInput<ShufflePlayersMode>(
-						"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
-						menu.transform, new Vector2(45f, 0f),
-						new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
-							delegate (WYDSwitchOption<ShufflePlayersMode> option) {
-								HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDSwitchInput<SpawnLocationMode>(
-						"shufflePlayers", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
-						menu.transform, new Vector2(45f, 0f),
-						new UnityAction<WYDSwitchOption<SpawnLocationMode>>[] {
-							delegate (WYDSwitchOption<SpawnLocationMode> option) {
-								HexaMod.persistentLobby.lobbySettings.spawnMode = option.value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					// TODO: move this into a map specific settings menu
-					new WYDBooleanControl(
-						"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.disablePets = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"doorSounds", "Door Interact Sounds", ls.doorSounds, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.doorSounds = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"ventSounds", "Vent Interact Sounds", ls.ventSounds, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.ventSounds = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.allMustDie = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"spectatingAllowed", "Spectating Allowed", ls.allowSpectating, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.allowSpectating = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDBooleanControl(
-						"cheats", "Cheats", ls.cheats, menu.transform,
-						new Vector2(200f, 0f),
-						new UnityAction<bool>[] {
-							delegate (bool value) {
-								HexaMod.persistentLobby.lobbySettings.cheats = value;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-
-					new WYDTextInputField(
-						"relayServer", "Voice Chat Relay", ls.relay, menu.transform,
-						new Vector2(455f, 0f),
-						new UnityAction<string>[] { // edit
-							
-						},
-						new UnityAction<string>[] { // submit
-							delegate (string text)
-							{
-								HexaMod.persistentLobby.lobbySettings.relay = text;
-								HexaMod.persistentLobby.CommitChanges();
-							}
-						}
-					),
-				};
-
-				for (int i = 0; i < options.Count(); i++)
+				void MakeMatchSettings(MenuUtil menuUtil, bool inGame)
 				{
-					var control = options[i];
+					GameObject menu = menuUtil.NewMenu("MatchSettings");
+					int menuId = menuUtil.GetMenuId(menu.name);
+					WYDTextButton backButton = WYDTextButton.MakeBackButton(menuUtil, menu.transform);
+					menuUtil.menuController.startBtn[menuId] = backButton.gameObject;
 
-					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
-					bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
+					WYDTextButton changeMapButton = new WYDTextButton(
+						"changeMap", "Map", menu.transform,
+						backButton.gameObject.transform.localPosition + new Vector3(
+							WYDTextButton.gap.x,
+							0,
+							0
+						),
+						new UnityAction[] { ButtonCallbacks.ChangeMapButton }
+					);
+
+					if (!inGame)
+					{
+						changeMapButton.button.interactable = Assets.levels.Count > 0;
+						OnLevelsLoaded();
+					}
+					else
+					{
+						changeMapButton.button.interactable = false;
+					}
+
+					Vector2 bottomLeft = new Vector2(0f, 200f);
+					float gap = 15f;
+
+					LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
+
+					WYDUIElement[] options = {
+						new WYDSwitchInput<ShufflePlayersMode>(
+							"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
+							menu.transform, new Vector2(45f, 0f),
+							new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
+								delegate (WYDSwitchOption<ShufflePlayersMode> option) {
+									HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDSwitchInput<SpawnLocationMode>(
+							"shufflePlayers", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
+							menu.transform, new Vector2(45f, 0f),
+							new UnityAction<WYDSwitchOption<SpawnLocationMode>>[] {
+								delegate (WYDSwitchOption<SpawnLocationMode> option) {
+									HexaMod.persistentLobby.lobbySettings.spawnMode = option.value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						// TODO: move this into a map specific settings menu
+						new WYDBooleanControl(
+							"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.disablePets = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"doorSounds", "Door Interact Sounds", ls.doorSounds, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.doorSounds = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"ventSounds", "Vent Interact Sounds", ls.ventSounds, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.ventSounds = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.allMustDie = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"spectatingAllowed", "Spectating Allowed", ls.allowSpectating, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.allowSpectating = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDBooleanControl(
+							"cheats", "Cheats", ls.cheats, menu.transform,
+							new Vector2(200f, 0f),
+							new UnityAction<bool>[] {
+								delegate (bool value) {
+									HexaMod.persistentLobby.lobbySettings.cheats = value;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+
+						new WYDTextInputField(
+							"relayServer", "Voice Chat Relay", ls.relay, menu.transform,
+							new Vector2(455f, 0f),
+							new UnityAction<string>[] { // edit
+							
+							},
+							new UnityAction<string>[] { // submit
+								delegate (string text)
+								{
+									HexaMod.persistentLobby.lobbySettings.relay = text;
+									HexaMod.persistentLobby.CommitChanges();
+								}
+							}
+						),
+					};
+
+					if (inGame)
+					{
+						for (int i = 0; i < options.Count(); i++)
+						{
+							WYDUIElement control = options[i];
+
+							if (control is WYDBooleanControl && control.gameObject.name == "cheats")
+							{
+
+								(control as WYDBooleanControl).control.interactable = false;
+							}
+						}
+					}
+
+					for (int i = 0; i < options.Count(); i++)
+					{
+						WYDUIElement control = options[i];
+
+						control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
+						bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
+					}
+
+					// rob the title screen text because it's easier this way lmao
+					GameObject titleText = Instantiate(title.FindMenu("SplashMenu").Find("Text").gameObject, menu.transform, true);
+					titleText.name = "MatchSettingsActionText";
+					Text titleTextComponent = titleText.GetComponent<Text>();
+					titleTextComponent.text = "";
+					titleTextComponent.fontSize = 25;
+					titleText.AddComponent<ActionText>();
 				}
 
-				// rob the title screen text because it's easier this way lmao
-				GameObject titleText = Instantiate(title.FindMenu("SplashMenu").Find("Text").gameObject, menu.transform, true);
-				titleText.name = "MatchSettingsActionText";
-				Text titleTextComponent = titleText.GetComponent<Text>();
-				titleTextComponent.text = "";
-				titleTextComponent.fontSize = 25;
-				titleText.AddComponent<ActionText>();
+				MakeMatchSettings(title, false);
+				MakeMatchSettings(inGame, true);
 			}
 
 			UpdateUIForLobbyState();

@@ -64,7 +64,7 @@ namespace HexaMod.UI.Util
 				hostControlToggleTemplate.gameObject.SetActive(false);
 			}
 
-			playLocalButton.GetComponent<Button>().interactable = false;
+			// playLocalButton.GetComponent<Button>().interactable = false;
 		}
 	}
 }
