@@ -197,6 +197,7 @@ namespace HexaMod
 			}
 			ActionText($"Loading Game\n(0%)");
 			yield return 0;
+			Application.targetFrameRate = 0;
 			sceneLoadOperation.allowSceneActivation = true;
 			while (!sceneLoadOperation.isDone)
 			{

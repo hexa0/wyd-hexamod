@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using static HexaMod.UI.Util.Menu;
 using static System.Guid;
+using HexaMod.Patches.Fixes;
 
 namespace HexaMod
 {
@@ -25,6 +26,7 @@ namespace HexaMod
 		public static GameStateController gameStateController;
 		public static RematchHelper rematchHelper;
 		public static EventSystem eventSystem;
+		public static RpcChatExtended chat;
 		public static HexaLobby hexaLobby;
 		public static HexaModPersistence persistentInstance;
 		public static AsyncAssetLoader asyncAssetLoader;
@@ -68,12 +70,11 @@ namespace HexaMod
 			Mod.Print($"HexaMod OnGameSceneStart {activeScene.name}");
 
 			if (activeScene.name == "Game") {
-				Application.targetFrameRate = 0;
-
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
+				networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
-				networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
+				chat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
 
 				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
 				hexaLobby.enabled = true;
