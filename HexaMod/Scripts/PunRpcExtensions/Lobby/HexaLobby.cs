@@ -31,9 +31,10 @@ namespace HexaMod
 
 			if (PhotonNetwork.inRoom)
 			{
-				PlayerConnectedObject player = new PlayerConnectedObject();
-
-				player.isDad = HexaMod.networkManager.isDad;
+				PlayerConnectedObject player = new PlayerConnectedObject
+				{
+					isDad = HexaMod.networkManager.isDad
+				};
 
 				if (HexaMod.persistentLobby.dads.ContainsKey(PhotonNetwork.player.ID))
 				{
@@ -63,10 +64,12 @@ namespace HexaMod
 						HexaMod.testGameWaitingForConn = false;
 						waitingForTestRoom = true;
 
-						RoomOptions roomOptions = new RoomOptions();
-						roomOptions.IsOpen = false;
-						roomOptions.IsVisible = false;
-						roomOptions.MaxPlayers = 1;
+						RoomOptions roomOptions = new RoomOptions
+						{
+							IsOpen = false,
+							IsVisible = false,
+							MaxPlayers = 1
+						};
 						PhotonNetwork.CreateRoom(
 							"FG_" + HexaMod.networkManager.gameName + HexaMod.networkManager.gameNum,
 							roomOptions,

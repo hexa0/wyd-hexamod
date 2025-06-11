@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using static HexaMod.UI.Util.Menu;
 using static System.Guid;
-using HexaMod.Patches.Fixes;
+using HexaMod.Patches.Hooks;
 
 namespace HexaMod
 {

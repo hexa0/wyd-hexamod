@@ -265,7 +265,6 @@
     <Compile Include="Patches\Feature\VentSound.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
-    <Compile Include="Patches\Fixes\ChatUsePhotonName.cs" />
     <Compile Include="Patches\Fixes\DeathCamFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
     <Compile Include="Patches\Fixes\ExplosionShadowFix.cs" />
