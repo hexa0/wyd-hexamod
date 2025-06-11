@@ -26,7 +26,10 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void Reset(ref OptionsController __instance)
 		{
-			__instance.dispText.text = (__instance.curDisplay + 1).ToString();
+			if (__instance.dispText != null)
+			{
+				__instance.dispText.text = (__instance.curDisplay + 1).ToString();
+			}
 		}
 	}
 }
