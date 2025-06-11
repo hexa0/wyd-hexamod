@@ -42,7 +42,6 @@ namespace HexaMod.Patches.Fixes
 			MethodInfo getNormalizedMethod = AccessTools.PropertyGetter(typeof(Vector3), "normalized");
 
 			int getNormalIndex = -1;
-			int getNormalizedIndex = -1;
 
 			for (int i = 0; i < patchedInstructions.Count; i++)
 			{
@@ -51,10 +50,7 @@ namespace HexaMod.Patches.Fixes
 					if (patchedInstructions[i].OperandIs(getNormalMethod))
 					{
 						getNormalIndex = i;
-					}
-					if (patchedInstructions[i].OperandIs(getNormalizedMethod))
-					{
-						getNormalizedIndex = i;
+						break;
 					}
 				}
 			}
@@ -80,7 +76,7 @@ namespace HexaMod.Patches.Fixes
 				patchedInstructions[getNormalIndex].operand = getUpMethod;
 			}
 
-			getNormalizedIndex = -1;
+			int getNormalizedIndex = -1;
 			for (int i = 0; i < patchedInstructions.Count; i++)
 			{
 				if (patchedInstructions[i].opcode == OpCodes.Call && patchedInstructions[i].OperandIs(getNormalizedMethod))

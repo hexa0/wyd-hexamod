@@ -279,6 +279,7 @@
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />
+    <Compile Include="Patches\Fixes\PhotonMultipleMethodsSilencer.cs" />
     <Compile Include="Patches\Fixes\PictureNetworkingFix.cs" />
     <Compile Include="Patches\Fixes\PoolSkimmerFix.cs" />
     <Compile Include="Patches\Fixes\PutAwayChoreFix.cs" />
