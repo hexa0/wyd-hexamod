@@ -8,7 +8,8 @@ namespace HexaMod.Patches.Hooks
 {
 	internal class DeathRPC : MonoBehaviour
 	{
-		bool isDead = false;
+		public bool isDead = false;
+
 		[PunRPC]
 		public IEnumerator DeadRPC()
 		{
