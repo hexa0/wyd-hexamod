@@ -36,7 +36,7 @@ namespace HexaMod
 			}
 
 			processedInitialState = true;
-			GetComponent<FirstPersonController>().playerName = netView.owner.NickName;
+			GetComponent<FirstPersonController>().playerName = HexaLobby.GetPlayerName(netView.owner);
 			GetComponent<CharacterModelSwapper>().SetShirtColor(initialState.shirtColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);

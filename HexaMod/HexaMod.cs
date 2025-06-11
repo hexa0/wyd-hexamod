@@ -9,6 +9,9 @@ using UnityEngine.EventSystems;
 using static HexaMod.UI.Util.Menu;
 using static System.Guid;
 using HexaMod.Patches.Hooks;
+using System;
+using System.Linq;
+using Object = UnityEngine.Object;
 
 namespace HexaMod
 {
@@ -71,7 +74,10 @@ namespace HexaMod
 
 			if (activeScene.name == "Game") {
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
-				networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
+				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies"))
+				{
+					networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
+				}
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
 				textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();

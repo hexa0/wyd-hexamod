@@ -90,7 +90,7 @@ namespace HexaMod.Patches.Hooks
 			}
 			else if (chatName != "Server")
 			{
-				chatName = info.sender.NickName;
+				chatName = HexaLobby.GetPlayerName(info.sender, chatName);
 			}
 
 			chat.chatBox.text = chat.chatBox.text + chatName + ": " + chatMessage + "\n";
