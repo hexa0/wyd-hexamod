@@ -75,6 +75,7 @@ namespace HexaMod
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
 				chat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
+				chat.Init();
 
 				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
 				hexaLobby.enabled = true;

@@ -46,7 +46,7 @@ namespace HexaMod.Patches.Fixes
 	{
 		RpcChat chat;
 
-		public void Awake()
+		public void Init()
 		{
 			chat = GetComponent<RpcChat>();
 			chat.CheckWho();
