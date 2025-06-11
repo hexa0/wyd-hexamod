@@ -26,7 +26,7 @@ namespace HexaMod
 		public static GameStateController gameStateController;
 		public static RematchHelper rematchHelper;
 		public static EventSystem eventSystem;
-		public static RpcChatExtended chat;
+		public static RpcChatExtended textChat;
 		public static HexaLobby hexaLobby;
 		public static HexaModPersistence persistentInstance;
 		public static AsyncAssetLoader asyncAssetLoader;
@@ -74,8 +74,8 @@ namespace HexaMod
 				networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
-				chat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
-				chat.Init();
+				textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
+				textChat.Init();
 
 				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
 				hexaLobby.enabled = true;

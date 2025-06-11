@@ -44,7 +44,7 @@ namespace HexaMod.Patches.Fixes
 	// also them just not EVER using info.sender.NickName like they should have from the start lmao
 	public class RpcChatExtended : MonoBehaviour
 	{
-		RpcChat chat;
+		public RpcChat chat;
 
 		public void Init()
 		{

@@ -311,6 +311,7 @@ namespace HexaMod
 		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
 		{
 			HexaMod.networkManager.fader.SendMessage("Fade");
+			HexaMod.textChat.chat.CheckWho();
 
 			HexaLobbyState.loadedPlayers = PhotonNetwork.room.PlayerCount;
 			HexaLobbyState.handledPlayersLoaded = true;
