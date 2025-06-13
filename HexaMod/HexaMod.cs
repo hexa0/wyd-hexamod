@@ -21,7 +21,7 @@ namespace HexaMod
 		public static AssetBundle coreBundle;
 		public static AssetBundle startupBundle;
 
-		public static int sendRate = 60;
+		public static int sendRate = 30;
 		public static int defaultMaxPlayers = 64;
 		public static RigidbodyInterpolation preferedInterpolation = RigidbodyInterpolation.Interpolate;
 
@@ -112,6 +112,7 @@ namespace HexaMod
 		public static void SnappierReplication()
 		{
 			PhotonNetwork.sendRate = sendRate;
+			PhotonNetwork.sendRateOnSerialize = sendRate;
 		}
 		public static string testGameGuid = NewGuid().ToString();
 		public static bool testGameWaitingForConn = false;
