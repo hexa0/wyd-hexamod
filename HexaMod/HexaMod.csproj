@@ -276,7 +276,9 @@
     <Compile Include="Patches\Fixes\GhostFix.cs" />
     <Compile Include="Patches\Fixes\GlassCupSoundDesyncFix.cs" />
     <Compile Include="Patches\Fixes\GrillKnobFix.cs" />
+    <Compile Include="Patches\Fixes\HaltItemTargetting.cs" />
     <Compile Include="Patches\Fixes\ItemTargetingNameSizeFix.cs" />
+    <Compile Include="Patches\Fixes\MouseStuckFix.cs" />
     <Compile Include="Patches\Fixes\NanFix.cs" />
     <Compile Include="Patches\Fixes\NaNFixBehavior.cs" />
     <Compile Include="Patches\Fixes\OfflineAchievementFix.cs" />

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -127,7 +128,14 @@ namespace HexaMod.Patches.Hooks
 
 		public void SendFormattedChatMessage(string author, string message)
 		{
-			SendUnformattedChatMessage($"<b><color=\"#ed6553\">{author}</color></b>: {message}");
+			string chatColor = MainUI.GetCurrentShirtColorHex();
+
+			if (!chatColor.StartsWith("#"))
+			{
+				chatColor = $"#{chatColor}";
+			}
+
+			SendUnformattedChatMessage($"<b><color=\"{chatColor}\">{author}</color></b>: {message}");
 		}
 
 

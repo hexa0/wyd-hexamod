@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using HarmonyLib;
 using HexaMapAssemblies;
+using HexaMod.UI;
 using UnityEngine;
 using UnityStandardAssets.Effects;
 
 namespace HexaMod.Patches.Hooks
 {
-	internal class DeathRPC : MonoBehaviour
+	internal class DeathRPC : Photon.MonoBehaviour
 	{
 		public bool isDead = false;
 
@@ -17,9 +18,16 @@ namespace HexaMod.Patches.Hooks
 			{
 				isDead = true;
 
-				if (PhotonNetwork.isMasterClient)
+				if (PhotonNetwork.player == photonView.owner)
 				{
-					HexaMod.textChat.SendUnformattedChatMessage($"<color=red>☠️</color> <b><color=\"#ed6553\">{PhotonNetwork.playerName}</color></b> has died.");
+					string chatColor = MainUI.GetCurrentShirtColorHex();
+
+					if (!chatColor.StartsWith("#"))
+					{
+						chatColor = $"#{chatColor}";
+					}
+
+					HexaMod.textChat.SendUnformattedChatMessage($"<color=red>☠️</color> <b><color=\"{chatColor}\">{PhotonNetwork.playerName}</color></b> has died.");
 				}
 
 				gameObject.name = "Dead Baby";

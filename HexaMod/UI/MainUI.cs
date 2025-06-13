@@ -12,6 +12,7 @@ using HexaMod.UI.Class;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.UI
 {
@@ -382,24 +383,37 @@ namespace HexaMod.UI
 				if (PhotonNetwork.isMasterClient)
 				{
 					WYDTextButton hexaModOptions = new WYDTextButton(
-					"returnToLobby", "Return To\nLobby", inGame.FindMenu("OptionsMenu (1)").Find("ReturnToMenu").GetComponent<Button>(),
-					new UnityAction[]
-					{
+						"returnToLobby", "Return To\nLobby", inGame.FindMenu("OptionsMenu (1)").Find("ReturnToMenu").GetComponent<Button>(),
+						new UnityAction[] {
+							() => {
+								if (PhotonNetwork.room != null)
+								{
+									HexaMod.hexaLobby.ReturnToLobby();
+								}
+								else
+								{
+									// something is very wrong??
+									// just try and reload the scene??
+									SceneManager.LoadScene(1);
+								}
+							}
+						}
+					);
+				}
+
+				WYDTextButton backButton = new WYDTextButton(
+					"back", "Back", inGame.FindMenu("OptionsMenu (1)").Find("Back").GetComponent<Button>(),
+					new UnityAction[] {
 						() => {
-							if (PhotonNetwork.room != null)
-							{
-								HexaMod.hexaLobby.ReturnToLobby();
-							}
-							else
-							{
-								// something is very wrong??
-								// just try and reload the scene??
-								SceneManager.LoadScene(1);
-							}
+							FirstPersonController firstPersonController = HexaMod.networkManager.playerObj.GetComponent<FirstPersonController>();
+							InGameMenuHelper inGameMenuHelper = HexaMod.networkManager.playerObj.GetComponentInChildren<InGameMenuHelper>();
+							inGameMenuHelper.menuOn = false;
+							inGame.menuController.DeactivateAll();
+							firstPersonController.haltInput = false;
+							inGameMenuHelper.TurnOnPlayer();
 						}
 					}
 				);
-				}
 			}
 			{ // Title Screen
 				Mod.Print("edit title screen");
