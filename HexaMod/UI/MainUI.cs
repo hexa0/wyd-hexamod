@@ -12,7 +12,6 @@ using HexaMod.UI.Class;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 namespace HexaMod.UI
 {
