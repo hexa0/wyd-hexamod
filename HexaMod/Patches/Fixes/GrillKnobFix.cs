@@ -18,6 +18,7 @@ namespace HexaMod.Patches.Fixes
 				collider.size = new Vector3(0.005f, 0.005f, 0.002f);
 				collider.center = new Vector3(0f, 0f, 0.001f);
 				__instance.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
+				__instance.transform.parent.Find("Frying Pan").GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
 			}
 		}
 	}

@@ -8,7 +8,7 @@ namespace HexaMod.Patches.Fixes
 	{
 		[HarmonyPatch("SyncedMovement")]
 		[HarmonyPrefix]
-		static bool SyncedMovement(ref NetworkMovementRB __instance)
+		static bool SyncedMovement()
 		{
 			return false;
 		}
