@@ -8,23 +8,43 @@ namespace HexaMod.Patches.Fixes
 	{
 		[HarmonyPatch("AddDish")]
 		[HarmonyPrefix]
-		static void AddDish(object choreDoer, ref DishwareCount __instance)
+		static void AddDish(ref DishwareCount __instance)
 		{
-			if (__instance.curDishCount > 0)
+			Traverse fields = Traverse.Create(__instance);
+
+			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
 			{
 				DadPowerUps powerups = HexaMod.networkManager.playerObj.GetComponent<DadPowerUps>();
-				Traverse fields = Traverse.Create(powerups);
-				ActionText bigAction = fields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
+				Traverse powerupFields = Traverse.Create(powerups);
+				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 				bigAction.ActionDone("Chore Completed");
 				var audio = bigAction.GetComponent<AudioSource>();
-				audio.clip = HexaMod.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{(__instance.curDishCount + 1) + (16 - __instance.totalDishes)}.wav");
+				audio.clip = HexaMod.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount + 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
+				audio.Play();
+			}
+		}
+
+		[HarmonyPatch("SubtractDish")]
+		[HarmonyPrefix]
+		static void SubtractDish(ref DishwareCount __instance)
+		{
+			Traverse fields = Traverse.Create(__instance);
+
+			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
+			{
+				DadPowerUps powerups = HexaMod.networkManager.playerObj.GetComponent<DadPowerUps>();
+				Traverse powerupFields = Traverse.Create(powerups);
+				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
+				bigAction.ActionDone("Chore Completed");
+				var audio = bigAction.GetComponent<AudioSource>();
+				audio.clip = HexaMod.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount - 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
 				audio.Play();
 			}
 		}
 
 		[HarmonyPatch("CheckIfDone")]
 		[HarmonyPrefix]
-		static bool CheckIfDone(object choreDoer, ref DishwareCount __instance)
+		static bool CheckIfDone(ref DishwareCount __instance)
 		{
 			// HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/SmokeDetector.wav")
 			if (__instance.curDishCount >= __instance.totalDishes && !__instance.isDone)
