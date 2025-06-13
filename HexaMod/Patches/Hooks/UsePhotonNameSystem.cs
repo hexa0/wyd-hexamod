@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using Boo.Lang;
+using HarmonyLib;
 using HexaMod.UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +70,7 @@ namespace HexaMod.Patches.Hooks
 	public class RpcChatExtended : Photon.MonoBehaviour
 	{
 		public RpcChat chat;
+		public List<string> messages = new List<string>();
 
 		public void Init()
 		{
@@ -119,6 +122,8 @@ namespace HexaMod.Patches.Hooks
 
 			inputField.colors = colors;
 			inputField.textComponent.supportRichText = true;
+
+			chat.maskGroup.blocksRaycasts = true;
 		}
 
 		public void SendUnformattedChatMessage(string message)
@@ -150,36 +155,54 @@ namespace HexaMod.Patches.Hooks
 			SendFormattedChatMessage(PhotonNetwork.playerName, message);
 		}
 
-		[PunRPC]
-		public virtual void OnChatMessage(string chatMessage)
+		public void ShowChatBox(bool shown)
 		{
-			// show the chat box
 			Color chatMaskColor = chat.theMask.color;
-			chatMaskColor.a = 1;
+			chatMaskColor.a = shown ? 1 : 0;
 			chat.theMask.color = chatMaskColor;
+		}
 
-			chat.chatBox.text += chatMessage + "\n";
+		public void RenderMessages()
+		{
+			chat.chatBox.text = string.Join("\n", messages.ToArray()) + "\n";
 			chat.content.sizeDelta = new Vector2(250f, chat.chatBox.preferredHeight);
 			chat.textComp.anchoredPosition = new Vector2(-135f, chat.content.sizeDelta.y / 2f - 25f);
 			chat.scrollRect.verticalNormalizedPosition = 0f;
 		}
 
 		[PunRPC]
-		public virtual void SendRPCChat(string chatName, string chatMessage, PhotonMessageInfo info)
+		public void OnChatMessage(string chatMessage)
 		{
-			//if (chatName == "Name")
-			//{
-			//	// this should never be reached as the variable is initialized as "Baby" but i don't want to mess up the original logic just in case
-			//	// server messages just set the field to "Server" when sending it in the code from what i can see
-			//	Mod.Fatal("the seemingly imposible chatName == \"Name\" condition was reached");
-			//	chatName = "Server";
-			//}
-			//else if (chatName != "Server")
-			//{
-			//	chatName = HexaLobby.GetPlayerName(info.sender, chatName);
-			//}
+			ShowChatBox(true);
+			messages.Add(chatMessage);
 
-			//OnChatMessage($"{chatName}: {chatMessage}");
+			if (messages.Count > 15) // prevent VertexHelper from complaining about text being > 65000 vertices
+			{
+				messages.RemoveAt(0);
+			}
+
+			RenderMessages();
 		}
+
+
+		// we don't handle messages sent in the original format anymore, possibly re-enable this if i ever add support for vanilla clients to play although that sounds like a pipe dream because vanilla is borderline unplayably broken
+
+		//[PunRPC]
+		//public void SendRPCChat(string chatName, string chatMessage, PhotonMessageInfo info)
+		//{
+		//	if (chatName == "Name")
+		//	{
+		//		// this should never be reached as the variable is initialized as "Baby" but i don't want to mess up the original logic just in case
+		//		// server messages just set the field to "Server" when sending it in the code from what i can see
+		//		Mod.Fatal("the seemingly imposible chatName == \"Name\" condition was reached");
+		//		chatName = "Server";
+		//	}
+		//	else if (chatName != "Server")
+		//	{
+		//		chatName = HexaLobby.GetPlayerName(info.sender, chatName);
+		//	}
+
+		//	OnChatMessage($"{chatName}: {chatMessage}");
+		//}
 	}
 }
