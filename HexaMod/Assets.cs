@@ -436,6 +436,11 @@ namespace HexaMod
 			defaultLevelObjects.Clear();
 			gameStarted = HexaMod.networkManager.gameStarted;
 
+			if (PhotonNetwork.inRoom)
+			{
+				HexaMod.networkManager.gameStarted = true;
+			}
+
 			AttemptToLoadCurrentLevel();
 		}
 

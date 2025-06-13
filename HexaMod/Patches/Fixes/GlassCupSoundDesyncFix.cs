@@ -42,6 +42,8 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool RPCDestroy(ref VelocityBreak __instance)
 		{
+			float rng = (((float)new System.Random().NextDouble()) - 0.5f) * 2f;
+			__instance.breakSound.GetComponent<AudioSource>().pitch = 1 + (rng * 0.075f);
 			Object.Instantiate(__instance.breakSound, __instance.transform.position, __instance.transform.rotation);
 			return false;
 		}
