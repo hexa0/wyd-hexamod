@@ -96,7 +96,7 @@ namespace HexaMapAssemblies
 
 		public override void CheckForNewPosition()
 		{
-			Vector3 p = t.position;
+			Vector3 p = t ? t.position : Vector3.zero;
 
 			if (!p.AlmostEquals(lp, 0.1f))
 			{
@@ -120,7 +120,10 @@ namespace HexaMapAssemblies
 
 		internal override void DoCull(bool culled)
 		{
-			o.SetActive(!culled);
+			if (o)
+			{
+				o.SetActive(!culled);
+			}
 		}
 
 		public TrackedGameObject(GameObject gameObject, DynamicLightCullingManager lightCullingManager) : base(gameObject.transform, lightCullingManager)
@@ -137,7 +140,10 @@ namespace HexaMapAssemblies
 		{
 			// when culled use vertex lighting as it is way less expensive then the absolutely busted PPL shader that unity made
 			//l.renderMode = culled ? LightRenderMode.ForceVertex : LightRenderMode.ForcePixel;
-			l.enabled = !culled;
+			if (l)
+			{
+				l.enabled = !culled;
+			}
 		}
 
 		public TrackedLight(Light light, DynamicLightCullingManager lightCullingManager) : base(light.transform, lightCullingManager)

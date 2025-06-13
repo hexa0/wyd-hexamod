@@ -12,6 +12,12 @@ namespace HexaMapAssemblies
 		void Awake()
 		{
 			volumes = GetComponentsInChildren<LightCullingVolume>();
+			camera = new TrackedCamera(this);
+		}
+
+		void Start()
+		{
+			trackers.Clear();
 
 			foreach (Light light in FindObjectsOfType<Light>())
 			{
@@ -22,8 +28,6 @@ namespace HexaMapAssemblies
 					);
 				}
 			}
-
-			camera = new TrackedCamera(this);
 		}
 
 		void FixedUpdate()

@@ -299,7 +299,12 @@ namespace HexaMod
 
 			if (loadedLevelInstance)
 			{
-				Object.Destroy(loadedLevelInstance.gameObject);
+				Object.DestroyImmediate(loadedLevelInstance.gameObject);
+
+				if (PhotonNetwork.isMasterClient)
+				{
+					PhotonNetwork.DestroyAll();
+				}
 			}
 
 			GlobalPhotonFactory.Reset();
