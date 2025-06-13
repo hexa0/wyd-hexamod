@@ -5,6 +5,7 @@ using HexaMod.SerializableObjects;
 using HexaMod.UI.Util;
 using HexaMod.Util;
 using UnityEngine;
+using static HexaMod.UI.Util.Menu;
 
 namespace HexaMod
 {
@@ -410,9 +411,9 @@ namespace HexaMod
 			}
 		}
 
-		void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+		void OnPhotonPlayerConnected(PhotonPlayer player)
 		{
-			Mod.Print($"player \"{GetPlayerName(newPlayer)}\" joined the lobby");
+			Mod.Print($"player \"{GetPlayerName(player)}\" joined the lobby");
 
 			if (PhotonNetwork.isMasterClient)
 			{
@@ -422,18 +423,72 @@ namespace HexaMod
 
 				if (mode.defaultTeamIsDad)
 				{
-					playerList.AddDaddy(GetPlayerName(newPlayer), newPlayer);
+					playerList.AddDaddy(GetPlayerName(player), player);
 				}
 				else
 				{
-					playerList.AddBaby(GetPlayerName(newPlayer), newPlayer);
+					playerList.AddBaby(GetPlayerName(player), player);
 				}
+
+				HexaMod.textChat.SendUnformattedChatMessage($"<color=lime>►</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> joined.");
 			}
 		}
 
-		void OnPhotonPlayerDisconnected(PhotonPlayer oldPlayer)
+		IEnumerator OnPhotonPlayerDisconnected(PhotonPlayer player)
 		{
-			Mod.Print($"player \"{GetPlayerName(oldPlayer)}\" left the lobby");
+			Mod.Print($"player \"{GetPlayerName(player)}\" left the lobby");
+			if (PhotonNetwork.isMasterClient)
+			{
+				// player left/all players left chat messages
+
+				HexaMod.textChat.SendUnformattedChatMessage($"<color=red>◄</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> left.");
+
+				if (!Menus.title.menuController.menus[Menus.title.menuController.curMenu].activeInHierarchy && PhotonNetwork.playerList.Length <= 1)
+				{
+					HexaMod.textChat.SendServerMessage("All players have left the game.");
+				}
+
+				// abandoned screen
+
+				if (GameModes.gameModes[HexaMod.networkManager.curGameMode].twoPlayer)
+				{
+					GameObject BabyCam = GameObject.Find("BabyCam");
+					GameObject DadCam = GameObject.Find("DadCam");
+					HexaMod.gameStateController.DisableInGameUI();
+
+					if (BabyCam)
+					{
+						BabyCam.SendMessage("TurnOffPlayer");
+						BabyCam.GetComponent<NetworkMovement>().enabled = false;
+						BabyCam.transform.parent.GetComponent<NetworkMovement>().enabled = false;
+						BabyCam.SendMessage("ActivateWinCam");
+
+						if (!HexaMod.networkManager.isDad)
+						{
+							Menus.inGame.menuController.ChangeToMenu(3);
+						}
+					}
+
+					if (DadCam)
+					{
+						DadCam.SendMessage("TurnOffPlayer");
+						DadCam.GetComponent<NetworkMovement>().enabled = false;
+						DadCam.transform.parent.GetComponent<NetworkMovement>().enabled = false;
+						DadCam.SendMessage("ActivateWinCam");
+
+						if (HexaMod.networkManager.isDad)
+						{
+							Menus.inGame.menuController.ChangeToMenu(4);
+						}
+					}
+
+					if (!BabyCam && !DadCam)
+					{
+						yield return new WaitForSeconds(3f);
+						HexaMod.networkManager.SomeoneDisconnected();
+					}
+				}
+			}
 		}
 
 		[PunRPC]

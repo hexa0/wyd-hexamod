@@ -17,6 +17,11 @@ namespace HexaMod.Patches.Hooks
 			{
 				isDead = true;
 
+				if (PhotonNetwork.isMasterClient)
+				{
+					HexaMod.textChat.SendUnformattedChatMessage($"<color=red>☠️</color> <b><color=\"#ed6553\">{PhotonNetwork.playerName}</color></b> has died.");
+				}
+
 				gameObject.name = "Dead Baby";
 				Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
 				rigidBody.interpolation = RigidbodyInterpolation.Interpolate;

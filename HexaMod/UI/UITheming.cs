@@ -122,6 +122,9 @@ namespace HexaMod.UI
 							text.fontSize = (int)(text.fontSize * 0.8f);
 						}
 					}
+
+					inputFieldComponent.customCaretColor = true;
+					inputFieldComponent.caretColor = new Color(255f / 255f, 173f / 255f, 168f / 255f);
 				}
 			}
 			{ // Buttons

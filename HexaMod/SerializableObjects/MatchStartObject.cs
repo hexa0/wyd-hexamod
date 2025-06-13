@@ -52,7 +52,7 @@ namespace HexaMod.SerializableObjects
 			TeamSpawn dadSpawnObject = Assets.dadSpawn;
 			TeamSpawn babySpawnObject = Assets.babySpawn;
 
-			if (Assets.babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id)
+			if (Assets.babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.GetId("hungryGames"))
 			{
 				babySpawnObject = Assets.babySpawn.hgSpawns;
 			}

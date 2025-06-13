@@ -11,11 +11,11 @@ namespace HexaMod.Scripts
 		{
 			if (PhotonNetwork.inRoom)
 			{
-				if (HexaMod.networkManager.curGameMode != GameModes.named["hungryGames"].id && hgOnly)
+				if (HexaMod.networkManager.curGameMode != GameModes.GetId("hungryGames") && hgOnly)
 				{
 					Destroy(gameObject);
 				}
-				else if (HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id && !hgOnly)
+				else if (HexaMod.networkManager.curGameMode == GameModes.GetId("hungryGames") && !hgOnly)
 				{
 					Destroy(gameObject);
 				}

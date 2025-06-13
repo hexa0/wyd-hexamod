@@ -33,9 +33,10 @@ namespace HexaMod.Patches.Fixes
 
 		[HarmonyPatch("OnPhotonSerializeView")]
 		[HarmonyPrefix]
-		static bool OnPhotonSerializeViewTestLoaded(ref NetworkMovementRB __instance)
+		static bool OnPhotonSerializeViewCancel(ref NetworkMovementRB __instance)
 		{
-			return HexaLobby.HexaLobbyState.handledPlayersLoaded;
+			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
+			return HexaLobby.HexaLobbyState.handledPlayersLoaded && !float.IsNaN(rigidBody.position.y);
 		}
 
 		[HarmonyPatch("OnPhotonSerializeView")]
@@ -45,7 +46,7 @@ namespace HexaMod.Patches.Fixes
 			var privateFields = Traverse.Create(__instance);
 
 			var netView = privateFields.Field<PhotonView>("netView");
-			var rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
+			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
 			var syncPosition = privateFields.Field<Vector3>("syncPosition");
 			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
 			var syncVel = privateFields.Field<Vector3>("syncVel");
@@ -78,7 +79,7 @@ namespace HexaMod.Patches.Fixes
 			var privateFields = Traverse.Create(__instance);
 
 			var netView = privateFields.Field<PhotonView>("netView");
-			var rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
+			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
 			var syncPosition = privateFields.Field<Vector3>("syncPosition");
 			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
 			var syncVel = privateFields.Field<Vector3>("syncVel");

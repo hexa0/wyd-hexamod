@@ -22,6 +22,7 @@ namespace HexaMod.UI.Class
 
 			label.text = text;
 			label.transform.localPosition = new Vector2(570f, -7f);
+			label.raycastTarget = false;
 			label.GetComponent<RectTransform>().sizeDelta = new Vector3(1000f, 1f);
 
 			control.name = name;

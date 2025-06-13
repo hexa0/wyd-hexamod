@@ -33,8 +33,7 @@ namespace HexaMod.Patches.Fixes
 
 			int baseAddress = patchedInstructions.FindIndex(instruction => instruction.operand == opperandToFind) + 3;
 
-			patchedInstructions.Insert(baseAddress, new CodeInstruction(OpCodes.Pop));
-			patchedInstructions[baseAddress + 1] = new CodeInstruction(OpCodes.Nop);
+			patchedInstructions[baseAddress] = new CodeInstruction(OpCodes.Pop);
 
 			// Uncomment to verify the patched IL:
 

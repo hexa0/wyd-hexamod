@@ -1,15 +1,17 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
 namespace HexaMod
 {
-	public class PickUpRpcExtension : MonoBehaviour
+	public class PickUpRpcExtension : Photon.MonoBehaviour
 	{
 		[PunRPC]
-		public void SetGrabbedDistance(float distance)
+		public void SetGrabbedDistance(float distance, PhotonMessageInfo info)
 		{
-			PickUp pickup = gameObject.GetComponent<PickUp>();
-			Traverse.Create(pickup).Field("grabbedDis").SetValue(distance);
+			if (!photonView.isMine)
+			{
+				PickUp pickup = gameObject.GetComponent<PickUp>();
+				Traverse.Create(pickup).Field("grabbedDis").SetValue(distance);
+			}
 		}
 	}
 }

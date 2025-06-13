@@ -68,11 +68,12 @@ namespace HexaMod.Patches.Feature
 			return true;
 		}
 
-		[HarmonyPatch("RPCPickUp")]
+		[HarmonyPatch("PickUp")]
 		[HarmonyPostfix]
-		static void RPCPickUp(ref PickUp __instance)
+		static void PickUp(ref PickUp __instance)
 		{
-			__instance.GetComponent<PhotonView>().RPC("SetGrabbedDistance", PhotonTargets.Others, new object[] { (float)Traverse.Create(__instance).Field("grabbedDis").GetValue() });
+			PhotonView netView = __instance.GetComponent<PhotonView>();
+			netView.RPC("SetGrabbedDistance", PhotonTargets.Others, new object[] { (float)Traverse.Create(__instance).Field("grabbedDis").GetValue() });
 		}
 	}
 }

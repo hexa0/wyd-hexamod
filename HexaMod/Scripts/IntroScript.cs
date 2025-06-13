@@ -110,6 +110,13 @@ namespace HexaMod
 		IEnumerator Load()
 		{
 			Application.backgroundLoadingPriority = ThreadPriority.High;
+			QualitySettings.pixelLightCount = 15;
+			QualitySettings.realtimeReflectionProbes = false;
+			QualitySettings.shadows = ShadowQuality.HardOnly;
+			QualitySettings.shadowResolution = ShadowResolution.Low;
+			QualitySettings.shadowDistance *= 0.75f;
+			QualitySettings.shadowProjection = ShadowProjection.CloseFit;
+
 			ActionText("Loading HexaModInitResourcesBundle");
 			yield return 0;
 			HexaMod.InitStartupBundle();

@@ -265,6 +265,7 @@
     <Compile Include="Patches\Feature\VentSound.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
+    <Compile Include="Patches\Fixes\ChatColorFix.cs" />
     <Compile Include="Patches\Fixes\DeathCamFix.cs" />
     <Compile Include="Patches\Fixes\DeathSpamFix.cs" />
     <Compile Include="Patches\Fixes\DisplayCountFix.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="Patches\Fixes\FixStartingLocalGames.cs" />
     <Compile Include="Patches\Hooks\DeathHook.cs" />
     <Compile Include="Patches\Hooks\UsePhotonNameSystem.cs" />
+    <Compile Include="Patches\Performance\DistanceCulling.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="ScriptableObjects\ModRadioTrack.cs" />
     <Compile Include="ScriptableObjects\ModShirt.cs" />
@@ -303,6 +305,8 @@
     <Compile Include="Scripts\Levels\HGHider.cs" />
     <Compile Include="Scripts\Levels\HGLevelSetup.cs" />
     <Compile Include="Scripts\Levels\LevelSkybox.cs" />
+    <Compile Include="Scripts\Levels\DynamicLightCullingVolume.cs" />
+    <Compile Include="Scripts\Levels\DynamicLightCullingManager.cs" />
     <Compile Include="Scripts\Levels\TeamSpawn.cs" />
     <Compile Include="Scripts\Levels\VoidFailSafe.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />

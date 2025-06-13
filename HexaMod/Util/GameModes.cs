@@ -44,6 +44,11 @@ namespace HexaMod.Util
 			named[info.internalName] = info;
 		}
 
+		public static int GetId(string gameModeInternalName)
+		{
+			return named[gameModeInternalName].id;
+		}
+
 		public static bool IsModes(int mode, string[] gamemodeNames)
 		{
 			foreach (var gamemodeName in gamemodeNames)

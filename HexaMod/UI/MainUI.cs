@@ -12,6 +12,7 @@ using HexaMod.UI.Class;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 namespace HexaMod.UI
 {
@@ -86,6 +87,8 @@ namespace HexaMod.UI
 			{
 				Mod.Print($"change to {mapName}");
 				PlayerPrefs.SetString("HMV2_CustomMap", mapName);
+
+				HexaMod.textChat.SendServerMessage($"Map changed to {mapName}.");
 
 				HexaMod.persistentLobby.lobbySettings.mapName = mapName;
 				HexaMod.persistentLobby.CommitChanges();
@@ -664,17 +667,19 @@ namespace HexaMod.UI
 								delegate (WYDSwitchOption<ShufflePlayersMode> option) {
 									HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
 								}
 							}
 						),
 
 						new WYDSwitchInput<SpawnLocationMode>(
-							"shufflePlayers", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
+							"spawnMode", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
 							menu.transform, new Vector2(45f, 0f),
 							new UnityAction<WYDSwitchOption<SpawnLocationMode>>[] {
 								delegate (WYDSwitchOption<SpawnLocationMode> option) {
 									HexaMod.persistentLobby.lobbySettings.spawnMode = option.value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"spawnMode changed to {option.value}");
 								}
 							}
 						),
@@ -687,6 +692,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.disablePets = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"disablePets changed to {value}");
 								}
 							}
 						),
@@ -698,6 +704,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.doorSounds = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"doorSounds changed to {value}");
 								}
 							}
 						),
@@ -709,6 +716,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.ventSounds = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"ventSounds changed to {value}");
 								}
 							}
 						),
@@ -720,6 +728,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"modernGrabbing changed to {value}");
 								}
 							}
 						),
@@ -731,6 +740,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.allMustDie = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"allMustDie changed to {value}");
 								}
 							}
 						),
@@ -742,6 +752,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.allowSpectating = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"spectatingAllowed changed to {value}");
 								}
 							}
 						),
@@ -753,6 +764,7 @@ namespace HexaMod.UI
 								delegate (bool value) {
 									HexaMod.persistentLobby.lobbySettings.cheats = value;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage($"cheats changed to {value}");
 								}
 							}
 						),
@@ -768,6 +780,7 @@ namespace HexaMod.UI
 								{
 									HexaMod.persistentLobby.lobbySettings.relay = text;
 									HexaMod.persistentLobby.CommitChanges();
+									HexaMod.textChat.SendServerMessage("Voice chat relay server updated.");
 								}
 							}
 						),

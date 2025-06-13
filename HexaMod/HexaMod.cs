@@ -80,8 +80,6 @@ namespace HexaMod
 				}
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
-				textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
-				textChat.Init();
 
 				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
 				hexaLobby.enabled = true;
@@ -92,6 +90,9 @@ namespace HexaMod
 				Menu.Init();
 				mainUI = menuCanvas.gameObject.AddComponent<MainUI>();
 				mainUI.Init();
+
+				textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
+				textChat.Init();
 
 				if (!PhotonNetwork.inRoom)
 				{
@@ -124,7 +125,7 @@ namespace HexaMod
 			networkManager.isDad = spawnAsDad;
 			Menus.title.menuController.DeactivateAll();
 			testGameWaitingForConn = true;
-			networkManager.curGameMode = GameModes.named["familyGathering"].id;
+			networkManager.curGameMode = GameModes.GetId("familyGathering");
 		}
 	}
 }

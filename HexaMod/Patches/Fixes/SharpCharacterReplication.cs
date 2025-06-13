@@ -6,6 +6,13 @@ namespace HexaMod.Patches.Fixes
 	[HarmonyPatch(typeof(NetworkMovement))]
 	internal class SharpCharacterReplication
 	{
+		[HarmonyPatch("OnPhotonSerializeView")]
+		[HarmonyPrefix]
+		static bool OnPhotonSerializeViewCancel(ref NetworkMovementRB __instance)
+		{
+			return HexaLobby.HexaLobbyState.handledPlayersLoaded && !float.IsNaN(__instance.transform.position.y);
+		}
+
 		[HarmonyPatch("SyncedMovement")]
 		[HarmonyPrefix]
 		static bool SharpCharacterReplicationPatch(ref NetworkMovement __instance)

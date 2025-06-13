@@ -5,6 +5,7 @@ using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
 using HexaMod.Util;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityStandardAssets.Characters.FirstPerson;
 using static HexaMod.HexaLobby;
 
@@ -127,6 +128,24 @@ namespace HexaMod
 
 		public static void FixDefaultLevel()
 		{
+			Renderer[] renderers = Object.FindObjectsOfType<Renderer>();
+
+			foreach (var renderer in renderers)
+			{
+				renderer.allowOcclusionWhenDynamic = true;
+
+				foreach (var material in renderer.materials)
+				{
+					material.enableInstancing = true;
+					material.doubleSidedGI = false;
+				}
+
+				if (renderer.material != null)
+				{
+					renderer.material.enableInstancing = true;
+					renderer.material.doubleSidedGI = false;
+				}
+			}
 			//Rigidbody[] rigidbodies = Object.FindObjectsOfType<Rigidbody>();
 
 			//foreach (var rigidbody in rigidbodies)
@@ -246,7 +265,7 @@ namespace HexaMod
 		{
 			TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
 
-			if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.named["hungryGames"].id)
+			if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.GetId("hungryGames"))
 			{
 				spawn = babySpawn.hgSpawns;
 			}
