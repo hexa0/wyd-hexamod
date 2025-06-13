@@ -262,6 +262,7 @@
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
     <Compile Include="Patches\Feature\CustomRadio.cs" />
     <Compile Include="Patches\Feature\MakeSickGrabbablePatch.cs" />
+    <Compile Include="Patches\Feature\RichTextNames.cs" />
     <Compile Include="Patches\Feature\VentSound.cs" />
     <Compile Include="Patches\Fixes\BabyGateBarsFix.cs" />
     <Compile Include="Patches\Fixes\CharacterSoundOverlapFix.cs" />
