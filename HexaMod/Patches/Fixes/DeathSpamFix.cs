@@ -8,7 +8,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool Dead(ref BabyStats __instance)
 		{
-			return !__instance.GetComponent<DeathRPC>().isDead;
+			return !__instance.GetComponent<DeathManager>().isDead;
 		}
 	}
 }

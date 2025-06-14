@@ -26,11 +26,7 @@ namespace HexaMod.Util
 		public bool hostDefaultTeamIsDad = false;
 		public bool defaultTeamIsDad = false;
 		public bool twoTeams = true;
-
-		public static implicit operator global::GameModeInfo(GameMode v)
-		{
-			throw new NotImplementedException();
-		}
+		public bool babiesCanDie = true;
 	}
 
 	public static class GameModes
@@ -142,6 +138,7 @@ namespace HexaMod.Util
 				info.tag =			"DNM";
 				info.hostMenuName = "DaddysNightmare";
 				info.respawnRPC =	"RespawnLotsOfPlayers";
+				info.babiesCanDie = false;
 
 				DefineGameMode(info);
 			}
