@@ -109,6 +109,11 @@ namespace HexaMod.UI.Util
 			public static MenuUtil title;
 			public static MenuUtil inGame;
 
+			public static bool AnyMenuOpen()
+			{
+				return inGame.menuController.menus[inGame.currentMenu].activeSelf || title.menuController.menus[title.currentMenu].activeSelf;
+			}
+
 			public static MenuUtil GetMenuUtilForController(MenuController controller)
 			{
 				if (title.menuController == controller)

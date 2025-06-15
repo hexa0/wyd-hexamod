@@ -256,6 +256,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Patches\Debugging\ILDebugger.cs" />
     <Compile Include="Patches\Feature\BetterSmokeDetector.cs" />
     <Compile Include="Patches\Feature\CharacterCulling.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
@@ -297,6 +298,7 @@
     <Compile Include="Patches\Fixes\FixStartingLocalGames.cs" />
     <Compile Include="Patches\Hooks\DeathHook.cs" />
     <Compile Include="Patches\Hooks\UsePhotonNameSystem.cs" />
+    <Compile Include="Patches\Hooks\DadWinHook.cs" />
     <Compile Include="Patches\Performance\DistanceCulling.cs" />
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="ScriptableObjects\ModRadioTrack.cs" />

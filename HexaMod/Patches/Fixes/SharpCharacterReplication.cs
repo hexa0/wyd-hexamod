@@ -10,7 +10,6 @@ namespace HexaMod.Patches.Fixes
 	internal class CharacterReplication : Photon.MonoBehaviour
 	{
 		FirstPersonController playerController;
-		CharacterController characterController;
 		NetworkMovement networkMovement;
 		Vector3 lastPosition;
 		Quaternion lastRotation;
@@ -25,7 +24,6 @@ namespace HexaMod.Patches.Fixes
 		void Awake()
 		{
 			playerController = transform.GetComponent<FirstPersonController>();
-			characterController = transform.GetComponent<CharacterController>();
 			networkMovement = transform.GetComponent<NetworkMovement>();
 
 			lastPosition = transform.position;
@@ -62,7 +60,7 @@ namespace HexaMod.Patches.Fixes
 						stream.Serialize(ref energy);
 					}
 				}
-				else
+				else if (stream.isReading)
 				{
 					lastPosition = nextPosition;
 					lastRotation = nextRotation;
@@ -77,8 +75,6 @@ namespace HexaMod.Patches.Fixes
 
 					if (lastTime != Time.time)
 					{
-						// timeScale = 1f / (Time.time - lastTime);
-						// timeScale = Mathf.Clamp(timeScale, 0f, PhotonNetwork.sendRateOnSerialize);
 						timeScale = PhotonNetwork.sendRateOnSerialize;
 						lastTime = Time.time;
 					}
@@ -87,7 +83,7 @@ namespace HexaMod.Patches.Fixes
 		}
 
 		void Update()
-		{;
+		{
 			if (!photonView.isMine)
 			{
 				var privateFields = Traverse.Create(networkMovement);

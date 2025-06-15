@@ -8,6 +8,8 @@ using HexaMod.Util;
 using UnityEngine;
 using UnityStandardAssets.Effects;
 using HexaMod.Patches.Fixes;
+using System.Threading;
+using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -26,7 +28,7 @@ namespace HexaMod.Patches.Hooks
 		CarAccident,
 	}
 
-	internal class DeathManager : Photon.MonoBehaviour
+	public class DeathManager : Photon.MonoBehaviour
 	{
 		BabyStats stats;
 		ItemTargeting itemTargetting;
@@ -78,6 +80,8 @@ namespace HexaMod.Patches.Hooks
 
 			isDead = true;
 
+			stats.mainCam.GetComponent<Camera>().enabled = false;
+
 			string chatColor = MainUI.GetCurrentShirtColorHex();
 
 			if (!chatColor.StartsWith("#"))
@@ -111,7 +115,7 @@ namespace HexaMod.Patches.Hooks
 			}
 			else
 			{
-				Mod.Print($"peer with id {photonView.owner.ID} has died");
+				WinManager.lastPlayerWon = photonView.owner;
 
 				MakeDead();
 
@@ -122,6 +126,11 @@ namespace HexaMod.Patches.Hooks
 				else
 				{
 					HexaMod.gameStateController.BabyWins();
+
+					if (photonView.isMine)
+					{
+						stats.deathCam.GetComponent<Camera>().enabled = true;
+					}
 				}
 
 				MakeThrowable();
@@ -203,12 +212,15 @@ namespace HexaMod.Patches.Hooks
 	[HarmonyPatch]
 	internal class DeathHook
 	{
-
-		[HarmonyPatch(typeof(BabyStats), "Start")]
+		[HarmonyPatch(typeof(FirstPersonController), "Start")]
 		[HarmonyPostfix]
-		static void Start(ref BabyStats __instance)
+		static void Start(ref FirstPersonController __instance)
 		{
 			__instance.gameObject.AddComponent<DeathManager>();
+			GameObject deathCam = __instance.transform.Find("Camera").gameObject;
+			deathCam.GetComponent<Camera>().enabled = false;
+			deathCam.SetActive(true);
+			deathCam.name = "DeathCam";
 		}
 
 		[HarmonyPatch(typeof(BabyStats), "Dead")]

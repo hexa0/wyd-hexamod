@@ -73,6 +73,9 @@ namespace HexaMod
 			Mod.Print($"HexaMod OnGameSceneStart {activeScene.name}");
 
 			if (activeScene.name == "Game") {
+				Cursor.visible = true;
+				Cursor.lockState = CursorLockMode.None;
+
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
 				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies"))
 				{

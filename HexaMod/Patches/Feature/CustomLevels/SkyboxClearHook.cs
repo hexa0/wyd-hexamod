@@ -18,16 +18,5 @@ namespace HexaMod.Patches.Feature.CustomLevels
 			}
 		}
 	}
-
-	[HarmonyPatch(typeof(BabyStats))]
-	internal class BabyDeadCameraFix
-	{
-		[HarmonyPatch("Dead")]
-		[HarmonyPostfix]
-		static void Dead(ref BabyStats __instance)
-		{
-			__instance.mainCam.GetComponent<Camera>().enabled = false;
-		}
-	}
 }
 	
