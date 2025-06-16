@@ -7,13 +7,13 @@ namespace HexaMod.Patches.Fixes
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class FixBabyPickupFlying
 	{
-		[HarmonyPatch("Start")]
-		[HarmonyPostfix]
-		static void Start(ref FirstPersonController __instance)
+		[HarmonyPatch("Update")]
+		[HarmonyPrefix]
+		static void Update(ref FirstPersonController __instance)
 		{
 			if (!__instance.GetComponent<PhotonView>().isMine)
 			{
-				__instance.GetComponent<CharacterController>().enabled = false;
+				__instance.GetComponent<CharacterController>().enabled = !(__instance.restrained || __instance.restrainedHeld);
 			}
 		}
 	}
