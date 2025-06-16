@@ -241,22 +241,6 @@ namespace HexaMod.UI
 				UpdateUIForLobbyState();
 			});
 
-			HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
-			{
-				var oldSettings = HexaMod.persistentLobby.currentLobbySettingsEvent.oldSettings;
-				var newSettings = HexaMod.persistentLobby.currentLobbySettingsEvent.newSettings;
-				if (oldSettings.relay != newSettings.relay)
-				{
-					VoiceChat.SetRelay(newSettings.relay);
-				}
-
-				if (VoiceChatRoomsHook.wantedRoom != null)
-				{
-					VoiceChat.JoinVoiceRoom(VoiceChatRoomsHook.wantedRoom);
-					VoiceChatRoomsHook.wantedRoom = null;
-				}
-			});
-
 			mapInfo = Instantiate(title.root.Find("Version"), title.root).GetComponent<Text>();
 			mapInfo.name = "mapInfo";
 			mapInfo.transform.localPosition = new Vector2(mapInfo.transform.localPosition.x, mapInfo.transform.localPosition.y * 0.8f);
@@ -898,12 +882,6 @@ namespace HexaMod.UI
 				if (PhotonNetwork.room != null)
 				{
 					loadingController.SetTaskState("RoomCreate", false);
-
-					if (VoiceChatRoomsHook.wantedRoom != null)
-					{
-						VoiceChat.JoinVoiceRoom(VoiceChatRoomsHook.wantedRoom);
-						VoiceChatRoomsHook.wantedRoom = null;
-					}
 				}
 			}
 

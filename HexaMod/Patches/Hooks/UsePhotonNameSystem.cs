@@ -172,6 +172,12 @@ namespace HexaMod.Patches.Hooks
 			chat.scrollRect.verticalNormalizedPosition = 0f;
 		}
 
+		public void ClearChatBox()
+		{
+			messages.Clear();
+			RenderMessages();
+		}
+
 		[PunRPC]
 		public void OnChatMessage(string chatMessage)
 		{

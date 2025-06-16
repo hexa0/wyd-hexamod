@@ -4,7 +4,9 @@ using HarmonyLib;
 using HexaMod.SerializableObjects;
 using HexaMod.UI.Util;
 using HexaMod.Util;
+using HexaMod.Voice;
 using UnityEngine;
+using static HexaMod.HexaPersistentLobby;
 using static HexaMod.UI.Util.Menu;
 
 namespace HexaMod
@@ -66,6 +68,20 @@ namespace HexaMod
 				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
 				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
 			}
+
+			HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
+			{
+				LobbySettingsChangedEvent changedEvent = HexaMod.persistentLobby.currentLobbySettingsEvent;
+				if (changedEvent.oldSettings.relay != changedEvent.newSettings.relay)
+				{
+					VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
+				}
+
+				if (VoiceChatRoomsHook.inRoom && !PhotonNetwork.isMasterClient && VoiceChat.room == null)
+				{
+					VoiceChat.JoinVoiceRoom(HexaMod.persistentLobby.lobbySettings.voiceRoom);
+				}
+			});
 		}
 
 		public void Start()
@@ -112,6 +128,7 @@ namespace HexaMod
 
 		public void TryNetworkLobbySettings(LobbySettings newSettings)
 		{
+			newSettings.voiceRoom = HexaMod.instanceGuid;
 			if (PhotonNetwork.isMasterClient && (PhotonNetwork.inRoom || PhotonNetwork.insideLobby))
 			{
 				netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.serializer.Serialize(newSettings) });
@@ -411,12 +428,21 @@ namespace HexaMod
 			}
 		}
 
+		void OnCreatedRoom()
+		{
+			Mod.Print($"RoomCreated");
+			VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
+			VoiceChat.JoinVoiceRoom(HexaMod.instanceGuid);
+		}
+
 		void OnPhotonPlayerConnected(PhotonPlayer player)
 		{
 			Mod.Print($"player \"{GetPlayerName(player)}\" joined the lobby");
 
 			if (PhotonNetwork.isMasterClient)
 			{
+				HexaMod.hexaLobby.TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
+
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
 				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);

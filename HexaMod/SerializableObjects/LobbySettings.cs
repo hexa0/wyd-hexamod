@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using HexaMod.UI.Class;
 using HexaMod.Util;
+using UnityStandardAssets.Water;
 
 namespace HexaMod.SerializableObjects
 {
@@ -33,6 +34,7 @@ namespace HexaMod.SerializableObjects
 		public byte GameMode = 0; // TODO: switching game modes in the lobby & quit to lobby instead of the menu button
 		public string mapName = Assets.defaultLevelName;
 		public string relay = "127.0.0.1";
+		public string voiceRoom = HexaMod.instanceGuid;
 		public ushort roundNumber = 0;
 
 		public static WYDSwitchOption<ShufflePlayersMode>[] shuffleOptions = new WYDSwitchOption<ShufflePlayersMode>[]
@@ -101,6 +103,7 @@ namespace HexaMod.SerializableObjects
 			writer.Write(lobby.GameMode);
 			writer.Write(lobby.mapName);
 			writer.Write(lobby.relay);
+			writer.Write(lobby.voiceRoom);
 			writer.Write(lobby.roundNumber);
 			writer.Write((byte)lobby.spawnMode);
 
@@ -130,6 +133,7 @@ namespace HexaMod.SerializableObjects
 			lobby.GameMode = reader.Read();
 			lobby.mapName = reader.ReadString();
 			lobby.relay = reader.ReadString();
+			lobby.voiceRoom = reader.ReadString();
 			lobby.roundNumber = reader.ReadUshort();
 			lobby.spawnMode = (SpawnLocationMode)reader.Read();
 

@@ -93,6 +93,16 @@ namespace HexaMod.Patches.Feature
 
 				__instance.babyNames = newNames;
 			}
+
+			foreach (Text name in __instance.daddyNames)
+			{
+				name.raycastTarget = false;
+			}
+
+			foreach (Text name in __instance.babyNames)
+			{
+				name.raycastTarget = false;
+			}
 		}
 		[HarmonyPatch(typeof(PlayerNames), "ClearNameList")]
 		[HarmonyPrefix]

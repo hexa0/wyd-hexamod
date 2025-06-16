@@ -243,6 +243,8 @@ namespace HexaMod.Voice
 
 		public static void SetRelay(string ip)
 		{
+			Mod.Print($"SetRelay {ip}");
+
 			string oldRoom = room;
 
 			if (room != null)
@@ -265,6 +267,8 @@ namespace HexaMod.Voice
 
 		public static void JoinVoiceRoom(string roomName)
 		{
+			Mod.Print($"JoinVoiceRoom {roomName}");
+
 			if (room != roomName)
 			{
 				voicechatTranscodeClient.SendMessage(ClientWrappedMessage.BuildMessage(
@@ -292,6 +296,7 @@ namespace HexaMod.Voice
 
 		public static void LeaveVoiceRoom()
 		{
+			Mod.Print($"LeaveVoiceRoom {room}");
 			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
 				Protocol.VoiceChatMessageType.VoiceRoomLeave,
 				new byte[1]

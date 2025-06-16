@@ -14,6 +14,8 @@ namespace HexaMod.Voice
 		void Start()
 		{
 			playerNames = GetComponent<PlayerNames>();
+
+			Refresh();
 		}
 
 		void MakeIndicators()
@@ -76,13 +78,46 @@ namespace HexaMod.Voice
 			}
 		}
 
+		public void OnDisable()
+		{
+			if (dadIndicators != null)
+			{
+				foreach (var item in dadIndicators)
+				{
+					Destroy(item);
+				}
+
+				dadIndicators = null;
+			}
+
+			if (babyIndicators != null)
+			{
+				foreach (var item in babyIndicators)
+				{
+					Destroy(item);
+				}
+
+				babyIndicators = null;
+			}
+
+			if (emitters != null)
+			{
+				foreach (var emitter in emitters)
+				{
+					Destroy(emitter);
+				}
+
+				emitters = null;
+			}
+		}
+
 		public void Refresh()
 		{
 			if (emitters != null)
 			{
 				foreach (var emitter in emitters)
 				{
-					Object.Destroy(emitter);
+					Destroy(emitter);
 				}
 
 				emitters = null;

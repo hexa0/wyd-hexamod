@@ -344,7 +344,6 @@
     <Compile Include="HexaMod.cs" />
     <Compile Include="Patches\Debugging\LogRPCPatch.cs" />
     <Compile Include="Patches\Feature\CustomLevels\HostControlDefaultFix.cs" />
-    <Compile Include="Patches\Feature\CustomLevels\TransmitStateOnJoin.cs" />
     <Compile Include="Patches\Feature\Noclip.cs" />
     <Compile Include="Patches\Fixes\ConnectSpamFix.cs" />
     <Compile Include="Patches\Fixes\RematchHelperDisable.cs" />

@@ -117,12 +117,12 @@ namespace HexaMod
 			PhotonNetwork.sendRate = sendRate;
 			PhotonNetwork.sendRateOnSerialize = sendRate;
 		}
-		public static string testGameGuid = NewGuid().ToString();
+		public static readonly string instanceGuid = NewGuid().ToString();
 		public static bool testGameWaitingForConn = false;
 		public static void MakeTestGame(bool spawnAsDad = true)
 		{
 			networkManager.ConnectToPhoton();
-			networkManager.gameName = testGameGuid;
+			networkManager.gameName = instanceGuid;
 			persistentLobby.Reset();
 			// PhotonNetwork.player.ID will be uninitialized at -1, 1 will always be our id in a test game so we set that
 			persistentLobby.dads[1] = spawnAsDad;

@@ -129,7 +129,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool OnJoinedRoom()
 		{
-			if (PhotonNetwork.room.Name.Contains(HexaMod.testGameGuid))
+			if (PhotonNetwork.room.Name.Contains(HexaMod.instanceGuid))
 			{
 				return false;
 			}
