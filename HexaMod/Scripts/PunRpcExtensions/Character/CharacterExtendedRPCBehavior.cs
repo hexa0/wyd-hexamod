@@ -21,7 +21,7 @@ namespace HexaMod
 			{
 				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
 				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
-				characterModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default"),
+				characterModel = gameObject.name.Substring(0, 3) == "dad" ? PlayerPrefs.GetString("HMV2_DadCharacterModel", "default") : PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default"),
 				shirtMaterial = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default")
 			};
 

@@ -68,6 +68,16 @@ namespace HexaMod.UI
 				dadModelSwapper.SetCharacterModel(modelName);
 			}
 
+			public static void SetBabyModel(string modelName)
+			{
+				babyModelSwapper.SetCharacterModel(modelName);
+			}
+
+			public static void SaveBabyModel(string modelName)
+			{
+				PlayerPrefs.SetString("HMV2_BabyCharacterModel", modelName);
+			}
+
 			public static void SetDadShirt(string shirtName)
 			{
 				dadModelSwapper.SetShirt(shirtName);
@@ -607,8 +617,8 @@ namespace HexaMod.UI
 							0f
 						),
 						new UnityAction<WYDSwitchOption<string>>[] { (WYDSwitchOption<string> option) => {
-							// ButtonCallbacks.SetBabyModel(option.value);
-							// ButtonCallbacks.SaveBabyModel(option.value);
+							ButtonCallbacks.SetBabyModel(option.value);
+							ButtonCallbacks.SaveBabyModel(option.value);
 						}}
 					),
 				};

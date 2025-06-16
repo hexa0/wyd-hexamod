@@ -121,8 +121,11 @@ namespace HexaMod.Patches.Hooks
 
 			inputField.colors = colors;
 			inputField.textComponent.supportRichText = true;
+		}
 
-			chat.maskGroup.blocksRaycasts = true;
+		public void FixedUpdate()
+		{
+			chat.maskGroup.blocksRaycasts = HexaMod.networkManager.gameStarted;
 		}
 
 		public void SendUnformattedChatMessage(string message)

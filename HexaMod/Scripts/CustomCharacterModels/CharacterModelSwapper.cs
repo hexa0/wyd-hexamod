@@ -48,7 +48,14 @@ namespace HexaMod.Util
 			{
 				isDad = false;
 				var babyModel = transform.name == "Baby001" ? transform : transform.Find("Baby001");
-				body = babyModel.GetComponentInChildren<SkinnedMeshRenderer>(true);
+				if (babyModel.Find("skin"))
+				{
+					body = babyModel.Find("skin").GetComponent<SkinnedMeshRenderer>();
+				}
+				else
+				{
+					body = babyModel.Find("BabyBodyMesh").GetComponent<SkinnedMeshRenderer>();
+				}
 				defaultMesh = body.sharedMesh;
 				defaultMaterials = body.materials;
 			}
@@ -103,6 +110,8 @@ namespace HexaMod.Util
 						{
 							body.materials = defaultMaterials;
 						}
+
+						break;
 					}
 				}
 
@@ -114,21 +123,80 @@ namespace HexaMod.Util
 					skinMaterialIndex = 2;
 					shirtMaterialIndex = 4;
 				}
+
+				SetShirtColor(currentShirtColor);
+				SetSkinColor(currentSkinColor);
+				SetShirt(currentShirtMaterial);
 			}
 			else
 			{
+				bool foundMatch = false;
+
 				foreach (ModCharacterModel model in Assets.characterModels)
 				{
 					if (!model.isDad && model.modelNameReadable == modelName)
 					{
+						foundMatch = true;
 
+						skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
+						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
+
+						body.sharedMesh = model.characterMesh;
+
+						if (isSelf)
+						{
+							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+							{
+								renderer.gameObject.layer = 12;
+							}
+							if (!model.selfCulling)
+							{
+								body.gameObject.layer = 1;
+							}
+						}
+						else
+						{
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+							{
+								renderer.gameObject.layer = 0;
+							}
+						}
+
+						if (model.materials.Length > 0)
+						{
+							body.materials = model.materials;
+						}
+						else
+						{
+							body.materials = defaultMaterials;
+						}
+
+						break;
 					}
 				}
-			}
 
-			SetShirtColor(currentShirtColor);
-			SetSkinColor(currentSkinColor);
-			SetShirt(currentShirtMaterial);
+				if (!foundMatch)
+				{
+					body.gameObject.layer = 0;
+					body.sharedMesh = defaultMesh;
+					body.materials = defaultMaterials;
+					skinMaterialIndex = -1;
+					shirtMaterialIndex = -1;
+				}
+
+				body.transform.parent.GetChild(1).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(2).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(3).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(5).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(7).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(8).gameObject.SetActive(!foundMatch);
+				body.transform.parent.GetChild(9).gameObject.SetActive(!foundMatch);
+
+				SetShirtColor(currentShirtColor);
+				SetSkinColor(currentSkinColor);
+				SetShirt(currentShirtMaterial);
+			}
 		}
 
 		public void SetShirt(string shirtName)

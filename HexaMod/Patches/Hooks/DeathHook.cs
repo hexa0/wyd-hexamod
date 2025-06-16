@@ -229,7 +229,7 @@ namespace HexaMod.Patches.Hooks
 				float radius = 20f * multiplier;
 				Vector3 underBabyExplosionPosition = lastExplosion.transform.position;
 				underBabyExplosionPosition.y = rigidBody.position.y - 5f;
-				rigidBody.AddExplosionForce(lastExplosion.explosionForce * 2f * multiplier, underBabyExplosionPosition, radius, 1f * multiplier, ForceMode.Impulse);
+				rigidBody.AddExplosionForce(lastExplosion.explosionForce * 1.5f * multiplier, underBabyExplosionPosition, radius, 1f * multiplier, ForceMode.Impulse);
 			}
 		}
 	}
