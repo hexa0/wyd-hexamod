@@ -135,7 +135,7 @@ namespace HexaMod
 			}
 		}
 
-		public void SetLobbySettings(LobbySettings newSettings, LobbySettings oldSettings)
+		public void SetLobbySettings(LobbySettings newSettings)
 		{
 			TryNetworkLobbySettings(newSettings);
 		}
@@ -444,7 +444,7 @@ namespace HexaMod
 				HexaMod.hexaLobby.TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
 
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				if (mode.defaultTeamIsDad)

@@ -24,6 +24,7 @@ namespace HexaMod.Patches.Fixes
 	internal class HexaDeathCam : MonoBehaviour
 	{
 		Camera camera;
+		AudioListener listener;
 		DeathCam deathCam;
 		Transform target;
 		PhotonPlayer player;
@@ -36,6 +37,7 @@ namespace HexaMod.Patches.Fixes
 
 			player = transform.parent.GetComponent<PhotonView>().owner;
 			camera = GetComponent<Camera>();
+			listener = GetComponent<AudioListener>();
 			deathCam = GetComponent<DeathCam>();
 			startSpectatingText = GameObject.Find("PressSpaceToSpectate").GetComponent<Text>();
 
@@ -56,10 +58,12 @@ namespace HexaMod.Patches.Fixes
 				if (player == WinManager.lastPlayerWon)
 				{
 					camera.enabled = true;
+					listener.enabled = true;
 				}
 				else
 				{
 					camera.enabled = false;
+					listener.enabled = false;
 				}
 			}
 

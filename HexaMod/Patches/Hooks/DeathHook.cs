@@ -112,6 +112,7 @@ namespace HexaMod.Patches.Hooks
 			isDead = true;
 
 			stats.mainCam.GetComponent<Camera>().enabled = false;
+			stats.mainCam.GetComponent<AudioListener>().enabled = false;
 
 			string chatColor = MainUI.GetCurrentShirtColorHex();
 
@@ -250,6 +251,7 @@ namespace HexaMod.Patches.Hooks
 			__instance.gameObject.AddComponent<DeathManager>();
 			GameObject deathCam = __instance.transform.Find("Camera").gameObject;
 			deathCam.GetComponent<Camera>().enabled = false;
+			deathCam.GetComponent<AudioListener>().enabled = false;
 			deathCam.SetActive(true);
 			deathCam.name = "DeathCam";
 		}

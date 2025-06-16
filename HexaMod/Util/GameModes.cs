@@ -138,6 +138,7 @@ namespace HexaMod.Util
 				info.tag =			"DNM";
 				info.hostMenuName = "DaddysNightmare";
 				info.respawnRPC =	"RespawnLotsOfPlayers";
+				info.hostDefaultTeamIsDad = true;
 				info.babiesCanDie = false;
 
 				DefineGameMode(info);

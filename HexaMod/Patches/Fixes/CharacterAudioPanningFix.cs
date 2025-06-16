@@ -9,7 +9,7 @@ namespace HexaMod.Patches.Fixes
 	{
 		[HarmonyPatch("Start")]
 		[HarmonyPostfix]
-		static void FixBabyStereoAudioIssue(ref FirstPersonController __instance)
+		static void FixCharacterAudioPanning(ref FirstPersonController __instance)
 		{
 			PhotonNetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
 
@@ -19,7 +19,7 @@ namespace HexaMod.Patches.Fixes
 			{
 				audioEmitter.bypassEffects = true;
 				// audioEmitter.panStereo = -0.4f;
-				audioEmitter.spatialBlend = 0;
+				audioEmitter.spatialBlend = 0f;
 				audioEmitter.volume = 0.35f;
 			}
 			else

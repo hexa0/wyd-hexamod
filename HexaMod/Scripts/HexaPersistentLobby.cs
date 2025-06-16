@@ -87,7 +87,7 @@ namespace HexaMod
 			currentLobbySettingsEvent.oldSettings = oldLobbySettings;
 			currentLobbySettingsEvent.newSettings = lobbySettings;
 			HexaMod.persistentLobby.lobbySettingsChanged.Invoke();
-			HexaMod.hexaLobby.SetLobbySettings(lobbySettings, oldLobbySettings);
+			HexaMod.hexaLobby.SetLobbySettings(lobbySettings);
 			oldLobbySettings = LobbySettings.serializer.MakeUnique(lobbySettings);
 			if (!inOtherLobby)
 			{

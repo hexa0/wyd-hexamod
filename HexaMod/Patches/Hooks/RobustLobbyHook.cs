@@ -140,7 +140,7 @@ namespace HexaMod.Patches.Hooks
 				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
-				if (mode.hostDefaultTeamIsDad)
+				if (mode.hostDefaultTeamIsDad || mode.defaultTeamIsDad)
 				{
 					playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 				}
