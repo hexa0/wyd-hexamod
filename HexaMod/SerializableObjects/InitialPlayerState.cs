@@ -35,12 +35,13 @@ namespace HexaMod.SerializableObjects
 				data = serializedBytes.ToList()
 			};
 
-			InitialPlayerState state = new InitialPlayerState();
-
-			state.shirtColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject());
-			state.skinColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject());
-			state.characterModel = reader.ReadString();
-			state.shirtMaterial = reader.ReadString();
+			InitialPlayerState state = new InitialPlayerState
+			{
+				shirtColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject()),
+				skinColor = SerializableColor.serializer.Deserialize(reader.ReadSizedObject()),
+				characterModel = reader.ReadString(),
+				shirtMaterial = reader.ReadString()
+			};
 
 			return state;
 		}

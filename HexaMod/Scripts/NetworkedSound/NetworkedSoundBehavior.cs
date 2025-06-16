@@ -20,6 +20,11 @@ namespace HexaMod.Scripts
 			}
 		}
 
+		public void UnregisterSounds()
+		{
+			clips.Clear();
+		}
+
 		public void Play(AudioClip sound)
 		{
 			GetComponent<AudioSource>().PlayOneShot(sound);

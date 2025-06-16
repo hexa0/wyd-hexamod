@@ -1,5 +1,9 @@
-﻿using HexaMod.ScriptableObjects;
+﻿using HarmonyLib;
+using HexaMapAssemblies;
+using HexaMod.ScriptableObjects;
+using HexaMod.Scripts;
 using UnityEngine;
+using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Util
 {
@@ -22,6 +26,8 @@ namespace HexaMod.Util
 
 		public Color initShirtColor = HexToColor.GetColorFromHex("#E76F3D");
 		public Color initSkinColor = HexToColor.GetColorFromHex("#CC9485");
+
+		public GameObject currentV2Model;
 
 		private bool isSelf = false;
 		private bool isDad = true;
@@ -68,47 +74,144 @@ namespace HexaMod.Util
 
 		public void SetCharacterModel(string modelName)
 		{
+			if (currentV2Model)
+			{
+				Destroy(currentV2Model);
+				currentV2Model = null;
+			}
+
 			if (isDad)
 			{
 				bool foundMatch = false;
 
-				foreach (ModCharacterModel model in Assets.characterModels)
+				foreach (ModCharacterModelBase baseModel in Assets.characterModels)
 				{
-					if (model.isDad && model.modelNameReadable == modelName)
+					if (baseModel.isDad && baseModel.name == modelName)
 					{
 						foundMatch = true;
 
-						skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
-						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
+						if (baseModel is ModCharacterModel)
+						{
+							ModCharacterModel model = baseModel as ModCharacterModel;
 
-						body.sharedMesh = model.characterMesh;
-						if (isSelf)
-						{
-							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 12;
-							}
-							if (!model.selfCulling)
-							{
-								body.gameObject.layer = 1;
-							}
-						}
-						else
-						{
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 0;
-							}
-						}
+							body.GetComponent<SkinnedMeshRenderer>().enabled = true;
 
-						if (model.materials.Length > 0)
-						{
-							body.materials = model.materials;
+							skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
+							shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
+
+							body.sharedMesh = model.characterMesh;
+							if (isSelf)
+							{
+								body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
+								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+								{
+									renderer.gameObject.layer = 12;
+								}
+								if (!model.selfCulling)
+								{
+									body.gameObject.layer = 1;
+								}
+							}
+							else
+							{
+								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+								{
+									renderer.gameObject.layer = 0;
+								}
+							}
+
+							if (model.materials.Length > 0)
+							{
+								body.materials = model.materials;
+							}
+							else
+							{
+								body.materials = defaultMaterials;
+							}
 						}
-						else
+						else if (baseModel is ModCharacterModelV2)
 						{
-							body.materials = defaultMaterials;
+							ModCharacterModelV2 model = baseModel as ModCharacterModelV2;
+
+							currentV2Model = Instantiate(model.characterModel, transform);
+							currentV2Model.transform.SetPositionAndRotation(body.transform.position, body.transform.rotation);
+							body.GetComponent<SkinnedMeshRenderer>().enabled = false;
+
+							Traverse animatorFields = Traverse.Create(GetComponentInChildren<DadAnimator>());
+							Traverse<Animator> anim = animatorFields.Field<Animator>("anim");
+
+							anim.Value = currentV2Model.GetComponentInChildren<Animator>();
+
+							CharacterHands hands = currentV2Model.GetComponentInChildren<CharacterHands>();
+
+							if (hands != null)
+							{
+								Transform originalLeftHand = body.transform.parent.Find("Armature").FindDeepChild("LeftDadHoldPos");
+								Transform originalRightHand = body.transform.parent.Find("Armature").FindDeepChild("DadHoldPos");
+
+								if (originalLeftHand != null && originalRightHand != null)
+								{
+									originalLeftHand.name = "oldLeftHand";
+									originalRightHand.name = "oldRightHand";
+								}
+
+								hands.leftHand.name = "LeftDadHoldPos";
+								hands.rightHand.name = "DadHoldPos";
+							}
+
+							CharacterHats hats = currentV2Model.GetComponentInChildren<CharacterHats>();
+
+							if (hats != null)
+							{
+								Transform armature = body.transform.parent.Find("Armature");
+								Transform originalHats = armature.FindDeepChild("GameObject (1)");
+								Transform originalShades = armature.FindDeepChild("Shades (1)");
+
+								if (!originalHats && !originalShades)
+								{
+									originalHats = armature.FindDeepChild("GameObject");
+									originalShades = armature.FindDeepChild("Shades");
+								}
+
+								if (originalHats && originalShades)
+								{
+									originalHats.SetParent(hats.hatRoot);
+									originalHats.SetPositionAndRotation(hats.hatRoot.position, hats.hatRoot.rotation);
+									originalHats.transform.localScale = Vector3.one;
+									originalShades.SetParent(hats.shadesRoot);
+									originalShades.SetPositionAndRotation(hats.shadesRoot.position, hats.shadesRoot.rotation);
+									originalShades.transform.localScale = Vector3.one;
+								}
+							}
+
+							FirstPersonController controller = GetComponentInChildren<FirstPersonController>();
+							NetworkedSoundBehavior networkedSound = GetComponentInChildren<NetworkedSoundBehavior>();
+							Traverse controllerFields = Traverse.Create(controller);
+
+							if (model.footsteps != null && model.footsteps.Length > 0)
+							{
+
+								controllerFields.Field<AudioClip[]>("m_FootstepSounds").Value = model.footsteps;
+							}
+
+							if (model.jump != null)
+							{
+								controllerFields.Field<AudioClip>("m_JumpSound").Value = model.jump;
+							}
+
+							if (model.land != null)
+							{
+								controllerFields.Field<AudioClip>("m_LandSound").Value = model.land;
+							}
+
+							if (networkedSound)
+							{
+								networkedSound.UnregisterSounds();
+
+								networkedSound.RegisterSound(controllerFields.Field<AudioClip>("m_JumpSound").Value);
+								networkedSound.RegisterSound(controllerFields.Field<AudioClip>("m_LandSound").Value);
+								networkedSound.RegisterSounds(controllerFields.Field<AudioClip[]>("m_FootstepSounds").Value);
+							}
 						}
 
 						break;
@@ -132,44 +235,49 @@ namespace HexaMod.Util
 			{
 				bool foundMatch = false;
 
-				foreach (ModCharacterModel model in Assets.characterModels)
+				foreach (ModCharacterModelBase baseModel in Assets.characterModels)
 				{
-					if (!model.isDad && model.modelNameReadable == modelName)
+					if (!baseModel.isDad && baseModel.name == modelName)
 					{
 						foundMatch = true;
 
-						skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
-						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
+						if (baseModel is ModCharacterModel)
+						{
+							ModCharacterModel model = baseModel as ModCharacterModel;
 
-						body.sharedMesh = model.characterMesh;
+							skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
+							shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
 
-						if (isSelf)
-						{
-							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 12;
-							}
-							if (!model.selfCulling)
-							{
-								body.gameObject.layer = 1;
-							}
-						}
-						else
-						{
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 0;
-							}
-						}
+							body.sharedMesh = model.characterMesh;
 
-						if (model.materials.Length > 0)
-						{
-							body.materials = model.materials;
-						}
-						else
-						{
-							body.materials = defaultMaterials;
+							if (isSelf)
+							{
+								body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
+								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+								{
+									renderer.gameObject.layer = 12;
+								}
+								if (!model.selfCulling)
+								{
+									body.gameObject.layer = 1;
+								}
+							}
+							else
+							{
+								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+								{
+									renderer.gameObject.layer = 0;
+								}
+							}
+
+							if (model.materials.Length > 0)
+							{
+								body.materials = model.materials;
+							}
+							else
+							{
+								body.materials = defaultMaterials;
+							}
 						}
 
 						break;

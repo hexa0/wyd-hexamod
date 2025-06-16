@@ -262,6 +262,7 @@
     <Compile Include="Patches\Feature\CustomLevels\SetCustomSunLightHook.cs" />
     <Compile Include="Patches\Feature\CustomLevels\SkyboxClearHook.cs" />
     <Compile Include="Patches\Feature\CustomRadio.cs" />
+    <Compile Include="Patches\Feature\KeepDefaultAnimator.cs" />
     <Compile Include="Patches\Feature\MakeSickGrabbablePatch.cs" />
     <Compile Include="Patches\Feature\RichTextNames.cs" />
     <Compile Include="Patches\Feature\VentSound.cs" />
@@ -303,6 +304,8 @@
     <Compile Include="ScriptableObjects\ModCharacterModel.cs" />
     <Compile Include="ScriptableObjects\ModRadioTrack.cs" />
     <Compile Include="ScriptableObjects\ModShirt.cs" />
+    <Compile Include="Scripts\CustomCharacterModels\CharacterHands.cs" />
+    <Compile Include="Scripts\CustomCharacterModels\CharacterHats.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\DrawerFactory.cs" />

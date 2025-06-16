@@ -524,10 +524,10 @@ namespace HexaMod.UI
 					dadModelOptions[i + 1] = new WYDSwitchOption<string>
 					{
 						name = Assets.dadCharacterModels[i].modelNameReadable,
-						value = Assets.dadCharacterModels[i].modelNameReadable
+						value = Assets.dadCharacterModels[i].name
 					};
 
-					if (Assets.dadCharacterModels[i].modelNameReadable == dadModelSwapper.initModel)
+					if (Assets.dadCharacterModels[i].name == dadModelSwapper.initModel)
 					{
 						dadCharacterDefault = i + 1;
 					}
@@ -553,10 +553,10 @@ namespace HexaMod.UI
 					babyModelOptions[i + 1] = new WYDSwitchOption<string>
 					{
 						name = Assets.babyCharacterModels[i].modelNameReadable,
-						value = Assets.babyCharacterModels[i].modelNameReadable
+						value = Assets.babyCharacterModels[i].name
 					};
 
-					if (Assets.babyCharacterModels[i].modelNameReadable == babyModelSwapper.initModel)
+					if (Assets.babyCharacterModels[i].name == babyModelSwapper.initModel)
 					{
 						babyCharacterDefault = i + 1;
 					}

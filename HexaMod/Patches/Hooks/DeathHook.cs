@@ -8,7 +8,6 @@ using HexaMod.Util;
 using UnityEngine;
 using UnityStandardAssets.Effects;
 using HexaMod.Patches.Fixes;
-using System.Threading;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches.Hooks
@@ -25,7 +24,14 @@ namespace HexaMod.Patches.Hooks
 		Drowned,
 		DrownedTub,
 		DrownedPool,
-		CarAccident,
+		DrownedToilet,
+		Exploded,
+		ExplodedOutlet,
+		ExplodedCar,
+		ExplodedToaster,
+		Sickness,
+		SicknessBleach,
+		SicknessSoap,
 	}
 
 	public class DeathManager : Photon.MonoBehaviour

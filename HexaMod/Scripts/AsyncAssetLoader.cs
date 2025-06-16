@@ -63,7 +63,26 @@ namespace HexaMod
 						{
 							Assets.babyCharacterModels.Add(model);
 						}
-						Mod.Print($"Found model {model.modelNameReadable}");
+						Mod.Print($"Found v1 model {model.modelNameReadable}");
+					}
+
+					break;
+				case "avatar2":
+					var allV2CharacterModels = bundle.LoadAllAssetsAsync<ModCharacterModelV2>();
+					yield return allV2CharacterModels;
+
+					foreach (ModCharacterModelV2 model in allV2CharacterModels.allAssets)
+					{
+						Assets.characterModels.Add(model);
+						if (model.isDad)
+						{
+							Assets.dadCharacterModels.Add(model);
+						}
+						else
+						{
+							Assets.babyCharacterModels.Add(model);
+						}
+						Mod.Print($"Found v2 model {model.modelNameReadable}");
 					}
 
 					break;

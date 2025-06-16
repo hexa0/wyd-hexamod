@@ -19,9 +19,9 @@ namespace HexaMod
 		internal static List<ModLevel> levels = new List<ModLevel>();
 		internal static List<ModRadioTrack> radioTracks = new List<ModRadioTrack>();
 		internal static List<ModShirt> shirts = new List<ModShirt>();
-		internal static List<ModCharacterModel> characterModels = new List<ModCharacterModel>();
-		internal static List<ModCharacterModel> dadCharacterModels = new List<ModCharacterModel>();
-		internal static List<ModCharacterModel> babyCharacterModels = new List<ModCharacterModel>();
+		internal static List<ModCharacterModelBase> characterModels = new List<ModCharacterModelBase>();
+		internal static List<ModCharacterModelBase> dadCharacterModels = new List<ModCharacterModelBase>();
+		internal static List<ModCharacterModelBase> babyCharacterModels = new List<ModCharacterModelBase>();
 
 		internal static ModLevel defaultLevel;
 		internal static string defaultLevelName = "compiled_Default";
