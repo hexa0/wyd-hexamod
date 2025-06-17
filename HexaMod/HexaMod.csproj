@@ -308,6 +308,8 @@
     <Compile Include="ScriptableObjects\ModShirt.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterHands.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterHats.cs" />
+    <Compile Include="Scripts\CustomCharacterModels\CharacterHeadBone.cs" />
+    <Compile Include="Scripts\CustomCharacterModels\CharacterSelfCuller.cs" />
     <Compile Include="Scripts\Levels\DNMLevelSetup.cs" />
     <Compile Include="Scripts\Levels\Factory\CabinetFactory.cs" />
     <Compile Include="Scripts\Levels\Factory\DrawerFactory.cs" />

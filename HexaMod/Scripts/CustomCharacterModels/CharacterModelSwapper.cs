@@ -212,6 +212,22 @@ namespace HexaMod.Util
 								networkedSound.RegisterSound(controllerFields.Field<AudioClip>("m_LandSound").Value);
 								networkedSound.RegisterSounds(controllerFields.Field<AudioClip[]>("m_FootstepSounds").Value);
 							}
+
+							if (isSelf)
+							{
+								foreach (CharacterSelfCuller culler in currentV2Model.GetComponentsInChildren<CharacterSelfCuller>())
+								{
+									culler.Cull();
+								}
+							}
+
+							CharacterHeadBone headBone = currentV2Model.GetComponentInChildren<CharacterHeadBone>();
+
+							if (headBone)
+							{
+								ParRotation headBoneRotation = headBone.headBone.gameObject.AddComponent<ParRotation>();
+								headBoneRotation.target = controller.myCam.transform;
+							}
 						}
 
 						break;

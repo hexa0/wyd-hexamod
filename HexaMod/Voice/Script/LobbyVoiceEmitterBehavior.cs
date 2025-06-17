@@ -78,7 +78,7 @@ namespace HexaMod.Voice
 			}
 		}
 
-		public void OnDisable()
+		void OnDisable()
 		{
 			if (dadIndicators != null)
 			{
@@ -109,6 +109,11 @@ namespace HexaMod.Voice
 
 				emitters = null;
 			}
+		}
+
+		void OnEnable()
+		{
+			Refresh();
 		}
 
 		public void Refresh()
