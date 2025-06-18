@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\VoiceChatSharedNet9\VoiceChatSharedNet9.csproj" />
+    <ProjectReference Include="..\VoiceChatShared\VoiceChatShared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -428,7 +428,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\VoiceChatShared\VoiceChatShared.csproj">
       <Project>{7afbbf8d-85e8-4af5-8236-abeb695427ae}</Project>

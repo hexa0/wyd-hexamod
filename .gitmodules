@@ -1,0 +1,3 @@
+[submodule "VoiceChatShared"]
+	path = VoiceChatShared
+	url = https://github.com/hexa0/voicechat-shared
