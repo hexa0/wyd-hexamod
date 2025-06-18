@@ -59,12 +59,12 @@ namespace HexaMod
 
 		public static void InitCoreBundle()
 		{
-			coreBundle = AssetBundle.LoadFromFile(Path.Combine(assetDir, "HexaModCoreResourcesBundle"));
+			coreBundle = AssetBundle.LoadFromFile(PathJoin.Join(assetDir, "HexaModCoreResourcesBundle"));
 		}
 
 		public static void InitStartupBundle()
 		{
-			startupBundle = AssetBundle.LoadFromFile(Path.Combine(assetDir, "HexaModInitResourcesBundle"));
+			startupBundle = AssetBundle.LoadFromFile(PathJoin.Join(assetDir, "HexaModInitResourcesBundle"));
 		}
 
 		public static void OnGameSceneStart()

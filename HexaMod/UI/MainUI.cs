@@ -539,8 +539,8 @@ namespace HexaMod.UI
 						.Select(dadCharacterDefault)
 						.AddListener(option =>
 						{
-							ButtonCallbacks.SetDadModel(option.name);
-							ButtonCallbacks.SaveDadModel(option.name);
+							ButtonCallbacks.SetDadModel(option.value);
+							ButtonCallbacks.SaveDadModel(option.value);
 						}),
 
 					new WYDSwitchInput<string>()

@@ -13,7 +13,7 @@ namespace HexaMod
 {
 	internal static class Assets
 	{
-		internal static string assetsDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "assets");
+		internal static string assetsDir = PathJoin.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "assets");
 		internal static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
 
 		internal static List<ModLevel> levels = new List<ModLevel>();

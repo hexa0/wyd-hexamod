@@ -344,6 +344,7 @@
     <Compile Include="UI\Elements\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
+    <Compile Include="Util\PathJoin.cs" />
     <Compile Include="Util\SerializationHelper.cs" />
     <Compile Include="Util\GetGameObjectChildren.cs" />
     <Compile Include="Util\Shuffle.cs" />

@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using BepInEx.Logging;
 using HexaVoiceChatShared.MessageProtocol;
 using HexaVoiceChatShared.Net;
 using NAudio.Wave;
@@ -40,6 +41,7 @@ namespace HexaMod.Voice
 		public static VoiceChatClient voicechatTranscodeClient;
 		private static int transcodeServerPort = 0;
 		public static Process internalTranscodeServerProcess;
+		internal static ManualLogSource voiceChatProcessLog = BepInEx.Logging.Logger.CreateLogSource("VoiceChatHost");
 
 		public static int micSampleRate = 48000;
 		public static int micBufferMillis = 20;
@@ -124,13 +126,20 @@ namespace HexaMod.Voice
 			{
 				StartInfo = new ProcessStartInfo()
 				{
-					FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice/VoiceChatHost.exe"),
-					Arguments = $"t 127.0.0.1 {transcodeServerPort}", // 39200
-					UseShellExecute = false
+					FileName = PathJoin.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice", "VoiceChatHost.exe"),
+					Arguments = $"{(Environment.GetCommandLineArgs().Contains("VoiceChatHostVerboseLogging") ? "tv" : "t")} 127.0.0.1 {transcodeServerPort}", // 39200
+					UseShellExecute = false,
+					RedirectStandardOutput = true,
 				}
 			};
 
+			internalTranscodeServerProcess.OutputDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
+			{
+				voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
+			});
+
 			internalTranscodeServerProcess.Start();
+			internalTranscodeServerProcess.BeginOutputReadLine();
 		}
 
 		public static bool completedHandshake = false;
