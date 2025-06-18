@@ -3,25 +3,30 @@ using UnityEngine;
 using UnityEngine.UI;
 using HexaMod.Voice;
 
-namespace HexaMod.UI.Class
+namespace HexaMod.UI.Elements.Extended
 {
 	public class WYDMicrophoneIndicator : WYDTextButton
 	{
-		private static Sprite microphoneIcon = HexaMod.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Microphone512.png");
+		private readonly static Sprite microphoneIcon = HexaMod.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Microphone512.png");
 
-		public WYDMicrophoneIndicator(string name, Transform menu, Vector2 position)
-			: base(
-				  name, "", menu, position,
-				  new UnityAction[0]
-			)
+		public WYDMicrophoneIndicator() : base()
 		{
 			rectTransform.sizeDelta = new Vector2(50f, 50f);
 			rectTransform.pivot = new Vector2(0f, 0.5f);
-			button.interactable = false;
-			image.sprite = microphoneIcon;
-			label.fontSize = 15;
+			this.SetName("microphoneVolume")
+				.SetInteractable(false)
+				.SetSprite(microphoneIcon)
+				.SetText("")
+				.SetFontSize(15);
 
 			Init();
+		}
+
+		public WYDMicrophoneIndicator(string name, Transform menu, Vector2 position) : this()
+		{
+			this.SetName(name)
+				.SetParent(menu)
+				.SetPosition(position);
 		}
 
 		public override void Shown()

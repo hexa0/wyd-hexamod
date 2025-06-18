@@ -41,7 +41,7 @@ namespace HexaMod.Voice
 
 			GameObject onNameItem(GameObject gameObject)
 			{
-				var kickPlayer = gameObject.transform.Find("KickPlayer").gameObject;
+				var kickPlayer = gameObject.Find("KickPlayer");
 				var speakingIndicator = Instantiate(kickPlayer, gameObject.transform);
 				speakingIndicator.name = "Speaking";
 
@@ -118,6 +118,8 @@ namespace HexaMod.Voice
 
 		public void Refresh()
 		{
+			if (playerNames == null) { return; }
+
 			if (emitters != null)
 			{
 				foreach (var emitter in emitters)

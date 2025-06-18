@@ -19,8 +19,8 @@ namespace HexaMod
 			netView = GetComponent<PhotonView>();
 			initialState = new InitialPlayerState()
 			{
-				shirtColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentShirtColorHex())),
-				skinColor = new SerializableColor(HexToColor.GetColorFromHex(MainUI.GetCurrentSkinColorHex())),
+				shirtColor = new SerializableColor(new Color().FromHex(MainUI.GetCurrentShirtColorHex())),
+				skinColor = new SerializableColor(new Color().FromHex(MainUI.GetCurrentSkinColorHex())),
 				characterModel = gameObject.name.Substring(0, 3) == "Dad" ? PlayerPrefs.GetString("HMV2_DadCharacterModel", "default") : PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default"),
 				shirtMaterial = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default")
 			};

@@ -129,7 +129,7 @@ namespace HexaMod
 		public void TryNetworkLobbySettings(LobbySettings newSettings)
 		{
 			newSettings.voiceRoom = HexaMod.instanceGuid;
-			if (PhotonNetwork.isMasterClient && (PhotonNetwork.inRoom || PhotonNetwork.insideLobby))
+			if (PhotonNetwork.isMasterClient && PhotonNetwork.inRoom)
 			{
 				netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.serializer.Serialize(newSettings) });
 			}
@@ -522,7 +522,7 @@ namespace HexaMod
 		{
 			HexaMod.persistentLobby.ResetRound();
 			HexaMod.persistentLobby.dads[PhotonNetwork.player.ID] = HexaMod.networkManager.isDad;
-			GameObject menuCamera = GameObject.Find("BackendObjects").transform.Find("MenuCamera").gameObject;
+			GameObject menuCamera = GameObject.Find("BackendObjects").Find("MenuCamera");
 			menuCamera.SetActive(true);
 			Camera currentCamera = Camera.current;
 			Camera menuCameraComponent = menuCamera.GetComponent<Camera>();

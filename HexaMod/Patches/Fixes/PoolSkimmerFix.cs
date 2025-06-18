@@ -12,7 +12,7 @@ namespace HexaMod.Patches.Fixes
 		{
 			if (__instance.isSkimmer)
 			{
-				Object.Destroy(__instance.transform.Find("PoolSkimmerHead").GetComponent<Rigidbody>());
+				Object.Destroy(__instance.Find("PoolSkimmerHead").GetComponent<Rigidbody>());
 			}
 		}
 	}

@@ -13,11 +13,10 @@ namespace HexaMod.Patches.Fixes
 		{
 			if (__instance.held)
 			{
-				PhotonNetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
-				if (__instance.transform.IsChildOf(networkManager.playerObj.transform))
+				if (__instance.transform.IsChildOf(HexaMod.networkManager.playerObj.transform))
 				{
-					var dadItemTargetting = networkManager.playerObj.GetComponent<DadItemTargeting>();
-					var itemTargetting = networkManager.playerObj.GetComponent<ItemTargeting>();
+					var dadItemTargetting = HexaMod.networkManager.playerObj.GetComponent<DadItemTargeting>();
+					var itemTargetting = HexaMod.networkManager.playerObj.GetComponent<ItemTargeting>();
 					if (dadItemTargetting)
 					{
 						if (dadItemTargetting.heldItem == null && dadItemTargetting.heldItem2 == null)

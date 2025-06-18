@@ -130,7 +130,10 @@ namespace HexaMod.Patches.Hooks
 
 		public void SendUnformattedChatMessage(string message)
 		{
-			photonView.RPC("OnChatMessage", PhotonTargets.All, message);
+			if (PhotonNetwork.inRoom)
+			{
+				photonView.RPC("OnChatMessage", PhotonTargets.All, message);
+			}
 		}
 
 		public void SendFormattedChatMessage(string author, string message)

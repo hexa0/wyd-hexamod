@@ -5,10 +5,10 @@ using HexaMod.UI.Util;
 using HexaMod.Util;
 using System.Linq;
 using HexaMod.ScriptableObjects;
-using System.Collections.Generic;
 using HexaMod.Voice;
 using static HexaMod.UI.Util.Menu.Menus;
-using HexaMod.UI.Class;
+using HexaMod.UI.Elements;
+using HexaMod.UI.Elements.Extended;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -134,11 +134,6 @@ namespace HexaMod.UI
 				title.FindMenu("DaddysNightmare").Find("Start").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
 
 				mapInfo.text = $"{foundLevel.levelNameReadable}\n{foundLevel.levelDescriptionReadable}";
-
-				foreach (WYDTextButton matchSettings in matchSettingButtons)
-				{
-					matchSettings.button.interactable = PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom;
-				}
 			}
 		}
 
@@ -159,21 +154,6 @@ namespace HexaMod.UI
 
 			Vector2 center = new Vector2(1920f / 2f, 1080f / 2f);
 
-			//void Reset()
-			//{
-			//	ButtonCallbacks.ChangeLevel(Assets.titleName);
-			//}
-
-			//new WYDTextButton(
-			//	"resetMapToDefault", "Default", menu.transform,
-			//	backButton.gameObject.transform.localPosition + new Vector3(
-			//		WYDTextButton.gap.x,
-			//		0,
-			//		0
-			//	),
-			//	new UnityAction[] { Reset, title.GoBack }
-			//);
-
 			float height = Mathf.Clamp(Assets.levels.Count() - 1, 0f, 4f);
 			float width = Mathf.Floor((Assets.levels.Count() - 1) / 5f);
 
@@ -181,41 +161,21 @@ namespace HexaMod.UI
 			{
 				ModLevel level = Assets.levels[i];
 
-				float y = (-(i % 5) + (height / 2f)) + 0.5f;
 				float x = Mathf.Floor(i / 5f) - (width / 2f);
+				float y = -(i % 5) + (height / 2f) + 0.5f;
 
-				void Press()
-				{
-					ButtonCallbacks.ChangeLevel(level.levelPrefab.name);
-				}
-
-				WYDTextButton mapButton = new WYDTextButton(
-					"mapButton", level.levelNameReadable, menu.transform,
-					center + new Vector2(
+				new WYDMapButton(level)
+					.SetParent(menu.transform)
+					.SetPosition(center + new Vector2(
 						WYDTextButton.gap.x * x,
 						WYDTextButton.gap.y * y
-					),
-					new UnityAction[] { Press, title.GoBack }
-				);
-
-				mapButton.image.sprite = level.levelSprite;
-				mapButton.image.color = Color.white;
-
-				var colors = mapButton.button.colors;
-
-				colors.pressedColor = Color.white;
-				colors.highlightedColor = Color.white;
-				colors.normalColor = Color.white;
-				colors.disabledColor = Color.white;
-
-				mapButton.button.colors = colors;
+					))
+					.AddListener(() => { ButtonCallbacks.ChangeLevel(level.levelPrefab.name); });
 			}
 		}
 
 		public static Text mapInfo;
 		public LoadingController loadingController;
-
-		public List<WYDTextButton> matchSettingButtons = new List<WYDTextButton>();
 
 		public void Init()
 		{
@@ -223,6 +183,7 @@ namespace HexaMod.UI
 			{
 				UITheming.Init();
 			}
+
 			UITemplates.Init();
 			loadingController = gameObject.AddComponent<LoadingController>().Init();
 
@@ -250,32 +211,24 @@ namespace HexaMod.UI
 			{ // HexaMod Options Menu
 				void MakeButton(Button originalButton, MenuUtil menu)
 				{
-					// originalButton.gameObject.SetActive(false);
-					WYDTextButton hexaModOptions = new WYDTextButton(
-						"hexaModOptions", "Hexa Mod", originalButton.transform.parent, new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * 0.95f, 0f),
-						new UnityAction[]
+					new WYDTextButton()
+						.SetName("hexaModOptions")
+						.SetParent(originalButton.transform.parent)
+						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * 0.95f, 0f))
+						.SetText("Hexa Mod")
+						.SetFontSize(WYDTextButton.FontSizes.Small)
+						.AddListener(() =>
 						{
-							delegate ()
-							{
-								menu.menuController.ChangeToMenu(menu.GetMenuId("HexaModOptions"));
-							}
-						}
-					);
+							menu.menuController.ChangeToMenu(menu.GetMenuId("HexaModOptions"));
+						});
 
-					hexaModOptions.label.fontSize = (int)WYDTextButton.FontSizes.Small;
-
-					WYDTextButton matchOptions = new WYDTextButton(
-						"inGameMatchOptions", "Match\nSettings", originalButton.transform.parent, new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * -0.95f, 0f),
-						new UnityAction[]
+					new WYDMatchSettingsButton()
+						.SetParent(originalButton.transform.parent)
+						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * -0.95f, 0f))
+						.AddListener(() =>
 						{
-							delegate ()
-							{
-								menu.menuController.ChangeToMenu(menu.GetMenuId("MatchSettings"));
-							}
-						}
-					);
-
-					matchOptions.button.interactable = PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom;
+							menu.menuController.ChangeToMenu(menu.GetMenuId("MatchSettings"));
+						});
 				}
 
 				HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = PlayerPrefs.GetInt("HMV2_TabOutMute", 1) == 1;
@@ -306,56 +259,53 @@ namespace HexaMod.UI
 					WYDUIElement[] options = {
 						// Audio
 
-						new WYDBooleanControl(
-							"micRnNoise", "Microphone Denoising (RNNoise)", PlayerPrefs.GetInt("HMV2_UseRnNoise", 0) == 1, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									PlayerPrefs.SetInt("HMV2_UseRnNoise", value ? 1 : 0);
-									VoiceChat.SetDenoiseEnabled(value);
-								}
-							}
-						),
+						new WYDBooleanControl()
+							.SetName("micRnNoise")
+							.SetParent(menu.transform)
+							.SetPosition(200f, 0f)
+							.SetText("Microphone Denoising (RNNoise)")
+							.LinkToPreference("HMV2_UseRnNoise")
+							.AddListener((bool value) =>
+							{
+								VoiceChat.SetDenoiseEnabled(value);
+							}),
 
-						new WYDSwitchInput<VoiceChat.MicrophoneDevice>(
-							"microphoneDevice", "", Mathf.Min(PlayerPrefs.GetInt("HMV2_MicrophoneDevice", 0), deviceOptions.Length - 1), deviceOptions,
-							menu.transform, new Vector2(45f, 0f),
-							new UnityAction<WYDSwitchOption<VoiceChat.MicrophoneDevice>>[] {
-								delegate (WYDSwitchOption<VoiceChat.MicrophoneDevice> option) {
-									PlayerPrefs.SetInt("HMV2_MicrophoneDevice", option.value.deviceId);
-									VoiceChat.SetDevice(option.value);
+						new WYDSwitchInput<VoiceChat.MicrophoneDevice>()
+							.SetName("microphoneDevice")
+							.SetParent(menu.transform)
+							.SetPosition(45f, 0f)
+							.SetText("")
+							.AddOptions(deviceOptions)
+							.LinkToPreference("HMV2_MicrophoneDevice")
+							.AddListener((WYDSwitchOption<VoiceChat.MicrophoneDevice> option) =>
+							{
+								VoiceChat.SetDevice(option.value);
+							}),
 
-								}
-							}
-						),
+						new WYDMicrophoneIndicator()
+							.SetName("microphoneVolume")
+							.SetParent(menu.transform)
+							.SetPosition(45f, 0f),
 
-						new WYDMicrophoneIndicator(
-							"microphoneVolume",
-							menu.transform, new Vector2(45f, 0f)
-						),
-
-						new WYDBooleanControl(
-							"tabOutMute", "Mute While Tabbed Out", PlayerPrefs.GetInt("HMV2_TabOutMute", 1) == 1, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									PlayerPrefs.SetInt("HMV2_TabOutMute", value ? 1 : 0);
-									HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = value;
-								}
-							}
-						),
+						new WYDBooleanControl()
+							.SetName("tabOutMute")
+							.SetParent(menu.transform)
+							.SetPosition(200f, 0f)
+							.SetText("Mute While Tabbed Out")
+							.LinkToPreference("HMV2_TabOutMute")
+							.AddListener((bool value) =>
+							{
+								HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = value;
+							}),
 						
 						// UI
 
-						new WYDBooleanControl(
-							"uiRefresh", "Refreshed UI Colors (Requires Scene Reload)", PlayerPrefs.GetInt("HMV2_DoUITheme", 1) == 1, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									PlayerPrefs.SetInt("HMV2_DoUITheme", value ? 1 : 0);
-								}
-							}
-						),
+						new WYDBooleanControl()
+							.SetName("uiRefresh")
+							.SetParent(menu.transform)
+							.SetPosition(200f, 0f)
+							.SetText("Refreshed UI Colors (Requires Scene Reload)")
+							.LinkToPreference("HMV2_DoUITheme"),
 
 					};
 
@@ -428,46 +378,46 @@ namespace HexaMod.UI
 
 				Vector2 TopLeft = new Vector2(-160f, -118f);
 
-				WYDTextButton testDad = new WYDTextButton(
-					"testDad", "Test\nDad", title.FindMenu("SplashMenu"),
-					TopLeft + new Vector2(
+				WYDTextButton testDad = new WYDTextButton()
+					.SetName("testDad")
+					.SetTextAuto("Test\nDad")
+					.SetParent(title.FindMenu("SplashMenu"))
+					.SetPosition(TopLeft + new Vector2(
 						WYDTextButton.gap.x * -1,
 						WYDTextButton.gap.y * 0
-					),
-					new UnityAction[] { ButtonCallbacks.TestDadButton }
-				);
+					))
+					.AddListener(ButtonCallbacks.TestDadButton);
 
-				WYDTextButton testBaby = new WYDTextButton(
-					"testBaby", "Test\nBaby", title.FindMenu("SplashMenu"),
-					TopLeft + new Vector2(
+				WYDTextButton testBaby = new WYDTextButton()
+					.SetName("testBaby")
+					.SetTextAuto("Test\nBaby")
+					.SetParent(title.FindMenu("SplashMenu"))
+					.SetPosition(TopLeft + new Vector2(
 						WYDTextButton.gap.x * -1,
 						WYDTextButton.gap.y * -1
-					),
-					new UnityAction[] { ButtonCallbacks.TestBabyButton }
-				);
+					))
+					.AddListener(ButtonCallbacks.TestBabyButton);
 
-				WYDTextButton matchSettings = new WYDTextButton(
-					"matchSettings", "Match\nSettings", title.FindMenu("SplashMenu"),
-					TopLeft + new Vector2(
-						WYDTextButton.gap.x * -1,
-						WYDTextButton.gap.y * -2
-					),
-					new UnityAction[] { ButtonCallbacks.MatchSettingsButton }
-				);
+				new WYDMatchSettingsButton()
+					.SetParent(title.FindMenu("SplashMenu"))
+					.SetPosition(TopLeft + new Vector2(
+							WYDTextButton.gap.x * -1,
+							WYDTextButton.gap.y * -2
+					))
+					.AddListener(ButtonCallbacks.MatchSettingsButton);
+
 			}
 			{ // Character Customization Menu
 				Mod.Print("edit character customization menu");
 
-				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").transform.Find("MenuCamera").Find("Camera").Find("Canvas").gameObject;
-				dadModelSwapper = characterPreviewCanvas.transform.Find("Dad").gameObject.AddComponent<CharacterModelSwapper>();
-				babyModelSwapper = characterPreviewCanvas.transform.Find("Baby001").gameObject.AddComponent<CharacterModelSwapper>();
+				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").Find("MenuCamera").Find("Camera").Find("Canvas");
+				dadModelSwapper = characterPreviewCanvas.Find("Dad").AddComponent<CharacterModelSwapper>();
+				babyModelSwapper = characterPreviewCanvas.Find("Baby001").AddComponent<CharacterModelSwapper>();
 				dadModelSwapper.initModel = PlayerPrefs.GetString("HMV2_DadCharacterModel", "default");
 				dadModelSwapper.initShirt = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default");
-				dadModelSwapper.initShirtColor = HexToColor.GetColorFromHex(GetCurrentShirtColorHex());
-				dadModelSwapper.initSkinColor = HexToColor.GetColorFromHex(GetCurrentSkinColorHex());
+				dadModelSwapper.initShirtColor = new Color().FromHex(GetCurrentShirtColorHex());
+				dadModelSwapper.initSkinColor = new Color().FromHex(GetCurrentSkinColorHex());
 				babyModelSwapper.initModel = PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default");
-				babyModelSwapper.initShirtColor = HexToColor.GetColorFromHex(GetCurrentShirtColorHex());
-				babyModelSwapper.initSkinColor = HexToColor.GetColorFromHex(GetCurrentSkinColorHex());
 
 				Transform characterCustomizationMenu = title.FindMenu("CharacterCustomizationMenu");
 
@@ -547,64 +497,64 @@ namespace HexaMod.UI
 				}
 
 				WYDUIElement[] options = {
-					new WYDHexColorInputField(
-						"ShirtColor", "Shirt Color (Hex)", GetCurrentShirtColorHex(), characterCustomizationMenu,
-						new Vector2(
-							-468.4f,
-							0f
-						),
-						new UnityAction<Color, string>[] { ButtonCallbacks.SetShirtColor },
-						new UnityAction<Color, string>[] { ButtonCallbacks.SaveShirtColor, ButtonCallbacks.SetShirtColor }
-					),
-					new WYDHexColorInputField(
-						"SkinColor", "Skin Color (Hex)", GetCurrentSkinColorHex(), characterCustomizationMenu,
-						new Vector2(
-							-468.4f,
-							0f
-						),
-						new UnityAction<Color, string>[] { ButtonCallbacks.SetSkinColor },
-						new UnityAction<Color, string>[] { ButtonCallbacks.SaveSkinColor, ButtonCallbacks.SetSkinColor }
-					),
-					new WYDSwitchInput<Material>(
-						"DadShirtMaterial", "", dadShirtDefault,
-						dadShirtOptions,
-						characterCustomizationMenu,
-						new Vector2(
-							-880,
-							0f
-						),
-						new UnityAction<WYDSwitchOption<Material>>[] { (WYDSwitchOption<Material> option) => {
+					new WYDHexColorInputField()
+						.SetName("shirtColor")
+						.SetParent(characterCustomizationMenu)
+						.SetPosition(-468.4f, 0f)
+						.AddChangedListener(ButtonCallbacks.SetShirtColor)
+						.AddSubmitListener(ButtonCallbacks.SaveShirtColor)
+						.AddSubmitListener(ButtonCallbacks.SetShirtColor)
+						.SetText("Shirt Color (Hex)")
+						.SetFieldText(GetCurrentShirtColorHex()),
+
+					new WYDHexColorInputField()
+						.SetName("skinColor")
+						.SetParent(characterCustomizationMenu)
+						.SetPosition(-468.4f, 0f)
+						.AddChangedListener(ButtonCallbacks.SetSkinColor)
+						.AddSubmitListener(ButtonCallbacks.SaveSkinColor)
+						.AddSubmitListener(ButtonCallbacks.SetSkinColor)
+						.SetText("Skin Color (Hex)")
+						.SetFieldText(GetCurrentSkinColorHex()),
+
+					new WYDSwitchInput<Material>()
+						.SetName("dadShirtMaterial")
+						.SetParent(characterCustomizationMenu)
+						.SetPosition(-880f, 0f)
+						.SetText("")
+						.AddOptions(dadShirtOptions)
+						.Select(dadShirtDefault)
+						.AddListener(option =>
+						{
 							ButtonCallbacks.SetDadShirt(option.name);
 							ButtonCallbacks.SaveDadShirt(option.name);
-						}}
-					),
-					new WYDSwitchInput<string>(
-						"DadCharacterModel", "", dadCharacterDefault,
-						dadModelOptions,
-						characterCustomizationMenu,
-						new Vector2(
-							-880,
-							0f
-						),
-						new UnityAction<WYDSwitchOption<string>>[] { (WYDSwitchOption<string> option) => {
-							ButtonCallbacks.SetDadModel(option.value);
-							ButtonCallbacks.SaveDadModel(option.value);
+						}),
 
-						}}
-					),
-					new WYDSwitchInput<string>(
-						"BabyCharacterModel", "", babyCharacterDefault,
-						babyModelOptions,
-						characterCustomizationMenu,
-						new Vector2(
-							-880,
-							0f
-						),
-						new UnityAction<WYDSwitchOption<string>>[] { (WYDSwitchOption<string> option) => {
-							ButtonCallbacks.SetBabyModel(option.value);
-							ButtonCallbacks.SaveBabyModel(option.value);
-						}}
-					),
+					new WYDSwitchInput<string>()
+						.SetName("dadCharacterModel")
+						.SetParent(characterCustomizationMenu)
+						.SetPosition(-880f, 0f)
+						.SetText("")
+						.AddOptions(dadModelOptions)
+						.Select(dadCharacterDefault)
+						.AddListener(option =>
+						{
+							ButtonCallbacks.SetDadModel(option.name);
+							ButtonCallbacks.SaveDadModel(option.name);
+						}),
+
+					new WYDSwitchInput<string>()
+						.SetName("babyCharacterModel")
+						.SetParent(characterCustomizationMenu)
+						.SetPosition(-880f, 0f)
+						.SetText("")
+						.AddOptions(babyModelOptions)
+						.Select(babyCharacterDefault)
+						.AddListener(option =>
+						{
+							ButtonCallbacks.SetBabyModel(option.name);
+							ButtonCallbacks.SaveBabyModel(option.name);
+						}),
 				};
 
 				for (int i = 0; i < options.Count(); i++)
@@ -620,15 +570,10 @@ namespace HexaMod.UI
 				{
 					Transform menu = title.FindMenu(menuName);
 
-					WYDTextButton matchSettings = new WYDTextButton(
-						"matchSettings", "Match\nSettings", menu,
-						new Vector2(790f, 445.5f),
-						new UnityAction[] { ButtonCallbacks.MatchSettingsButton }
-					);
-
-					matchSettings.button.interactable = false;
-
-					matchSettingButtons.Add(matchSettings);
+					new WYDMatchSettingsButton()
+						.SetParent(menu)
+						.SetPosition(790f, 445.5f)
+						.AddListener(ButtonCallbacks.MatchSettingsButton);
 				}
 			}
 			{ // Match Settings
@@ -641,25 +586,14 @@ namespace HexaMod.UI
 					WYDTextButton backButton = WYDTextButton.MakeBackButton(menuUtil, menu.transform);
 					menuUtil.menuController.startBtn[menuId] = backButton.gameObject;
 
-					WYDTextButton changeMapButton = new WYDTextButton(
-						"changeMap", "Map", menu.transform,
-						backButton.gameObject.transform.localPosition + new Vector3(
+					new WYDChangeMapButton(inGame)
+						.SetParent(menu.transform)
+						.SetPosition(backButton.gameObject.transform.localPosition + new Vector3(
 							WYDTextButton.gap.x,
-							0,
-							0
-						),
-						new UnityAction[] { ButtonCallbacks.ChangeMapButton }
-					);
-
-					if (!inGame)
-					{
-						changeMapButton.button.interactable = Assets.levels.Count > 0;
-						OnLevelsLoaded();
-					}
-					else
-					{
-						changeMapButton.button.interactable = false;
-					}
+							0f,
+							0f
+						))
+						.AddListener(ButtonCallbacks.ChangeMapButton);
 
 					Vector2 bottomLeft = new Vector2(0f, 200f);
 					float gap = 15f;
@@ -671,7 +605,7 @@ namespace HexaMod.UI
 							"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
 							menu.transform, new Vector2(45f, 0f),
 							new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
-								delegate (WYDSwitchOption<ShufflePlayersMode> option) {
+								(WYDSwitchOption<ShufflePlayersMode> option) => {
 									HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
 									HexaMod.persistentLobby.CommitChanges();
 									HexaMod.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
@@ -776,21 +710,17 @@ namespace HexaMod.UI
 							}
 						),
 
-						new WYDTextInputField(
-							"relayServer", "Voice Chat Relay", ls.relay, menu.transform,
-							new Vector2(455f, 0f),
-							new UnityAction<string>[] { // edit
-							
-							},
-							new UnityAction<string>[] { // submit
-								delegate (string text)
-								{
-									HexaMod.persistentLobby.lobbySettings.relay = text;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage("Voice chat relay server updated.");
-								}
-							}
-						),
+						new WYDSensitiveTextInputField()
+							.SetName("relayServer")
+							.SetParent(menu.transform)
+							.SetPosition(455f, 0f)
+							.SetText("Voice Chat Relay")
+							.SetFieldText(ls.relay)
+							.AddSubmitListener((string text) => {
+								HexaMod.persistentLobby.lobbySettings.relay = text;
+								HexaMod.persistentLobby.CommitChanges();
+								HexaMod.textChat.SendServerMessage("Voice chat relay server updated.");
+							})
 					};
 
 					if (inGame)
@@ -826,6 +756,7 @@ namespace HexaMod.UI
 
 				MakeMatchSettings(title, false);
 				MakeMatchSettings(inGame, true);
+				OnLevelsLoaded();
 			}
 
 			UpdateUIForLobbyState();

@@ -20,7 +20,7 @@ namespace HexaMapAssemblies
 					DaddyNightmare dnm = child.GetComponent<DaddyNightmare>();
 					dnm.spawnSpots = gasSpots;
 
-					Transform generatorTransform = dnm.transform.Find("Generator").transform;
+					Transform generatorTransform = dnm.Find("Generator").transform;
 
 					generatorTransform.position = generator.position;
 					generatorTransform.rotation = generator.rotation;

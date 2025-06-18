@@ -18,11 +18,9 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool Start(ref SetOptions __instance)
 		{
-			GameObject networkManager = GameObject.Find("NetworkManager");
-
 			QualitySettings.antiAliasing = PlayerPrefs.GetInt("AntiAliasing", 0);
 			QualitySettings.vSyncCount = PlayerPrefs.GetInt("UseVSync", 1);
-			networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+			HexaMod.networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
 
 			return false; // MasterVolume is now handled by TabOutMuteBehavior
 		}

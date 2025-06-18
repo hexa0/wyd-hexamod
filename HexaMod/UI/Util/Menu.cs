@@ -132,8 +132,6 @@ namespace HexaMod.UI.Util
 
 		public static void Init()
 		{
-			PhotonNetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
-
 			Mod.Print("init menu references");
 
 			menuCanvas = Object.FindObjectOfType<anvasHelper>().GetComponent<Canvas>();
@@ -141,9 +139,9 @@ namespace HexaMod.UI.Util
 			Menus.title = new MenuUtil();
 			Menus.inGame = new MenuUtil();
 
-			Menus.title.root = menuCanvas.transform.Find("MainMenu");
+			Menus.title.root = menuCanvas.Find("MainMenu").transform;
 			Menus.title.menuController = Menus.title.root.GetComponent<MenuController>();
-			Menus.inGame.root = menuCanvas.transform.Find("InGameMenu");
+			Menus.inGame.root = menuCanvas.Find("InGameMenu").transform;
 			Menus.inGame.menuController = Menus.inGame.root.GetComponent<MenuController>();
 
 			if (!PhotonNetwork.inRoom)
@@ -154,7 +152,7 @@ namespace HexaMod.UI.Util
 				Cursor.lockState = CursorLockMode.None;
 				Cursor.visible = true;
 				menuCanvas.GetComponent<CanvasGroup>().blocksRaycasts = true;
-				menuCanvas.transform.Find("InGameElements").gameObject.SetActive(false);
+				menuCanvas.Find("InGameElements").gameObject.SetActive(false);
 			}
 		}
 	}

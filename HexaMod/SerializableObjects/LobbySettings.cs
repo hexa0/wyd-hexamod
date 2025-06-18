@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using HexaMod.UI.Class;
+using HexaMod.UI.Elements;
 using HexaMod.Util;
 using UnityStandardAssets.Water;
 

@@ -249,7 +249,7 @@ namespace HexaMod.Patches.Hooks
 		static void Start(ref FirstPersonController __instance)
 		{
 			__instance.gameObject.AddComponent<DeathManager>();
-			GameObject deathCam = __instance.transform.Find("Camera").gameObject;
+			GameObject deathCam = __instance.Find("Camera").gameObject;
 			deathCam.GetComponent<Camera>().enabled = false;
 			deathCam.GetComponent<AudioListener>().enabled = false;
 			deathCam.SetActive(true);

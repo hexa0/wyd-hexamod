@@ -11,11 +11,9 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void FixCharacterAudioPanning(ref FirstPersonController __instance)
 		{
-			PhotonNetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<PhotonNetworkManager>();
-
 			AudioSource audioEmitter = __instance.GetComponent<AudioSource>();
 
-			if (__instance.gameObject.name == networkManager.playerObj.name && __instance.GetComponent<PhotonView>().isMine)
+			if (__instance.gameObject.name == HexaMod.networkManager.playerObj.name && __instance.GetComponent<PhotonView>().isMine)
 			{
 				audioEmitter.bypassEffects = true;
 				// audioEmitter.panStereo = -0.4f;

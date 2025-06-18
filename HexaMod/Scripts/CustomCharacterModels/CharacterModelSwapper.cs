@@ -15,8 +15,8 @@ namespace HexaMod.Util
 		private int skinMaterialIndex = -1;
 		private int shirtMaterialIndex = -1;
 
-		private Color currentShirtColor = HexToColor.GetColorFromHex("#E76F3D");
-		private Color currentSkinColor = HexToColor.GetColorFromHex("#CC9485");
+		private Color currentShirtColor = new Color().FromHex("#E76F3D");
+		private Color currentSkinColor = new Color().FromHex("#CC9485");
 
 		public string currentShirtMaterial = "default";
 		public bool currentShirtRecolorable = true;
@@ -24,8 +24,8 @@ namespace HexaMod.Util
 		public string initModel = "default";
 		public string initShirt = "default";
 
-		public Color initShirtColor = HexToColor.GetColorFromHex("#E76F3D");
-		public Color initSkinColor = HexToColor.GetColorFromHex("#CC9485");
+		public Color initShirtColor = new Color().FromHex("#E76F3D");
+		public Color initSkinColor = new Color().FromHex("#CC9485");
 
 		public GameObject currentV2Model;
 
@@ -80,111 +80,122 @@ namespace HexaMod.Util
 				currentV2Model = null;
 			}
 
-			if (isDad)
+			bool foundMatch = false;
+
+			foreach (ModCharacterModelBase baseModel in Assets.characterModels)
 			{
-				bool foundMatch = false;
-
-				foreach (ModCharacterModelBase baseModel in Assets.characterModels)
+				if (baseModel.name == modelName && baseModel.isDad == isDad)
 				{
-					if (baseModel.isDad && baseModel.name == modelName)
+					foundMatch = true;
+
+					if (baseModel is ModCharacterModel)
 					{
-						foundMatch = true;
+						ModCharacterModel model = baseModel as ModCharacterModel;
 
-						if (baseModel is ModCharacterModel)
+						body.GetComponent<SkinnedMeshRenderer>().enabled = true;
+
+						skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
+						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
+
+						body.sharedMesh = model.characterMesh;
+						if (isSelf)
 						{
-							ModCharacterModel model = baseModel as ModCharacterModel;
-
-							body.GetComponent<SkinnedMeshRenderer>().enabled = true;
-
-							skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
-							shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
-
-							body.sharedMesh = model.characterMesh;
-							if (isSelf)
+							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
 							{
-								body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-								{
-									renderer.gameObject.layer = 12;
-								}
-								if (!model.selfCulling)
-								{
-									body.gameObject.layer = 1;
-								}
+								renderer.gameObject.layer = 12;
 							}
-							else
+							if (!model.selfCulling)
 							{
-								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-								{
-									renderer.gameObject.layer = 0;
-								}
-							}
-
-							if (model.materials.Length > 0)
-							{
-								body.materials = model.materials;
-							}
-							else
-							{
-								body.materials = defaultMaterials;
+								body.gameObject.layer = 1;
 							}
 						}
-						else if (baseModel is ModCharacterModelV2)
+						else
 						{
-							ModCharacterModelV2 model = baseModel as ModCharacterModelV2;
+							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+							{
+								renderer.gameObject.layer = 0;
+							}
+						}
 
-							currentV2Model = Instantiate(model.characterModel, transform);
-							currentV2Model.transform.SetPositionAndRotation(body.transform.position, body.transform.rotation);
-							body.GetComponent<SkinnedMeshRenderer>().enabled = false;
+						if (model.materials.Length > 0)
+						{
+							body.materials = model.materials;
+						}
+						else
+						{
+							body.materials = defaultMaterials;
+						}
+					}
+					else if (baseModel is ModCharacterModelV2)
+					{
+						ModCharacterModelV2 model = baseModel as ModCharacterModelV2;
 
+						currentV2Model = Instantiate(model.characterModel, transform);
+						currentV2Model.transform.SetPositionAndRotation(body.transform.position, body.transform.rotation);
+						body.GetComponent<SkinnedMeshRenderer>().enabled = false;
+
+						if (isDad)
+						{
 							Traverse animatorFields = Traverse.Create(GetComponentInChildren<DadAnimator>());
 							Traverse<Animator> anim = animatorFields.Field<Animator>("anim");
 
 							anim.Value = currentV2Model.GetComponentInChildren<Animator>();
+						}
+						else
+						{
+							Traverse animatorFields = Traverse.Create(GetComponentInChildren<BabyAnimator>());
+							Traverse<Animator> anim = animatorFields.Field<Animator>("anim");
 
-							CharacterHands hands = currentV2Model.GetComponentInChildren<CharacterHands>();
+							anim.Value = currentV2Model.GetComponentInChildren<Animator>();
+						}
 
-							if (hands != null)
+						CharacterHands hands = currentV2Model.GetComponentInChildren<CharacterHands>();
+
+						if (hands != null)
+						{
+							Transform originalLeftHand = body.transform.parent.Find("Armature").FindDeep(isDad ? "LeftDadHoldPos" : "LeftBabyHoldPos");
+							Transform originalRightHand = body.transform.parent.Find("Armature").FindDeep(isDad ? "DadHoldPos" : "BabyHoldPos");
+
+							if (originalLeftHand != null && originalRightHand != null)
 							{
-								Transform originalLeftHand = body.transform.parent.Find("Armature").FindDeepChild("LeftDadHoldPos");
-								Transform originalRightHand = body.transform.parent.Find("Armature").FindDeepChild("DadHoldPos");
-
-								if (originalLeftHand != null && originalRightHand != null)
-								{
-									originalLeftHand.name = "oldLeftHand";
-									originalRightHand.name = "oldRightHand";
-								}
-
-								hands.leftHand.name = "LeftDadHoldPos";
-								hands.rightHand.name = "DadHoldPos";
+								originalLeftHand.name = "oldLeftHand";
+								originalRightHand.name = "oldRightHand";
 							}
 
-							CharacterHats hats = currentV2Model.GetComponentInChildren<CharacterHats>();
+							hands.leftHand.name = "LeftDadHoldPos";
+							hands.rightHand.name = "DadHoldPos";
+						}
 
-							if (hats != null)
+						CharacterHats hats = currentV2Model.GetComponentInChildren<CharacterHats>();
+
+						if (hats != null)
+						{
+							Transform armature = body.transform.parent.Find("Armature");
+							Transform originalHats = armature.FindDeepChild("GameObject (1)");
+							Transform originalShades = armature.FindDeepChild("Shades (1)");
+
+							if (!originalHats && !originalShades)
 							{
-								Transform armature = body.transform.parent.Find("Armature");
-								Transform originalHats = armature.FindDeepChild("GameObject (1)");
-								Transform originalShades = armature.FindDeepChild("Shades (1)");
-
-								if (!originalHats && !originalShades)
-								{
-									originalHats = armature.FindDeepChild("GameObject");
-									originalShades = armature.FindDeepChild("Shades");
-								}
-
-								if (originalHats && originalShades)
-								{
-									originalHats.SetParent(hats.hatRoot);
-									originalHats.SetPositionAndRotation(hats.hatRoot.position, hats.hatRoot.rotation);
-									originalHats.transform.localScale = Vector3.one;
-									originalShades.SetParent(hats.shadesRoot);
-									originalShades.SetPositionAndRotation(hats.shadesRoot.position, hats.shadesRoot.rotation);
-									originalShades.transform.localScale = Vector3.one;
-								}
+								originalHats = armature.FindDeepChild("GameObject");
+								originalShades = armature.FindDeepChild("Shades");
 							}
 
-							FirstPersonController controller = GetComponentInChildren<FirstPersonController>();
+							if (originalHats && originalShades)
+							{
+								originalHats.SetParent(hats.hatRoot);
+								originalHats.SetPositionAndRotation(hats.hatRoot.position, hats.hatRoot.rotation);
+								originalHats.transform.localScale = Vector3.one;
+								originalShades.SetParent(hats.shadesRoot);
+								originalShades.SetPositionAndRotation(hats.shadesRoot.position, hats.shadesRoot.rotation);
+								originalShades.transform.localScale = Vector3.one;
+							}
+						}
+
+						FirstPersonController controller = GetComponentInChildren<FirstPersonController>();
+
+						if (controller)
+						{
 							NetworkedSoundBehavior networkedSound = GetComponentInChildren<NetworkedSoundBehavior>();
 							Traverse controllerFields = Traverse.Create(controller);
 
@@ -227,88 +238,26 @@ namespace HexaMod.Util
 							{
 								ParRotation headBoneRotation = headBone.headBone.gameObject.AddComponent<ParRotation>();
 								headBoneRotation.target = controller.myCam.transform;
+								headBoneRotation.Dad = isDad;
 							}
 						}
-
-						break;
 					}
-				}
 
-				if (!foundMatch)
-				{
-					body.gameObject.layer = 0;
-					body.sharedMesh = defaultMesh;
-					body.materials = defaultMaterials;
-					skinMaterialIndex = 2;
-					shirtMaterialIndex = 4;
+					break;
 				}
-
-				SetShirtColor(currentShirtColor);
-				SetSkinColor(currentSkinColor);
-				SetShirt(currentShirtMaterial);
 			}
-			else
+
+			if (!foundMatch)
 			{
-				bool foundMatch = false;
+				body.gameObject.layer = 0;
+				body.sharedMesh = defaultMesh;
+				body.materials = defaultMaterials;
+				skinMaterialIndex = isDad ? 2 : -1;
+				shirtMaterialIndex = isDad ? 4 : -1;
+			}
 
-				foreach (ModCharacterModelBase baseModel in Assets.characterModels)
-				{
-					if (!baseModel.isDad && baseModel.name == modelName)
-					{
-						foundMatch = true;
-
-						if (baseModel is ModCharacterModel)
-						{
-							ModCharacterModel model = baseModel as ModCharacterModel;
-
-							skinMaterialIndex = model.skinMaterialEditable ? model.skinMaterialId : -1;
-							shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
-
-							body.sharedMesh = model.characterMesh;
-
-							if (isSelf)
-							{
-								body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-								{
-									renderer.gameObject.layer = 12;
-								}
-								if (!model.selfCulling)
-								{
-									body.gameObject.layer = 1;
-								}
-							}
-							else
-							{
-								foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-								{
-									renderer.gameObject.layer = 0;
-								}
-							}
-
-							if (model.materials.Length > 0)
-							{
-								body.materials = model.materials;
-							}
-							else
-							{
-								body.materials = defaultMaterials;
-							}
-						}
-
-						break;
-					}
-				}
-
-				if (!foundMatch)
-				{
-					body.gameObject.layer = 0;
-					body.sharedMesh = defaultMesh;
-					body.materials = defaultMaterials;
-					skinMaterialIndex = -1;
-					shirtMaterialIndex = -1;
-				}
-
+			if (!isDad)
+			{
 				body.transform.parent.GetChild(1).gameObject.SetActive(!foundMatch);
 				body.transform.parent.GetChild(2).gameObject.SetActive(!foundMatch);
 				body.transform.parent.GetChild(3).gameObject.SetActive(!foundMatch);
@@ -316,11 +265,11 @@ namespace HexaMod.Util
 				body.transform.parent.GetChild(7).gameObject.SetActive(!foundMatch);
 				body.transform.parent.GetChild(8).gameObject.SetActive(!foundMatch);
 				body.transform.parent.GetChild(9).gameObject.SetActive(!foundMatch);
-
-				SetShirtColor(currentShirtColor);
-				SetSkinColor(currentSkinColor);
-				SetShirt(currentShirtMaterial);
 			}
+
+			SetShirtColor(currentShirtColor);
+			SetSkinColor(currentSkinColor);
+			SetShirt(currentShirtMaterial);
 		}
 
 		public void SetShirt(string shirtName)

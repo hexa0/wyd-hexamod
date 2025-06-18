@@ -178,7 +178,6 @@ namespace HexaMod
 
 		public static void CleanupDefaultLevel()
 		{
-			Mod.Print($"defaultLevelObjects.Count = {defaultLevelObjects.Count}");
 			if (defaultLevelObjects.Count == 0)
 			{
 				foreach (var child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
@@ -203,7 +202,7 @@ namespace HexaMod
 							bad = true;
 							break;
 						case "Misc":
-							child.transform.Find("MoreObjects").Find("LightHolder").SetParent(GameObject.Find("BackendObjects").transform);
+							child.FindDeep("LightHolder").SetParent(GameObject.Find("BackendObjects"));
 							bad = true;
 							break;
 						case "Halloween decs":
@@ -222,7 +221,7 @@ namespace HexaMod
 							bad = true;
 							break;
 						case "BackendObjects":
-							defaultLevelObjects.Add(child.transform.Find("Dadlympics").Find("PoolChoreObjs").gameObject);
+							defaultLevelObjects.Add(child.Find("Dadlympics").Find("PoolChoreObjs"));
 							break;
 					}
 
@@ -242,8 +241,6 @@ namespace HexaMod
 					}
 				}
 			}
-
-			Mod.Print($"NOW defaultLevelObjects.Count = {defaultLevelObjects.Count}");
 
 			foreach (var levelObject in defaultLevelObjects)
 			{

@@ -256,6 +256,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\Color.cs" />
+    <Compile Include="Extensions\ComponentExtensions.cs" />
+    <Compile Include="Extensions\GameObjectExtensions.cs" />
+    <Compile Include="Extensions\TransformExtensions.cs" />
     <Compile Include="Patches\Debugging\ILDebugger.cs" />
     <Compile Include="Patches\Feature\BetterSmokeDetector.cs" />
     <Compile Include="Patches\Feature\CharacterCulling.cs" />
@@ -326,13 +330,18 @@
     <Compile Include="SerializableObjects\MatchStartObject.cs" />
     <Compile Include="SerializableObjects\PlayerConnectedObject.cs" />
     <Compile Include="SerializableObjects\SerializableColor.cs" />
-    <Compile Include="UI\Class\WYDBooleanControl.cs" />
-    <Compile Include="UI\Class\WYDHexColorInputField.cs" />
-    <Compile Include="UI\Class\WYDMicrophoneIndicator.cs" />
-    <Compile Include="UI\Class\WYDSwitchInput.cs" />
-    <Compile Include="UI\Class\WYDTextButton.cs" />
-    <Compile Include="UI\Class\WYDTextInputField.cs" />
-    <Compile Include="UI\Class\WYDUIElement.cs" />
+    <Compile Include="UI\Elements\Extended\WYDChangeMapButton.cs" />
+    <Compile Include="UI\Elements\Extended\WYDMapButton.cs" />
+    <Compile Include="UI\Elements\Extended\WYDSensitiveTextInputField.cs" />
+    <Compile Include="UI\Elements\WYDBooleanControl.cs" />
+    <Compile Include="UI\Elements\WYDHexColorInputField.cs" />
+    <Compile Include="UI\Elements\Extended\WYDMatchSettingsButton.cs" />
+    <Compile Include="UI\Elements\WYDMenu.cs" />
+    <Compile Include="UI\Elements\Extended\WYDMicrophoneIndicator.cs" />
+    <Compile Include="UI\Elements\WYDSwitchInput.cs" />
+    <Compile Include="UI\Elements\WYDTextButton.cs" />
+    <Compile Include="UI\Elements\WYDTextInputField.cs" />
+    <Compile Include="UI\Elements\WYDUIElement.cs" />
     <Compile Include="UI\UITheming.cs" />
     <Compile Include="Scripts\CustomCharacterModels\CharacterModelSwapper.cs" />
     <Compile Include="Util\SerializationHelper.cs" />
@@ -410,7 +419,6 @@
     <Compile Include="UI\MainUI.cs" />
     <Compile Include="UI\Util\Menu.cs" />
     <Compile Include="UI\Util\UITemplates.cs" />
-    <Compile Include="Util\HexToColor.cs" />
     <Compile Include="Util\GameModes.cs" />
   </ItemGroup>
   <ItemGroup>

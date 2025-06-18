@@ -10,14 +10,14 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static void StartChallenge()
 		{
-			Menu.menuCanvas.transform.Find("InGameElements").gameObject.SetActive(true);
+			Menu.menuCanvas.Find("InGameElements").gameObject.SetActive(true);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetworkManager), "CreateOfflineGame")]
 		[HarmonyPrefix]
 		static void CreateOfflineGame()
 		{
-			Menu.menuCanvas.transform.Find("InGameElements").gameObject.SetActive(true);
+			Menu.menuCanvas.Find("InGameElements").gameObject.SetActive(true);
 		}
 	}
 }
