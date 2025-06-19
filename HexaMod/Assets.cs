@@ -5,7 +5,6 @@ using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
 using HexaMod.Util;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityStandardAssets.Characters.FirstPerson;
 using static HexaMod.HexaLobby;
 
