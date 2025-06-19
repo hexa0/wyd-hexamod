@@ -31,7 +31,7 @@ namespace VoiceChatHost
 
 		static int micSampleRate = 48000;
 		static int micBufferMillis = 20;
-		static int micChannels = 2;
+		static int micChannels = 1;
 		static int micBits = 16;
 
 		internal static bool listening = false;
