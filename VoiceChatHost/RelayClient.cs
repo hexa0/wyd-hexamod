@@ -2,9 +2,9 @@
 using System.Net;
 using HexaVoiceChatShared.Net;
 using HexaVoiceChatShared.MessageProtocol;
-using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
 using System.Text;
 using System.Diagnostics;
+using VoiceChatHost.Opus;
 
 namespace VoiceChatHost
 {
@@ -12,17 +12,17 @@ namespace VoiceChatHost
 	{
 		private readonly VoiceChatClient client;
 		public ulong clientId = (ulong)Process.GetCurrentProcess().Id;
-		public Action<ulong, byte[], int>? onOpusAction;
-		public Action<ulong, bool>? onSpeakingStateAction;
-		string? room = null;
+		public Action<ulong, byte[], int, int, int> onOpusAction;
+		public Action<ulong, bool> onSpeakingStateAction;
+		public string room = null;
 
 		public void JoinRoom(string roomName)
 		{
-			client.SendMessage(ClientWrappedMessage.BuildMessage(
+			client.SendClientWrappedMessage(
 				clientId,
-				VoiceChatMessageType.VoiceRoomJoin,
+				HVCMessage.VoiceRoomJoin,
 				Encoding.ASCII.GetBytes(roomName)
-			));
+			);
 
 			room = roomName;
 		}
@@ -31,11 +31,11 @@ namespace VoiceChatHost
 		{
 			if (room != null)
 			{
-				client.SendMessage(ClientWrappedMessage.BuildMessage(
+				client.SendClientWrappedMessage(
 					clientId,
-					VoiceChatMessageType.VoiceRoomKeepAlive,
+					HVCMessage.VoiceRoomKeepAlive,
 					Encoding.ASCII.GetBytes(room)
-				));
+				);
 			}
 			else
 			{
@@ -45,35 +45,45 @@ namespace VoiceChatHost
 
 		public void SetSpeakingState(bool speaking)
 		{
-			client.SendMessage(ClientWrappedMessage.BuildMessage(
+			client.SendClientWrappedMessage(
 				clientId,
-				VoiceChatMessageType.SpeakingStateUpdated,
+				HVCMessage.SpeakingStateUpdated,
 				speaking ? [1] : [0]
-			));
+			);
 		}
 
 		public void SendOpus(byte[] encoded, int samples)
 		{
 			byte[] sampleCount = BitConverter.GetBytes(samples);
-			byte[] opusMessage = new byte[encoded.Length + sampleCount.Length];
-			Buffer.BlockCopy(sampleCount, 0, opusMessage, 0, sampleCount.Length);
-			Buffer.BlockCopy(encoded, 0, opusMessage, sampleCount.Length, encoded.Length);
-			client.SendMessage(ClientWrappedMessage.BuildMessage(
+			byte[] sampleRate = BitConverter.GetBytes(EncodingSetup.sampleRate);
+			byte[] channels = BitConverter.GetBytes(EncodingSetup.channels);
+
+			byte[] opusMessage = new byte[encoded.Length + sampleCount.Length + sampleRate.Length + channels.Length];
+			
+			Buffer.BlockCopy(sampleCount, 0, opusMessage, 0, 4);
+			Buffer.BlockCopy(sampleRate, 0, opusMessage, 4, 4);
+			Buffer.BlockCopy(channels, 0, opusMessage, 8, 4);
+			Buffer.BlockCopy(encoded, 0, opusMessage, 12, encoded.Length);
+
+			//Buffer.BlockCopy(sampleCount, 0, opusMessage, 0, sampleCount.Length);
+			//Buffer.BlockCopy(encoded, 0, opusMessage, sampleCount.Length, encoded.Length);
+
+			client.SendClientWrappedMessage(
 				clientId,
-				VoiceChatMessageType.Opus,
+				HVCMessage.Opus,
 				opusMessage
-			));
+			);
 		}
 
 		public void LeaveRoom()
 		{
 			if (room != null)
 			{
-				client.SendMessage(ClientWrappedMessage.BuildMessage(
+				client.SendClientWrappedMessage(
 					clientId,
-					VoiceChatMessageType.VoiceRoomLeave,
+					HVCMessage.VoiceRoomLeave,
 					Encoding.ASCII.GetBytes(room)
-				));
+				);
 
 				room = null;
 			}
@@ -95,9 +105,9 @@ namespace VoiceChatHost
 				HexaVoiceChat.Ports.relay
 			));
 
-			client.Connect(true);
+			client.Connect();
 
-			client.OnMessage(VoiceChatMessageType.SpeakingStateUpdated, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
+			client.OnMessage(HVCMessage.SpeakingStateUpdated, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
 			{
 				DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
 				
@@ -109,16 +119,18 @@ namespace VoiceChatHost
 				Console.WriteLine($"client {clientMessage.clientId}'s voice chat state updated to {clientMessage.body[0]}");
 			});
 
-			client.OnMessage(VoiceChatMessageType.Opus, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
+			client.OnMessage(HVCMessage.Opus, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
 			{
 				DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
 
 				if (onOpusAction != null)
 				{
 					int samples = BitConverter.ToInt32(clientMessage.body, 0);
-					byte[] opusFrame = new byte[clientMessage.body.Length - 4];
-					Buffer.BlockCopy(clientMessage.body, 4, opusFrame, 0, clientMessage.body.Length - 4);
-					onOpusAction.Invoke(clientMessage.clientId, opusFrame, samples);
+					int sampleRate = BitConverter.ToInt32(clientMessage.body, 4);
+					int channels = BitConverter.ToInt32(clientMessage.body, 8);
+					byte[] opusFrame = new byte[clientMessage.body.Length - 12];
+					Buffer.BlockCopy(clientMessage.body, 12, opusFrame, 0, clientMessage.body.Length - 12);
+					onOpusAction.Invoke(clientMessage.clientId, opusFrame, samples, sampleRate, channels);
 				}
 			});
 

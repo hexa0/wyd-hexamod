@@ -60,7 +60,7 @@ namespace HexaMod
 				VoiceEmitter voiceEmitter = gameObject.AddComponent<VoiceEmitter>();
 				voiceEmitter.clientId = 0;
 
-				VoiceChat.SetRelay("127.0.0.1");
+				VoiceChat.ConnectToRelay("127.0.0.1");
 				VoiceChat.JoinVoiceRoom("VoiceChat.testMode room");
 			}
 		}
@@ -127,8 +127,7 @@ namespace HexaMod
 			{
 				ActionText("Init VoiceChat\n(Transcode Process)");
 				yield return 0;
-				VoiceChat.InitUnityForVoiceChat(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
-				VoiceChat.InitTranscodeServerProcess();
+				VoiceChat.Init(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
 			}
 			ActionText("Loading HexaModCoreResourcesBundle");
 			yield return 0;
@@ -153,7 +152,7 @@ namespace HexaMod
 			ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
 			yield return 0;
 			int attempts = 0;
-			while (!VoiceChat.completedHandshake)
+			while (!VoiceChat.transcodeServerReady)
 			{
 				ActionText($"Init VoiceChat\n(Transcode Connection)\n(Attempt {attempts})");
 				yield return 0;
@@ -171,7 +170,7 @@ namespace HexaMod
 
 				try
 				{
-					if (!VoiceChat.completedHandshake)
+					if (!VoiceChat.transcodeServerReady)
 					{
 						VoiceChat.SendTranscodeServerHandshake();
 					}
@@ -188,19 +187,6 @@ namespace HexaMod
 				yield return 0;
 
 				attempts++;
-			}
-			ActionText("Init VoiceChat\n(Microphone)");
-			yield return 0;
-			VoiceChat.InitMicrophone();
-			ActionText("Init VoiceChat\n(Relay)");
-			yield return 0;
-			try
-			{
-				VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
-			}
-			catch
-			{
-
 			}
 			ActionText($"Loading Game\n(0%)");
 			yield return 0;

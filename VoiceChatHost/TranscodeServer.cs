@@ -3,10 +3,11 @@ using HexaVoiceChatShared;
 using HexaVoiceChatShared.Net;
 using HexaVoiceChatShared.MessageProtocol;
 using VoiceChatHost.Opus;
-using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
 using System.Text;
 using System.Diagnostics;
 using RNNoise.NET;
+using NAudio.Wave;
+using VoiceChatShared;
 
 namespace VoiceChatHost
 {
@@ -18,17 +19,64 @@ namespace VoiceChatHost
 		private static readonly Dictionary<ulong, DecodingSetup> decoders = [];
 		private static readonly Denoiser rnNoiseDenoiser = new Denoiser();
 		private readonly VoiceChatServer server;
-		private RelayClient? relay;
-		private IPEndPoint? gameEndPoint;
+		private RelayClient relay;
+		private IPEndPoint gameEndPoint;
 		private bool isSpeaking = false;
 		private double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
 		private ulong clientId = (ulong)Process.GetCurrentProcess().Id;
 		private static long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 20;
 		private static float shortMaxValueMul = 1f / short.MaxValue;
-		private static float shortMinValueMul = 1f / short.MinValue;
+		// private static float shortMinValueMul = 1f / short.MinValue;
 		private static bool doDenoise = true;
 
-		private void OnSwitchRelay(DecodedVoiceChatMessage message, IPEndPoint from)
+		static int micSampleRate = 48000;
+		static int micBufferMillis = 20;
+		static int micChannels = 2;
+		static int micBits = 16;
+
+		internal static bool listening = false;
+		internal static WaveInEvent waveIn = new WaveInEvent
+		{
+			DeviceNumber = 0,
+			WaveFormat = new WaveFormat(
+				rate: micSampleRate,
+				bits: micBits,
+				channels: micChannels
+			),
+			BufferMilliseconds = micBufferMillis,
+			NumberOfBuffers = 2
+		};
+
+		private void DisconnectFromRelay(DecodedVoiceChatMessage message, IPEndPoint from)
+		{
+			gameEndPoint = from;
+
+			Console.WriteLine($"disconnect from relay");
+
+			if (relay != null)
+			{
+				try
+				{
+					relay.LeaveRoom();
+				}
+				catch
+				{
+
+				}
+				try
+				{
+					relay.Close();
+				}
+				catch
+				{
+
+				}
+			}
+
+			relay = null;
+		}
+
+		private void ConnectToRelay(DecodedVoiceChatMessage message, IPEndPoint from)
 		{
 			gameEndPoint = from;
 
@@ -63,7 +111,7 @@ namespace VoiceChatHost
 			relay.onSpeakingStateAction = OnSpeakingState;
 		}
 
-		private void OnVoiceRoomJoin(DecodedVoiceChatMessage message, IPEndPoint from)
+		private void OnVoiceRoomJoin(DecodedClientWrappedMessage message, IPEndPoint from)
 		{
 			gameEndPoint = from;
 
@@ -72,12 +120,10 @@ namespace VoiceChatHost
 				throw new Exception("OnVoiceRoomJoin() cannot be called when there is no RelayClient");
 			}
 
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+			clientId = message.clientId;
 
-			clientId = clientMessage.clientId;
-
-			relay.clientId = clientMessage.clientId;
-			relay.JoinRoom(Encoding.ASCII.GetString(clientMessage.body));
+			relay.clientId = message.clientId;
+			relay.JoinRoom(Encoding.ASCII.GetString(message.body));
 		}
 
 		private void OnVoiceRoomLeave(DecodedVoiceChatMessage message, IPEndPoint from)
@@ -91,72 +137,12 @@ namespace VoiceChatHost
 
 			decoders.Clear();
 			decodeBuffers.Clear();
+			isSpeaking = false;
 
 			relay.LeaveRoom();
 		}
 
-		private void OnPCM(DecodedVoiceChatMessage message, IPEndPoint from)
-		{
-			gameEndPoint = from;
-
-			if (relay != null)
-			{
-				int sampleCount = message.body.Length / 2;
-
-				short[] pcm = new short[sampleCount];
-				Buffer.BlockCopy(message.body, 0, pcm, 0, message.body.Length);
-
-				float[] floatAudio = new float[sampleCount];
-
-				for (int i = 0; i < sampleCount; i++)
-				{
-					floatAudio[i] = pcm[i] * shortMaxValueMul;
-				}
-
-				if (doDenoise)
-				{
-					rnNoiseDenoiser.Denoise(floatAudio);
-				}
-
-				float maxVolume = MathF.Max(floatAudio.Max(), -floatAudio.Min());
-				bool shouldBeSpeaking = maxVolume > 0.01; // > 1%
-
-				if (shouldBeSpeaking)
-				{
-					if (isSpeaking != shouldBeSpeaking)
-					{
-						isSpeaking = true;
-						relay.SetSpeakingState(true);
-						OnSpeakingState(clientId, true);
-					}
-
-					lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
-				}
-				else
-				{
-					double now = (DateTime.Now - start).TotalSeconds;
-					if (now >= lastSpeakingTime + 0.25d)
-					{
-						if (isSpeaking)
-						{
-							isSpeaking = false;
-							relay.SetSpeakingState(false);
-							OnSpeakingState(clientId, false);
-						}
-					}
-				}
-
-				if (isSpeaking)
-				{
-					int frameSize = EncodingSetup.encoder.Encode(floatAudio, pcm.Length, EncodingSetup.encodeBuffer, EncodingSetup.encodeBuffer.Length);
-					Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
-
-					relay.SendOpus(encoded.ToArray(), pcm.Length);
-				}
-			}
-		}
-
-		private void OnOpus(ulong clientId, byte[] opusFrame, int frameSize)
+		private void OnOpus(ulong clientId, byte[] opusFrame, int samples, int sampleRate, int channels)
 		{
 			if (!decodeBuffers.ContainsKey(clientId))
 			{
@@ -165,14 +151,20 @@ namespace VoiceChatHost
 
 			if (!decoders.ContainsKey(clientId))
 			{
-				decoders.Add(clientId, new DecodingSetup());
+				decoders.Add(clientId, new DecodingSetup(sampleRate, channels));
 			}
 
 			float[] decodeBuffer = decodeBuffers[clientId];
 
-			int decodedSampleCount = decoders[clientId].decoder.Decode(opusFrame, decodeBuffer, frameSize);
+			DecodingSetup decoder = decoders[clientId];
 
-			Span<float> decoded = decodeBuffer.AsSpan(0, frameSize);
+			decoder.sampleRate = sampleRate;
+			decoder.channels = channels;
+			decoder.CommitChanges();
+
+			int decodedSampleCount = decoder.Decode(opusFrame, decodeBuffer, samples) * channels;
+
+			Span<float> decoded = decodeBuffer.AsSpan(0, samples);
 
 			short[] decodePCM = new short[decodedSampleCount];
 
@@ -181,36 +173,122 @@ namespace VoiceChatHost
 				decodePCM[i] = (short)(decoded[i] * short.MaxValue);
 			}
 
-			byte[] decodeBytes = new byte[decodePCM.Length * 2];
-			Buffer.BlockCopy(decodePCM, 0, decodeBytes, 0, decodePCM.Length * 2);
+			byte[] message = new byte[(decodePCM.Length * 2) + 8];
 
-			server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.PCMData, decodeBytes), gameEndPoint);
+			Buffer.BlockCopy(BitConverter.GetBytes(sampleRate), 0, message, 0, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(channels), 0, message, 4, 4);
+			Buffer.BlockCopy(decodePCM, 0, message, 8, decodePCM.Length * 2);
+
+			server.SendClientWrappedMessage(clientId, HVCMessage.PCMData, message, gameEndPoint);
 		}
 
 		private void OnSpeakingState(ulong clientId, bool speaking)
 		{
-			server.SendMessage(ClientWrappedMessage.BuildMessage(clientId, VoiceChatMessageType.SpeakingStateUpdated, [speaking ? (byte)1 : (byte)0]), gameEndPoint);
+			server.SendClientWrappedMessage(clientId, HVCMessage.SpeakingStateUpdated, UDP.AsData(speaking), gameEndPoint);
 		}
 
-		private void OnKeepTranscodeAlive(DecodedVoiceChatMessage message, IPEndPoint from)
+		private void OnSetListening(DecodedVoiceChatMessage message, IPEndPoint from)
 		{
-			lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			bool shouldListen = message.body[0] == 1;
+			if (listening != shouldListen)
+			{
+				if (shouldListen)
+				{
+					Console.WriteLine("Mic Activated");
+					waveIn.StartRecording();
+				}
+				else
+				{
+					Console.WriteLine("Mic Deactivated");
+					waveIn.StopRecording();
+				}
+
+				listening = shouldListen;
+			}
 		}
 
-		private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
-		{
-			Console.WriteLine($"got handshake, respond to {from}");
-			server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, Encoding.ASCII.GetBytes("!")), from);
-		}
+		static float currentPeak = 0f;
 
-		private void OnDenoise(DecodedVoiceChatMessage message, IPEndPoint from)
+		void OnMicData(object sender, WaveInEventArgs waveInEvent)
 		{
-			Console.WriteLine($"set rn noise: {message.body[0]}");
-			doDenoise = message.body[0] == 1;
+			if (relay != null)
+			{
+				byte[] audioBuffer = new byte[waveInEvent.BytesRecorded];
+				Buffer.BlockCopy(waveInEvent.Buffer, 0, audioBuffer, 0, waveInEvent.BytesRecorded);
+
+				try
+				{
+					if (relay.room != null)
+					{
+						int sampleCount = audioBuffer.Length / 2;
+
+						short[] pcm = new short[sampleCount];
+						Buffer.BlockCopy(audioBuffer, 0, pcm, 0, audioBuffer.Length);
+
+						float[] floatAudio = new float[sampleCount];
+
+						for (int i = 0; i < sampleCount; i++)
+						{
+							floatAudio[i] = pcm[i] * shortMaxValueMul;
+						}
+
+						if (doDenoise)
+						{
+							rnNoiseDenoiser.Denoise(floatAudio);
+						}
+
+						currentPeak = Math.Max(floatAudio.Max(), -floatAudio.Min());
+						bool shouldBeSpeaking = currentPeak > 0.01; // > 1%
+
+						if (shouldBeSpeaking)
+						{
+							if (isSpeaking != shouldBeSpeaking)
+							{
+								isSpeaking = true;
+								relay.SetSpeakingState(true);
+								OnSpeakingState(clientId, true);
+							}
+
+							lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
+						}
+						else
+						{
+							double now = (DateTime.Now - start).TotalSeconds;
+							if (now >= lastSpeakingTime + 0.25d)
+							{
+								if (isSpeaking)
+								{
+									isSpeaking = false;
+									relay.SetSpeakingState(false);
+									OnSpeakingState(clientId, false);
+								}
+							}
+						}
+
+						if (isSpeaking)
+						{
+							int frameSize = EncodingSetup.Encode(floatAudio, pcm.Length / micChannels, EncodingSetup.encodeBuffer.Length);
+							Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
+
+							relay.SendOpus(encoded.ToArray(), pcm.Length);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					Console.Error.WriteLine(e);
+				}
+			}
+			else
+			{
+				currentPeak = 0f;
+			}
 		}
 
 		public TranscodeServer(string ip, int port = HexaVoiceChat.Ports.transcode)
 		{
+			EncodingSetup.channels = micChannels;
+			EncodingSetup.sampleRate = micSampleRate;
 			EncodingSetup.Init();
 
 			server = new VoiceChatServer(new IPEndPoint(
@@ -218,13 +296,76 @@ namespace VoiceChatHost
 				port
 			));
 
-			server.OnMessage(VoiceChatMessageType.PCMData, OnPCM);
-			server.OnMessage(VoiceChatMessageType.SwitchRelay, OnSwitchRelay);
-			server.OnMessage(VoiceChatMessageType.VoiceRoomJoin, OnVoiceRoomJoin);
-			server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, OnVoiceRoomLeave);
-			server.OnMessage(VoiceChatMessageType.KeepTranscodeAlive, OnKeepTranscodeAlive);
-			server.OnMessage(VoiceChatMessageType.Handshake, OnHandshake);
-			server.OnMessage(VoiceChatMessageType.SetRNNoiseEnabled, OnDenoise);
+			server.OnMessage(HVCMessage.ConnectToRelay, ConnectToRelay);
+			server.OnMessage(HVCMessage.DisconnectFromRelay, DisconnectFromRelay);
+			server.OnClientMessage(HVCMessage.VoiceRoomJoin, OnVoiceRoomJoin);
+			server.OnMessage(HVCMessage.VoiceRoomLeave, OnVoiceRoomLeave);
+			server.OnMessage(HVCMessage.KeepTranscodeAlive, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			});
+			server.OnMessage(HVCMessage.Handshake, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				Console.WriteLine($"got handshake, respond to {from}");
+				server.SendMessage(HVCMessage.Handshake, Encoding.ASCII.GetBytes("!"), from);
+			});
+			server.OnMessage(HVCMessage.SetRNNoiseEnabled, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				Console.WriteLine($"set rn noise: {message.body[0]}");
+				doDenoise = message.body[0] == 1;
+			});
+			server.OnMessage(HVCMessage.SetListening, OnSetListening);
+			server.OnMessage(HVCMessage.SetMicDeviceId, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				int deviceId = BitConverter.ToInt32(message.body);
+				Console.WriteLine($"set mic device: {deviceId}");
+				waveIn.DeviceNumber = deviceId;
+			});
+			server.OnMessage(HVCMessage.SetMicBufferMillis, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				waveIn.BufferMilliseconds = message.body[0];
+			});
+			server.OnMessage(HVCMessage.SetMicBufferCount, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				waveIn.NumberOfBuffers = message.body[0];
+			});
+			server.OnMessage(HVCMessage.SetBitrate, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				Bitrate preset = (Bitrate)message.body[0];
+				if (Enum.IsDefined(typeof(Bitrate), message.body[0]))
+				{
+					Console.WriteLine($"set bitrate: {preset}");
+					EncodingSetup.bitrateKB = message.body[0];
+					EncodingSetup.CommitBitrate();
+				}
+				else
+				{
+					Console.WriteLine($"attempted to set bitrate to an invalid value of {message.body[0]}");
+				}
+			});
+
+			waveIn.DataAvailable += OnMicData;
+
+			waveIn.RecordingStopped += delegate (object sender, StoppedEventArgs e)
+			{
+				if (listening)
+				{
+					// listening = false;
+					Console.WriteLine("mic dropout, attempt to reconnect");
+					//try
+					//{
+					//	waveIn.StopRecording();
+					//}
+					//catch { }
+					try
+					{
+						// waveIn.StartRecording();
+					}
+					catch { }
+
+					// listening = true;
+				}
+			};
 
 			new Thread(new ThreadStart(KeepAliveThread)).Start();
 

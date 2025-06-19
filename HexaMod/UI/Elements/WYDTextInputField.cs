@@ -55,9 +55,6 @@ namespace HexaMod.UI.Elements
 			label.transform.localPosition = new Vector2(label.transform.localPosition.x, 70f);
 
 			ClearEvents();
-			gameObject.SetActive(true);
-
-			Init();
 		}
 
 		public WYDTextInputField ClearEvents()

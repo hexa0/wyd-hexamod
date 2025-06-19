@@ -54,6 +54,23 @@ namespace HexaMod.UI.Elements
 		public GameObject gameObject;
 		public RectTransform rectTransform;
 
+		public WYDUIElement()
+		{
+
+		}
+
+		public virtual void Init()
+		{
+			WYDUIElementBehaviour behavior = gameObject.GetComponent<WYDUIElementBehaviour>();
+
+			if (!behavior)
+			{
+				gameObject.SetActive(true);
+				behavior = gameObject.AddComponent<WYDUIElementBehaviour>();
+				behavior.Initialize(this);
+			}
+		}
+
 		public virtual void Update()
 		{
 
@@ -68,17 +85,6 @@ namespace HexaMod.UI.Elements
 		{
 
 		}
-
-		internal void Init()
-		{
-			WYDUIElementBehaviour behavior = gameObject.GetComponent<WYDUIElementBehaviour>();
-
-			if (!behavior) {
-				behavior = gameObject.AddComponent<WYDUIElementBehaviour>();
-			}
-
-			behavior.Initialize(this);
-		}
 	}
 
 	static class WYDUIElementGenericMethodExtensions
@@ -86,6 +92,7 @@ namespace HexaMod.UI.Elements
 		public static Element SetParent<Element>(this Element element, Transform menu) where Element : WYDUIElement
 		{
 			element.gameObject.transform.SetParent(menu, false);
+			element.Init();
 			return element;
 		}
 

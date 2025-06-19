@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +35,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>40bucks.ico</ApplicationIcon>
@@ -46,6 +48,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -55,6 +58,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -326,10 +330,14 @@
     <Compile Include="Scripts\Levels\TeamSpawn.cs" />
     <Compile Include="Scripts\Levels\VoidFailSafe.cs" />
     <Compile Include="Scripts\NetworkedSound\NetworkedSoundBehavior.cs" />
+    <Compile Include="Scripts\PreferenceLinker.cs" />
     <Compile Include="SerializableObjects\InitialPlayerState.cs" />
     <Compile Include="SerializableObjects\MatchStartObject.cs" />
     <Compile Include="SerializableObjects\PlayerConnectedObject.cs" />
     <Compile Include="SerializableObjects\SerializableColor.cs" />
+    <Compile Include="Settings\HexaModPreferences.cs" />
+    <Compile Include="Settings\Type\ModPreference.cs" />
+    <Compile Include="Settings\Type\UnityPreference.cs" />
     <Compile Include="UI\Elements\Extended\WYDChangeMapButton.cs" />
     <Compile Include="UI\Elements\Extended\WYDMapButton.cs" />
     <Compile Include="UI\Elements\Extended\WYDSensitiveTextInputField.cs" />
@@ -348,6 +356,7 @@
     <Compile Include="Util\SerializationHelper.cs" />
     <Compile Include="Util\GetGameObjectChildren.cs" />
     <Compile Include="Util\Shuffle.cs" />
+    <Compile Include="Voice\CircularShortBuffer.cs" />
     <Compile Include="Voice\Script\LobbyVoiceEmitterBehavior.cs" />
     <Compile Include="Voice\Patch\LobbyVoiceEmitterHook.cs" />
     <Compile Include="Voice\Patch\QuitFix.cs" />
@@ -415,12 +424,13 @@
     <Compile Include="Scripts\Levels\Factory\SmokeDetectorFactory.cs" />
     <Compile Include="Scripts\Levels\SpecialSpawn.cs" />
     <Compile Include="Scripts\PunRpcExtensions\PickUp\PickUpRpcExtension.cs" />
-    <Compile Include="Scripts\TabOutMuteBehavior.cs" />
+    <Compile Include="Scripts\TabOutMute.cs" />
     <Compile Include="UI\LoadingController.cs" />
     <Compile Include="UI\MainUI.cs" />
     <Compile Include="UI\Util\Menu.cs" />
     <Compile Include="UI\Util\UITemplates.cs" />
     <Compile Include="Util\GameModes.cs" />
+    <Compile Include="Settings\Type\Preference.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="40bucks.ico" />

@@ -40,7 +40,7 @@ namespace VoiceChatHost.Type
 		public void SendToClient(ulong client, byte[] message)
 		{
 			UpdateLastEvent();
-			server.SendMessage(message, clients[client]);
+			server.Send(message, clients[client]);
 		}
 
 		public void SendToAllClients(byte[] message)

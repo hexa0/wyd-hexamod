@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace HexaMod
 {
-	public class TabOutMuteBehavior : MonoBehaviour
+	public class TabOutMute : MonoBehaviour
 	{
 		internal static class VolumeState
 		{
@@ -21,12 +21,17 @@ namespace HexaMod
 				StartCoroutine(DelayedStart());
 			};
 		}
-		public bool currentlyFocused = true;
-		public bool tabOutMuteEnabled = true;
+		public static bool currentlyFocused = true;
+		public static bool tabOutMuteEnabled = true;
 
 		public void UpdateFocusedState(bool state)
 		{
 			AudioListener.volume = state ? PlayerPrefs.GetFloat("MasterVolume", 0.75f) : 0f;
+		}
+
+		public static void SetEnabled(bool enabled)
+		{
+			tabOutMuteEnabled = enabled;
 		}
 
 		public bool IsFocused()

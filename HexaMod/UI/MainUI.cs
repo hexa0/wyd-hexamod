@@ -13,6 +13,9 @@ using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
+using HexaMod.Settings;
+using VoiceChatShared;
+using System;
 
 namespace HexaMod.UI
 {
@@ -231,8 +234,6 @@ namespace HexaMod.UI
 						});
 				}
 
-				HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = PlayerPrefs.GetInt("HMV2_TabOutMute", 1) == 1;
-
 				void MakeMenu(GameObject menu, MenuUtil menuUtil)
 				{
 					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = WYDTextButton.MakeBackButton(menuUtil, menu.transform).gameObject;
@@ -241,8 +242,6 @@ namespace HexaMod.UI
 					float gap = 15f;
 
 					LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
-
-					VoiceChat.SetDenoiseEnabled(PlayerPrefs.GetInt("HMV2_UseRnNoise", 0) == 1);
 
 					var devices = VoiceChat.GetDevices();
 					WYDSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WYDSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
@@ -256,6 +255,19 @@ namespace HexaMod.UI
 						};
 					}
 
+					WYDSwitchOption<int>[] audioBitrateOptions = new WYDSwitchOption<int>[Enum.GetValues(typeof(Bitrate)).Length];
+
+					for (int i = 0; i < audioBitrateOptions.Length;i++)
+					{
+						int value = (byte)Enum.GetValues(typeof(Bitrate)).GetValue(i);
+
+						audioBitrateOptions[i] = new WYDSwitchOption<int>()
+						{
+							name = Enum.GetName(typeof(Bitrate), value).Replace("Bitrate_Preset_", ""),
+							value = value
+						};
+					}
+
 					WYDUIElement[] options = {
 						// Audio
 
@@ -264,11 +276,15 @@ namespace HexaMod.UI
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
 							.SetText("Microphone Denoising (RNNoise)")
-							.LinkToPreference("HMV2_UseRnNoise")
-							.AddListener((bool value) =>
-							{
-								VoiceChat.SetDenoiseEnabled(value);
-							}),
+							.LinkToPreference(VoiceChat.denoisingEnabled),
+
+						new WYDSwitchInput<int>()
+							.SetName("microphoneBitrate")
+							.SetParent(menu.transform)
+							.SetPosition(45f, 0f)
+							.SetText("")
+							.AddOptions(audioBitrateOptions)
+							.LinkToPreference(VoiceChat.microphoneBitrate),
 
 						new WYDSwitchInput<VoiceChat.MicrophoneDevice>()
 							.SetName("microphoneDevice")
@@ -276,14 +292,9 @@ namespace HexaMod.UI
 							.SetPosition(45f, 0f)
 							.SetText("")
 							.AddOptions(deviceOptions)
-							.LinkToPreference("HMV2_MicrophoneDevice")
-							.AddListener((WYDSwitchOption<VoiceChat.MicrophoneDevice> option) =>
-							{
-								VoiceChat.SetDevice(option.value);
-							}),
+							.LinkToPreference(VoiceChat.microphoneDeviceId),
 
 						new WYDMicrophoneIndicator()
-							.SetName("microphoneVolume")
 							.SetParent(menu.transform)
 							.SetPosition(45f, 0f),
 
@@ -292,11 +303,7 @@ namespace HexaMod.UI
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
 							.SetText("Mute While Tabbed Out")
-							.LinkToPreference("HMV2_TabOutMute")
-							.AddListener((bool value) =>
-							{
-								HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>().tabOutMuteEnabled = value;
-							}),
+							.LinkToPreference(HexaModPreferences.tabOutMute),
 						
 						// UI
 
@@ -305,7 +312,7 @@ namespace HexaMod.UI
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
 							.SetText("Refreshed UI Colors (Requires Scene Reload)")
-							.LinkToPreference("HMV2_DoUITheme"),
+							.LinkToPreference(HexaModPreferences.doUItheme),
 
 					};
 

@@ -71,14 +71,9 @@ namespace HexaMod
 
 			HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
 			{
-				LobbySettingsChangedEvent changedEvent = HexaMod.persistentLobby.currentLobbySettingsEvent;
-				if (changedEvent.oldSettings.relay != changedEvent.newSettings.relay)
+				if (VoiceChatRoomsHook.inRoom)
 				{
-					VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
-				}
-
-				if (VoiceChatRoomsHook.inRoom && !PhotonNetwork.isMasterClient && VoiceChat.room == null)
-				{
+					VoiceChat.ConnectToRelay(HexaMod.persistentLobby.lobbySettings.relay);
 					VoiceChat.JoinVoiceRoom(HexaMod.persistentLobby.lobbySettings.voiceRoom);
 				}
 			});
@@ -157,7 +152,7 @@ namespace HexaMod
 			if (PhotonNetwork.room.IsOpen && info.sender != PhotonNetwork.masterClient)
 			{
 				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				if (player.isDad)
@@ -431,7 +426,7 @@ namespace HexaMod
 		void OnCreatedRoom()
 		{
 			Mod.Print($"RoomCreated");
-			VoiceChat.SetRelay(HexaMod.persistentLobby.lobbySettings.relay);
+			VoiceChat.ConnectToRelay(HexaMod.persistentLobby.lobbySettings.relay);
 			VoiceChat.JoinVoiceRoom(HexaMod.instanceGuid);
 		}
 
@@ -473,6 +468,32 @@ namespace HexaMod
 				{
 					HexaMod.textChat.SendServerMessage("All players have left the game.");
 				}
+
+				// lobby player list
+
+				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
+				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
+
+				for (int i = 0; i < playerList.daddyPlayerIds.Count; i++)
+				{
+					if (playerList.daddyPlayerIds[i] == player)
+					{
+						playerList.daddyPlayerIds.RemoveAt(i);
+						playerList.daddyPlayerNames.RemoveAt(i);
+					}
+				}
+
+				for (int i = 0; i < playerList.babyPlayerIds.Count; i++)
+				{
+					if (playerList.babyPlayerIds[i] == player)
+					{
+						playerList.babyPlayerIds.RemoveAt(i);
+						playerList.babyPlayerNames.RemoveAt(i);
+					}
+				}
+
+				playerList.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.All, playerList.daddyPlayerNames.ToArray(), playerList.daddyPlayerIds.ToArray(), playerList.babyPlayerNames.ToArray(), playerList.babyPlayerIds.ToArray());
 
 				// abandoned screen
 

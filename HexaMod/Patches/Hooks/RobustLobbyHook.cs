@@ -54,9 +54,17 @@ namespace HexaMod.Patches.Hooks
 
 		[HarmonyPatch(typeof(PlayerNames), "SendPlayerLists")]
 		[HarmonyPrefix]
-		static bool SendPlayerLists()
+		static bool SendPlayerLists(ref PlayerNames __instance)
 		{
-			return !PhotonNetwork.isMasterClient;
+			if (PhotonNetwork.isMasterClient)
+			{
+				__instance.RefreshNameList();
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "MoveDaddy")]
@@ -150,6 +158,13 @@ namespace HexaMod.Patches.Hooks
 				}
 			}
 
+			return false;
+		}
+
+		[HarmonyPatch(typeof(PlayerNames), "OnPhotonPlayerDisconnected")]
+		[HarmonyPrefix]
+		static bool OnPhotonPlayerDisconnected()
+		{
 			return false;
 		}
 	}

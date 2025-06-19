@@ -10,108 +10,102 @@ namespace HexaMod.Voice
 		public GameObject speakingObject;
 		public AudioSource audioSource;
 		public ulong clientId = 0;
-		private List<short[]> buffers;
-		private short[] lastBuffer = new short[512];
+		private List<VoiceChat.AudioBuffer> buffers;
+		private VoiceChat.AudioBuffer lastBuffer = new VoiceChat.AudioBuffer()
+		{
+			samples = new short[1024],
+			sampleRate = 48000,
+			channels = 1,
+		};
 		private void Start()
 		{
 			audioSource = GetComponent<AudioSource>();
 			audioSource.dopplerLevel = 0f;
 		}
 
-		private short[] NextBuffer()
+		private VoiceChat.AudioBuffer NextBuffer()
 		{
-			short[] buffer = buffers.ElementAtOrDefault(0);
-			if (buffer == null)
+			lock (buffers)
 			{
-				buffer = lastBuffer;
-
-				bool speaking = false;
-
-				if (VoiceChat.speakingStates.ContainsKey(clientId))
+				VoiceChat.AudioBuffer buffer = buffers.ElementAtOrDefault(0);
+				if (buffer == null)
 				{
-					if (VoiceChat.speakingStates[clientId])
+					buffer = lastBuffer;
+
+					bool speaking = false;
+
+					if (VoiceChat.speakingStates.ContainsKey(clientId))
 					{
-						speaking = true;
+						if (VoiceChat.speakingStates[clientId])
+						{
+							speaking = true;
+						}
 					}
-				}
 
-				if (speaking)
-				{
-					for (int i = 0; i < buffer.Length; i++)
+					if (speaking)
 					{
-						buffer[i] = (short)(buffer[i] * 0.7f); // haha discord funni
+						for (int i = 0; i < buffer.samples.Length; i++)
+						{
+							buffer.samples[i] = (short)(buffer.samples[i] * 0.85f); // haha discord funni
+						}
+					}
+					else
+					{
+						circularBuffer.Write(new short[circularBuffer.capacity]);
+						circularBuffer.realReadHead = 0;
+						circularBuffer.realWriteHead = 256;
+
+						for (int i = 0; i < buffer.samples.Length; i++)
+						{
+							buffer.samples[i] = 0;
+						}
 					}
 				}
 				else
 				{
-					for (int i = 0; i < buffer.Length; i++)
-					{
-						buffer[i] = 0;
-					}
+					lastBuffer = buffer;
+					buffers.RemoveAt(0);
 				}
-			}
-			else
-			{
-				lastBuffer = buffer;
-				buffers.RemoveAt(0);
-			}
 
-			return buffer;
+				return buffer;
+			}
 		}
 
-		private int digestPosition = 0;
-		private short[] buffer;
+		private CircularShortBuffer circularBuffer = new CircularShortBuffer(48000 * 2);
 		private static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
 		{
 			Buffer.BlockCopy(source, sourceIndex * 2, destination, destinationIndex * 2, length * 2);
 		}
+
 		private short[] NextChunk(int chunkSize)
 		{
-			short[] slice = new short[chunkSize];
-			if (buffer == null)
+			if (buffers != null)
 			{
-				// this really shouldn't happen but still does
-				buffer = NextBuffer();
-				if (buffer == null)
+				lock (buffers)
 				{
-					return slice;
+					foreach (VoiceChat.AudioBuffer buffer in buffers.ToArray())
+					{
+						circularBuffer.Write(buffer.samples);
+						lastBuffer = buffer;
+					}
+
+					buffers.Clear();
 				}
 			}
 
-			if (digestPosition >= buffer.Length)
+			if (!circularBuffer.IsEnough(chunkSize))
 			{
-				digestPosition = 0;
-				buffer = NextBuffer();
-				CopyData(buffer, digestPosition, slice, 0, chunkSize);
-				digestPosition += chunkSize;
-			}
-			else if ((digestPosition + chunkSize) > buffer.Length)
-			{
-				int firstHalfReduction = (digestPosition + chunkSize) - buffer.Length;
-				CopyData(
-					buffer, // source
-					digestPosition, // source start
-					slice, // destination
-					0, // write start
-					buffer.Length - digestPosition // length
-				);
-				buffer = NextBuffer();
-				CopyData(
-					buffer, // source
-					0, // source start
-					slice, // destination
-					chunkSize - firstHalfReduction, // write start
-					firstHalfReduction // length
-				);
-				digestPosition = firstHalfReduction;
-			}
-			else
-			{
-				CopyData(buffer, digestPosition, slice, 0, chunkSize);
-				digestPosition += chunkSize;
+				circularBuffer.realReadHead = circularBuffer.realWriteHead - 256;
+
+				short[] enough = new short[chunkSize];
+				CopyData(NextBuffer().samples, 0, enough, 0, chunkSize);
+
+				circularBuffer.Write(enough);
 			}
 
-			return slice;
+			short[] read = circularBuffer.Read(chunkSize);
+
+			return read;
 		}
 
 		private float volumeL = 0;
@@ -148,29 +142,48 @@ namespace HexaMod.Voice
 			}
 		}
 
-		private void OnAudioFilterRead(float[] data, int channels)
+		private void OnAudioFilterRead(float[] data, int outputChannels)
 		{
-			try
+			if (VoiceChat.audioBuffers.ContainsKey(clientId))
 			{
-				if (VoiceChat.audioBuffers.ContainsKey(clientId))
+				buffers = VoiceChat.audioBuffers[clientId];
+
+				try
 				{
-					buffers = VoiceChat.audioBuffers[clientId];
+					int neededSamples = data.Length / outputChannels;
+					int channels = lastBuffer.channels;
 
-					int sampleCount = data.Length / channels;
-					short[] monoInput = NextChunk(sampleCount);
+					short[] input = NextChunk(neededSamples * channels);
 
-					for (int sample = 0; sample < sampleCount; sample++)
+					switch (channels)
 					{
-						float currentSampleValue = monoInput[sample] / (float)short.MaxValue;
+						default:
+							for (int sample = 0; sample < neededSamples; sample++)
+							{
+								float currentSampleValue = input[sample] * VoiceChat.shortMaxValueMul;
 
-						data[sample * 2] = currentSampleValue * volumeL;
-						data[(sample * 2) + 1] = currentSampleValue * volumeR;
+								data[sample * 2] = currentSampleValue * volumeL;
+								data[1 + sample * 2] = currentSampleValue * volumeR;
+							}
+
+							break;
+						case 2:
+							for (int sample = 0; sample < neededSamples; sample++)
+							{
+								float currentSampleValueL = input[sample * 2] * VoiceChat.shortMaxValueMul;
+								float currentSampleValueR = input[1 + sample * 2] * VoiceChat.shortMaxValueMul;
+
+								data[sample * 2] = currentSampleValueL * volumeL;
+								data[1 + sample * 2] = currentSampleValueR * volumeR;
+							}
+
+							break;
 					}
 				}
-			}
-			catch (Exception e)
-			{
-				Mod.Fatal(e);
+				catch (Exception e)
+				{
+					Mod.Fatal(e);
+				}
 			}
 		}
 	}

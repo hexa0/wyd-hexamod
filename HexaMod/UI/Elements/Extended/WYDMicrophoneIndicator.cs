@@ -18,8 +18,6 @@ namespace HexaMod.UI.Elements.Extended
 				.SetSprite(microphoneIcon)
 				.SetText("")
 				.SetFontSize(15);
-
-			Init();
 		}
 
 		public WYDMicrophoneIndicator(string name, Transform menu, Vector2 position) : this()

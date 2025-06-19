@@ -10,8 +10,7 @@ namespace HexaMod.Patches.Fixes
 
 		static void UpdateVolume()
 		{
-			TabOutMuteBehavior tabOutMute = HexaMod.persistentInstance.GetComponent<TabOutMuteBehavior>();
-			tabOutMute.UpdateFocusedState(tabOutMute.IsFocused());
+			HexaMod.tabOutMute.UpdateFocusedState(HexaMod.tabOutMute.IsFocused());
 		}
 
 		[HarmonyPatch(typeof(SetOptions), "Start")]

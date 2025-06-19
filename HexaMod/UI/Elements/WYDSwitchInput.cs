@@ -102,10 +102,6 @@ namespace HexaMod.UI.Elements
 			lower.name = "lower";
 			current.name = "currentValue";
 			res.name = "label";
-
-			gameObject.SetActive(true);
-
-			Init();
 		}
 
 		public WYDSwitchInput<Type> SetText(string text)
@@ -132,13 +128,10 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDSwitchInput<Type> LinkToPreference(string preference)
+		public WYDSwitchInput<Type> LinkToPreference(Preference<int> preference)
 		{
-			SetOption(Mathf.Min(PlayerPrefs.GetInt(preference, 0), options.Count - 1))
-				.AddListener((WYDSwitchOption<Type> option) =>
-				{
-					PlayerPrefs.SetInt(preference, option.index);
-				});
+			SetOption(Mathf.Min(preference.Value, options.Count - 1))
+				.AddListener((WYDSwitchOption<Type> option) => preference.Value = option.index);
 			return this;
 		}
 

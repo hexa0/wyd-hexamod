@@ -1,6 +1,7 @@
 ﻿using Boo.Lang;
 using HarmonyLib;
 using HexaMod.UI;
+using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,21 @@ namespace HexaMod.Patches.Hooks
 		static void ChangeLobbyName(ref PhotonNetworkManager __instance)
 		{
 			PhotonNetwork.playerName = __instance.lobbyName;
+		}
+
+		[HarmonyPatch(typeof(PlayerNames), "RefreshNameList")]
+		[HarmonyPrefix]
+		static void RefreshNameList(ref PlayerNames __instance)
+		{
+			for (int i = 0; i < __instance.daddyPlayerNames.Count; i++)
+			{
+				__instance.daddyPlayerNames[i] = HexaLobby.GetPlayerName(__instance.daddyPlayerIds[i]);
+			}
+
+			for (int i = 0; i < __instance.babyPlayerNames.Count; i++)
+			{
+				__instance.babyPlayerNames[i] = HexaLobby.GetPlayerName(__instance.babyPlayerIds[i]);
+			}
 		}
 
 		[HarmonyPatch(typeof(PhotonNetworkManager), "Start")]

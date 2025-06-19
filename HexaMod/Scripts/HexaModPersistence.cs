@@ -6,7 +6,10 @@ namespace HexaMod
 	{
 		void Awake()
 		{
-			gameObject.AddComponent<TabOutMuteBehavior>();
+			HexaMod.asyncAssetLoader = gameObject.AddComponent<AsyncAssetLoader>();
+			HexaMod.persistentLobby = gameObject.AddComponent<HexaPersistentLobby>();
+			HexaMod.tabOutMute = gameObject.AddComponent<TabOutMute>();
+			HexaMod.preferenceLinker = gameObject.AddComponent<PreferenceLinker>();
 		}
 	}
 }

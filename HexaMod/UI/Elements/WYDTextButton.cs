@@ -117,11 +117,7 @@ namespace HexaMod.UI.Elements
 			button = gameObject.GetComponent<Button>();
 			label = button.transform.GetChild(0).GetComponent<Text>();
 
-			button.gameObject.SetActive(true);
-
 			ClearEvents();
-
-			Init();
 		}
 
 		public WYDTextButton() : this(Object.Instantiate(UITemplates.buttonTemplate.gameObject)) { }

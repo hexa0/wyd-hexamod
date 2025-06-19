@@ -15,13 +15,10 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDBooleanControl LinkToPreference(string preference)
+		public WYDBooleanControl LinkToPreference(Preference<bool> preference)
 		{
-			SetState(PlayerPrefs.GetInt(preference, 1) == 1)
-				.AddListener((bool value) =>
-				{
-					PlayerPrefs.SetInt(preference, value ? 1 : 0);
-				});
+			SetState(preference.Value)
+				.AddListener(value => preference.Value = value);
 			return this;
 		}
 
@@ -68,10 +65,6 @@ namespace HexaMod.UI.Elements
 			label.GetComponent<RectTransform>().sizeDelta = new Vector3(1000f, 1f);
 
 			ClearEvents();
-
-			control.gameObject.SetActive(true);
-
-			Init();
 		}
 
 		public WYDBooleanControl(string name, string text, bool active, Transform menu, Vector2 position, UnityAction<bool>[] actions) : this()

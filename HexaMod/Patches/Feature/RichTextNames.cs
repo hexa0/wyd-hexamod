@@ -8,15 +8,15 @@ namespace HexaMod.Voice
 	{
 		[HarmonyPatch(typeof(PhotonNetworkManager), "Start")]
 		[HarmonyPrefix]
-		static void RefreshNameList(ref PhotonNetworkManager __instance)
+		static void Start(ref PhotonNetworkManager __instance)
 		{
 			__instance.lobbyInputField.characterLimit = 200;
 			__instance.lobbyInputField.textComponent.supportRichText = true;
 		}
 
-		[HarmonyPatch(typeof(PlayerNames), "RefreshNameList")]
+		[HarmonyPatch(typeof(PlayerNames), "Start")]
 		[HarmonyPostfix]
-		static void RefreshNameList(ref PlayerNames __instance)
+		static void Start(ref PlayerNames __instance)
 		{
 			foreach (Text name in __instance.daddyNames)
 			{

@@ -4,7 +4,6 @@ using HexaVoiceChatShared;
 using HexaVoiceChatShared.Net;
 using HexaVoiceChatShared.MessageProtocol;
 using VoiceChatHost.Type;
-using static HexaVoiceChatShared.HexaVoiceChat.Protocol;
 
 namespace VoiceChatHost
 {
@@ -67,7 +66,7 @@ namespace VoiceChatHost
 		private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
 		{
 			Console.WriteLine($"got handshake, respond to {from}");
-			server.SendMessage(VoiceChatMessage.BuildMessage(VoiceChatMessageType.Handshake, []), from);
+			server.SendEventMessage(HVCMessage.Handshake, from);
 		}
 
 		public RelayServer(string ip)
@@ -77,12 +76,12 @@ namespace VoiceChatHost
 				HexaVoiceChat.Ports.relay
 			));
 
-			server.OnMessage(VoiceChatMessageType.VoiceRoomJoin, VoiceRoomJoinOrKeepAlive);
-			server.OnMessage(VoiceChatMessageType.VoiceRoomKeepAlive, VoiceRoomJoinOrKeepAlive);
-			server.OnMessage(VoiceChatMessageType.VoiceRoomLeave, VoiceRoomLeave);
-			server.OnMessage(VoiceChatMessageType.Opus, ForwardToOthersInRoom);
-			server.OnMessage(VoiceChatMessageType.SpeakingStateUpdated, ForwardToOthersInRoom);
-			server.OnMessage(VoiceChatMessageType.Handshake, OnHandshake);
+			server.OnMessage(HVCMessage.VoiceRoomJoin, VoiceRoomJoinOrKeepAlive);
+			server.OnMessage(HVCMessage.VoiceRoomKeepAlive, VoiceRoomJoinOrKeepAlive);
+			server.OnMessage(HVCMessage.VoiceRoomLeave, VoiceRoomLeave);
+			server.OnMessage(HVCMessage.Opus, ForwardToOthersInRoom);
+			server.OnMessage(HVCMessage.SpeakingStateUpdated, ForwardToOthersInRoom);
+			server.OnMessage(HVCMessage.Handshake, OnHandshake);
 
 			new Thread(new ThreadStart(RelayServerMainThread)).Start();
 		}

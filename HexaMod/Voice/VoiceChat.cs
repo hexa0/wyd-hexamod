@@ -13,7 +13,8 @@ using HexaVoiceChatShared.MessageProtocol;
 using HexaVoiceChatShared.Net;
 using NAudio.Wave;
 using UnityEngine;
-using static HexaVoiceChatShared.HexaVoiceChat;
+using HexaVoiceChatShared;
+using VoiceChatShared;
 
 namespace HexaMod.Voice
 {
@@ -23,7 +24,7 @@ namespace HexaMod.Voice
 		{
 			if (Environment.GetCommandLineArgs().Contains("ForceConsistantTranscodePort"))
 			{
-				return Ports.transcode;
+				return HexaVoiceChat.Ports.transcode;
 			}
 			else
 			{
@@ -35,85 +36,42 @@ namespace HexaMod.Voice
 			}
 		}
 
+		public class AudioBuffer
+		{
+			public short[] samples;
+			public int channels = 1;
+			public int sampleRate = 48000;
+		}
+
 		public static bool testMode = false;
-		public static Dictionary<ulong, List<short[]>> audioBuffers = new Dictionary<ulong, List<short[]>>();
+		public static Dictionary<ulong, List<AudioBuffer>> audioBuffers = new Dictionary<ulong, List<AudioBuffer>>();
 		public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
 		public static VoiceChatClient voicechatTranscodeClient;
 		private static int transcodeServerPort = 0;
 		public static Process internalTranscodeServerProcess;
 		internal static ManualLogSource voiceChatProcessLog = BepInEx.Logging.Logger.CreateLogSource("VoiceChatHost");
+		public static float shortMaxValueMul = 1f / short.MaxValue;
 
-		public static int micSampleRate = 48000;
-		public static int micBufferMillis = 20;
-		public static int micChannels = 1;
-		public static int micBits = 16;
-		public static int opusBitrate = 8192;
-		public static int opusSegmentFrames = 960;
+		internal static int underrunPreventionSize = 4;
 
-
-		internal static int underrunPreventionSize = 3;
-		internal static bool listening = false;
-		internal static WaveInEvent waveIn = new WaveInEvent
+		public static void Init()
 		{
-			DeviceNumber = 0,
-			WaveFormat = new WaveFormat(	
-				rate: micSampleRate,
-				bits: micBits,
-				channels: micChannels
-			),
-			BufferMilliseconds = micBufferMillis,
-			NumberOfBuffers = 1
-		};
+			InitUnityForVoiceChat();
+			InitTranscodeServerProcess();
+		}
+
+		public static bool listening = false;
+
 		public static void StartListening()
 		{
-			if (!microphoneInitialized)
-			{
-				InitMicrophone();
-			}
-
-			Mod.Print("Mic Activated");
-			if (!listening)
-			{
-				listening = true;
-				waveIn.StartRecording();
-			}
+			voicechatTranscodeClient.SendMessage(HVCMessage.SetListening, UDP.AsData(true));
+			listening = true;
 		}
+
 		public static void StopListening()
 		{
-			Mod.Print("Mic Deactivated");
-			if (listening)
-			{
-				listening = false;
-				waveIn.StopRecording();
-			}
-		}
-		private static bool microphoneInitialized = false;
-		public static void InitMicrophone()
-		{
-			Mod.Print("Mic Initialized");
-			microphoneInitialized = true;
-			waveIn.DataAvailable += WaveIn_DataAvailable;
-
-			waveIn.RecordingStopped += delegate (object sender, StoppedEventArgs e)
-			{
-				if (listening)
-				{
-					listening = false;
-					Mod.Warn("mic dropout, attempt to reconnect");
-					//try
-					//{
-					//	waveIn.StopRecording();
-					//}
-					//catch { }
-					try
-					{
-						waveIn.StartRecording();
-					}
-					catch { }
-
-					listening = true;
-				}
-			};
+			voicechatTranscodeClient.SendMessage(HVCMessage.SetListening, UDP.AsData(false));
+			listening = false;
 		}
 
 		public static void InitTranscodeServerProcess()
@@ -135,26 +93,39 @@ namespace HexaMod.Voice
 
 			internalTranscodeServerProcess.OutputDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
 			{
-				voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
+				string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
+				foreach (string line in output.Split(new[] {'\r', '\n'}))
+				{
+					voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
+				}
 			});
 
 			internalTranscodeServerProcess.Start();
 			internalTranscodeServerProcess.BeginOutputReadLine();
 		}
 
-		public static bool completedHandshake = false;
+		public static bool transcodeServerReady = false;
 		static void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
 		{
-			if (!completedHandshake)
+			if (!transcodeServerReady)
 			{
 				Mod.Print($"Completed Handshake With Signature \"{Encoding.ASCII.GetString(message.body)}\" which should always match \"!\"");
-				completedHandshake = true;
+				transcodeServerReady = true;
 				new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
+				ConnectedToTranscodeServer();
 			}
 			else
 			{
 				Mod.Warn("Receive Handshake: Already Completed Handshake");
 			}
+		}
+
+		static void ConnectedToTranscodeServer()
+		{
+			SetDenoiseEnabled(denoisingEnabled.Value);
+			SetMicrophoneDeviceId(microphoneDeviceId.Value);
+			SetMicrophoneBufferMillis(microphoneBufferMillis.Value);
+			SetMicrophoneBitrate(microphoneBitrate.Value);
 		}
 
 		public static void InitTranscodeServerConnection()
@@ -166,19 +137,19 @@ namespace HexaMod.Voice
 				transcodeServerPort
 			));
 
-			voicechatTranscodeClient.Connect(true);
+			voicechatTranscodeClient.Connect();
 
 			Mod.Print("On Message");
 
-			voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.PCMData, OnPCMData);
-			voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.SpeakingStateUpdated, OnSpeakingState);
-			voicechatTranscodeClient.OnMessage(Protocol.VoiceChatMessageType.Handshake, OnHandshake);
+			voicechatTranscodeClient.OnClientMessage(HVCMessage.PCMData, OnPCMData);
+			voicechatTranscodeClient.OnMessage(HVCMessage.SpeakingStateUpdated, OnSpeakingState);
+			voicechatTranscodeClient.OnMessage(HVCMessage.Handshake, OnHandshake);
 		}
 
 		public static void SendTranscodeServerHandshake()
 		{
 			Mod.Print("Attempt Handshake");
-			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(Protocol.VoiceChatMessageType.Handshake, new byte[1]));
+			voicechatTranscodeClient.SendMessage(HVCMessage.Handshake, new byte[1]);
 		}
 
 		public static void InitUnityForVoiceChat()
@@ -195,27 +166,41 @@ namespace HexaMod.Voice
 			AudioSettings.Reset(audioConfiguration);
 		}
 
+		public static readonly ModPreference<int> microphoneDeviceId = new ModPreference<int>("MicrophoneDevice", 0).LinkTo(SetMicrophoneDeviceId);
+		public static readonly ModPreference<byte> microphoneBufferMillis = new ModPreference<byte>("MicrophoneBufferMillis", 20).LinkTo(SetMicrophoneBufferMillis);
+		public static readonly ModPreference<int> microphoneBitrate = new ModPreference<int>("MicrophoneBitrate", 2).LinkTo(SetMicrophoneBitrate);
+		public static readonly ModPreference<bool> denoisingEnabled = new ModPreference<bool>("UseRnNoise", false).LinkTo(SetDenoiseEnabled);
+
 		public static float currentPeak = 0f;
 
-		static void OnPCMData(DecodedVoiceChatMessage message, IPEndPoint from)
+		static void OnPCMData(DecodedClientWrappedMessage message, IPEndPoint from)
 		{
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+			int sampleRate = BitConverter.ToInt32(message.body, 0);
+			int channels = BitConverter.ToInt32(message.body, 4);
+			short[] pcm = new short[Mathf.CeilToInt((message.body.Length - 8) / 2f)];
+			Buffer.BlockCopy(message.body, 8, pcm, 0, message.body.Length - 8);
 
-			short[] pcm = new short[Mathf.CeilToInt(clientMessage.body.Length / 2f)];
-			Buffer.BlockCopy(clientMessage.body, 0, pcm, 0, clientMessage.body.Length);
-
-			if (!audioBuffers.ContainsKey(clientMessage.clientId))
+			if (!audioBuffers.ContainsKey(message.clientId))
 			{
-				audioBuffers.Add(clientMessage.clientId, new List<short[]>());
+				audioBuffers.Add(message.clientId, new List<AudioBuffer>());
 			}
 
-			List<short[]> buffer = audioBuffers[clientMessage.clientId];
-			buffer.Add(pcm);
+			List<AudioBuffer> buffers = audioBuffers[message.clientId];
 
-			if (buffer.Count > underrunPreventionSize)
+			lock (buffers)
 			{
-				buffer.RemoveAt(0);
-				// Mod.Warn("too many buffers exist? did you forget to consume the audio data?");
+				buffers.Add(new AudioBuffer()
+				{
+					samples = pcm,
+					sampleRate = sampleRate,
+					channels = channels
+				});
+
+				if (buffers.Count > underrunPreventionSize)
+				{
+					buffers.RemoveAt(0);
+					// Mod.Warn("too many buffers exist? did you forget to consume the audio data?");
+				}
 			}
 		}
 
@@ -225,50 +210,38 @@ namespace HexaMod.Voice
 			speakingStates[clientMessage.clientId] = clientMessage.body[0] == 1;
 		}
 
-		static void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
+		static string relayIp = null;
+
+		public static void DisconnectFromRelay()
 		{
-			short[] pcm = new short[Mathf.CeilToInt(e.Buffer.Length / 2f)];
-			Buffer.BlockCopy(e.Buffer, 0, pcm, 0, e.Buffer.Length);
-
-			currentPeak = (float)Math.Max(pcm.Max(), -pcm.Min()) / (float)short.MaxValue;
-
-			try
-			{
-				if (room != null)
-				{
-					voicechatTranscodeClient.SendMessage(
-						VoiceChatMessage.BuildMessage(
-							Protocol.VoiceChatMessageType.PCMData,
-							e.Buffer
-						)
-					);
-				}
-			}
-			catch (Exception ex)
-			{
-				Mod.Warn(ex);
-			}
+			voicechatTranscodeClient.SendEventMessage(HVCMessage.DisconnectFromRelay);
+			relayIp = null;
 		}
 
-		public static void SetRelay(string ip)
+		public static void ConnectToRelay(string ip)
 		{
-			Mod.Print($"SetRelay {ip}");
-
-			string oldRoom = room;
-
-			if (room != null)
+			if (relayIp != ip)
 			{
-				LeaveVoiceRoom();
-			}
+				relayIp = ip;
 
-			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
-				Protocol.VoiceChatMessageType.SwitchRelay,
-				Encoding.ASCII.GetBytes(ip)
-			));
+				Mod.Print($"SetRelay {ip}");
 
-			if (oldRoom != null)
-			{
-				JoinVoiceRoom(oldRoom);
+				string oldRoom = room;
+
+				if (room != null)
+				{
+					LeaveVoiceRoom();
+				}
+
+				voicechatTranscodeClient.SendMessage(
+					HVCMessage.ConnectToRelay,
+					Encoding.ASCII.GetBytes(ip)
+				);
+
+				if (oldRoom != null)
+				{
+					JoinVoiceRoom(oldRoom);
+				}
 			}
 		}
 
@@ -276,49 +249,43 @@ namespace HexaMod.Voice
 
 		public static void JoinVoiceRoom(string roomName)
 		{
-			Mod.Print($"JoinVoiceRoom {roomName}");
-
 			if (room != roomName)
 			{
-				voicechatTranscodeClient.SendMessage(ClientWrappedMessage.BuildMessage(
+				room = roomName;
+
+				Mod.Print($"JoinVoiceRoom {roomName}");
+
+				voicechatTranscodeClient.SendClientWrappedMessage(
 					testMode ? 0 : (ulong)PhotonNetwork.player.ID,
-					Protocol.VoiceChatMessageType.VoiceRoomJoin,
+					HVCMessage.VoiceRoomJoin,
 					Encoding.ASCII.GetBytes(roomName)
-				));
-			}
+				);
 
-			room = roomName;
-
-			if (!listening)
-			{
 				StartListening();
 			}
 		}
 
-		public static void SetDenoiseEnabled(bool denoise)
+		static void SetDenoiseEnabled(bool denoise)
 		{
-			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
-				Protocol.VoiceChatMessageType.SetRNNoiseEnabled,
-				new byte[] { (byte)(denoise ? 1 : 0) }
-			));
+			if (transcodeServerReady)
+			{
+				voicechatTranscodeClient.SendMessage(HVCMessage.SetRNNoiseEnabled, new byte[] {
+				(byte)(denoise ? 0x01 : 0x00)
+			});
+			}
 		}
 
 		public static void LeaveVoiceRoom()
 		{
 			Mod.Print($"LeaveVoiceRoom {room}");
-			voicechatTranscodeClient.SendMessage(VoiceChatMessage.BuildMessage(
-				Protocol.VoiceChatMessageType.VoiceRoomLeave,
-				new byte[1]
-			));
+			voicechatTranscodeClient.SendEventMessage(HVCMessage.VoiceRoomLeave);
 
 			room = null;
 			speakingStates.Clear();
 			audioBuffers.Clear();
 
-			if (listening)
-			{
-				StopListening();
-			}
+			StopListening();
+			DisconnectFromRelay();
 		}
 
 		public class MicrophoneDevice
@@ -343,18 +310,27 @@ namespace HexaMod.Voice
 			return devices;
 		}
 
-		public static void SetDevice(MicrophoneDevice device)
+		public static void SetMicrophoneDeviceId(int device)
 		{
-			bool wasListening = listening;
-			if (wasListening)
+			if (transcodeServerReady)
 			{
-				StopListening();
+				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicDeviceId, UDP.AsData(device));
 			}
-			waveIn.DeviceNumber = device.deviceId;
-			Mod.Print($"mic device changed to {device.deviceId}");
-			if (wasListening)
+		}
+
+		public static void SetMicrophoneBufferMillis(byte millis)
+		{
+			if (transcodeServerReady)
 			{
-				StartListening();
+				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicBufferMillis, UDP.AsData(millis));
+			}
+		}
+
+		public static void SetMicrophoneBitrate(int bitrate)
+		{
+			if (transcodeServerReady)
+			{
+				voicechatTranscodeClient.SendMessage(HVCMessage.SetBitrate, UDP.AsData((byte)Enum.GetValues(typeof(Bitrate)).GetValue(bitrate)));
 			}
 		}
 
@@ -362,14 +338,52 @@ namespace HexaMod.Voice
 		{
 			while (true)
 			{
+				if (internalTranscodeServerProcess.HasExited)
+				{
+					Mod.Warn("transcode server has exited, restarting it");
+
+					internalTranscodeServerProcess = null;
+					transcodeServerReady = false;
+
+					InitTranscodeServerProcess();
+
+					while (!transcodeServerReady)
+					{
+						Thread.Sleep(100);
+
+						try
+						{
+							InitTranscodeServerConnection();
+						}
+						catch (Exception e)
+						{
+							Mod.Warn(e);
+						}
+
+						Thread.Sleep(100);
+
+						try
+						{
+							if (!transcodeServerReady)
+							{
+								SendTranscodeServerHandshake();
+							}
+						}
+						catch (Exception e)
+						{
+							Mod.Warn(e);
+						}
+
+						Thread.Sleep(100);
+					}
+
+					Mod.Warn("transcode has been re-initialized");
+				}
+
+
 				try
 				{
-					voicechatTranscodeClient.SendMessage(
-						VoiceChatMessage.BuildMessage(
-							Protocol.VoiceChatMessageType.KeepTranscodeAlive,
-							new byte[1]
-						)
-					);
+					voicechatTranscodeClient.SendEventMessage(HVCMessage.KeepTranscodeAlive);
 				}
 				catch (Exception e)
 				{

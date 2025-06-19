@@ -30,11 +30,13 @@ namespace HexaMod
 		public static RematchHelper rematchHelper;
 		public static EventSystem eventSystem;
 		public static RpcChatExtended textChat;
-		public static HexaLobby hexaLobby;
-		public static HexaModPersistence persistentInstance;
 		public static AsyncAssetLoader asyncAssetLoader;
 		public static HexaPersistentLobby persistentLobby;
+		public static TabOutMute tabOutMute;
+		public static PreferenceLinker preferenceLinker;
+		public static HexaLobby hexaLobby;
 		public static MainUI mainUI;
+
 		public static void Init()
 		{
 			Mod.Print("Setup Settings");
@@ -47,9 +49,7 @@ namespace HexaMod
 			Object.DontDestroyOnLoad(persistentGameObject);
 
 			persistentGameObject.name = "HexaModPersistent";
-			persistentInstance = persistentGameObject.AddComponent<HexaModPersistence>();
-			asyncAssetLoader = persistentGameObject.AddComponent<AsyncAssetLoader>();
-			persistentLobby = persistentGameObject.AddComponent<HexaPersistentLobby>();
+			persistentGameObject.AddComponent<HexaModPersistence>();
 
 			Mod.Print("Setup Levels");
 			Assets.Init();
