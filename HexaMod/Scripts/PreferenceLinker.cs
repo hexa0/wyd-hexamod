@@ -25,6 +25,8 @@ namespace HexaMod
 			}
 			else
 			{
+				action.Invoke();
+
 				HexaMod.preferenceLinker.preferenceUpdated += (sender, updateEvent) =>
 				{
 					if (updateEvent.preference == preference)

@@ -192,6 +192,8 @@ namespace VoiceChatHost
 			bool shouldListen = message.body[0] == 1;
 			if (listening != shouldListen)
 			{
+				listening = shouldListen;
+
 				if (shouldListen)
 				{
 					Console.WriteLine("Mic Activated");
@@ -202,8 +204,6 @@ namespace VoiceChatHost
 					Console.WriteLine("Mic Deactivated");
 					waveIn.StopRecording();
 				}
-
-				listening = shouldListen;
 			}
 		}
 
@@ -350,20 +350,15 @@ namespace VoiceChatHost
 			{
 				if (listening)
 				{
-					// listening = false;
+					listening = false;
 					Console.WriteLine("mic dropout, attempt to reconnect");
-					//try
-					//{
-					//	waveIn.StopRecording();
-					//}
-					//catch { }
 					try
 					{
-						// waveIn.StartRecording();
+						waveIn.StartRecording();
 					}
 					catch { }
 
-					// listening = true;
+					listening = true;
 				}
 			};
 
