@@ -33,8 +33,8 @@ namespace HexaMod.Patches.Hooks
 		{
 			if (PhotonNetwork.isMasterClient && PhotonNetwork.room != null && !PhotonNetwork.room.IsOpen)
 			{
-				HexaMod.persistentLobby.lobbySettings.roundNumber++;
-				HexaMod.persistentLobby.CommitChanges();
+				HexaPersistentLobby.instance.lobbySettings.roundNumber++;
+				HexaPersistentLobby.instance.CommitChanges();
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace HexaMod.Patches.Hooks
 		static void MoveDaddy(int oldSpot, ref PlayerNames __instance)
 		{
 			PhotonPlayer player = __instance.daddyPlayerIds[oldSpot];
-			HexaMod.persistentLobby.dads[player.ID] = false;
+			HexaPersistentLobby.instance.dads[player.ID] = false;
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "KickDadPlayer")]
@@ -96,7 +96,7 @@ namespace HexaMod.Patches.Hooks
 		static void MoveBaby(int oldSpot, ref PlayerNames __instance)
 		{
 			PhotonPlayer player = __instance.babyPlayerIds[oldSpot];
-			HexaMod.persistentLobby.dads[player.ID] = true;
+			HexaPersistentLobby.instance.dads[player.ID] = true;
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "AddDaddy")]
@@ -107,8 +107,8 @@ namespace HexaMod.Patches.Hooks
 			{
 				__instance.daddyPlayerNames.Add(input);
 				__instance.daddyPlayerIds.Add(input2);
-				HexaMod.persistentLobby.dads[input2.ID] = true;
-				HexaMod.networkManager.GetComponent<PhotonView>().RPC("SetIsDad", input2, true);
+				HexaPersistentLobby.instance.dads[input2.ID] = true;
+				HexaGlobal.networkManager.GetComponent<PhotonView>().RPC("SetIsDad", input2, true);
 				__instance.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.Others, __instance.daddyPlayerNames.ToArray(), __instance.daddyPlayerIds.ToArray(), __instance.babyPlayerNames.ToArray(), __instance.babyPlayerIds.ToArray());
 				__instance.RefreshNameList();
 			}
@@ -124,8 +124,8 @@ namespace HexaMod.Patches.Hooks
 			{
 				__instance.babyPlayerNames.Add(input);
 				__instance.babyPlayerIds.Add(input2);
-				HexaMod.persistentLobby.dads[input2.ID] = false;
-				HexaMod.networkManager.GetComponent<PhotonView>().RPC("SetIsDad", input2, false);
+				HexaPersistentLobby.instance.dads[input2.ID] = false;
+				HexaGlobal.networkManager.GetComponent<PhotonView>().RPC("SetIsDad", input2, false);
 				__instance.GetComponent<PhotonView>().RPC("SendPlayerLists", PhotonTargets.Others, __instance.daddyPlayerNames.ToArray(), __instance.daddyPlayerIds.ToArray(), __instance.babyPlayerNames.ToArray(), __instance.babyPlayerIds.ToArray());
 				__instance.RefreshNameList();
 			}
@@ -137,15 +137,15 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool OnJoinedRoom()
 		{
-			if (PhotonNetwork.room.Name.Contains(HexaMod.instanceGuid))
+			if (PhotonNetwork.room.Name.Contains(HexaGlobal.instanceGuid))
 			{
 				return false;
 			}
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+				var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
+				Transform hostMenu = Menu.WYDMenus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				if (mode.hostDefaultTeamIsDad || mode.defaultTeamIsDad)

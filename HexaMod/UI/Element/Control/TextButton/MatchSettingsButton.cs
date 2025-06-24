@@ -1,6 +1,8 @@
-﻿namespace HexaMod.UI.Elements.Extended
+﻿using HexaMod.UI.Element.Control.TextButton;
+
+namespace HexaMod.UI.Element.Extended
 {
-	public class WYDMatchSettingsButton : WYDTextButton
+	public class MatchSettingsButton : WTextButton
 	{
 		public override void Update()
 		{
@@ -8,7 +10,7 @@
 
 			SetInteractable(PhotonNetwork.isMasterClient || PhotonNetwork.room == null);
 		}
-		public WYDMatchSettingsButton() : base()
+		public MatchSettingsButton() : base()
 		{
 			this.SetName("matchSettings")
 				.SetTextAuto("Match\nSettings");

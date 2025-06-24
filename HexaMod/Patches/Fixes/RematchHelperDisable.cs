@@ -13,7 +13,7 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool OnLevelWasLoaded(ref RematchHelper __instance)
 		{
-			HexaMod.rematchHelper = __instance;
+			HexaGlobal.rematchHelper = __instance;
 
 			return false;
 		}
@@ -28,7 +28,7 @@ namespace HexaMod.Patches.Fixes
 				last = null;
 			}
 
-			HexaMod.rematchHelper = __instance;
+			HexaGlobal.rematchHelper = __instance;
 			last = __instance.gameObject;
 		}
 	}

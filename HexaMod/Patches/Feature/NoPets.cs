@@ -9,7 +9,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPrefix]
 		static bool NoPetsPatch()
 		{
-			return !HexaMod.persistentLobby.lobbySettings.disablePets;
+			return !HexaPersistentLobby.instance.lobbySettings.disablePets;
 		}
 	}
 }

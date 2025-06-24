@@ -18,7 +18,7 @@ namespace HexaMod.Patches.Fixes
 		{
 			if (PhotonNetwork.isMasterClient)
 			{
-				ItemSpawner itemSpawner = HexaMod.networkManager.itemSpawner.GetComponent<ItemSpawner>();
+				ItemSpawner itemSpawner = HexaGlobal.networkManager.itemSpawner.GetComponent<ItemSpawner>();
 				itemSpawner.NetworkSpawnObjects();
 			}
 		}

@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using HexaMod.UI;
+using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,37 +12,31 @@ namespace HexaMod
 {
 	public class IntroScript : MonoBehaviour
 	{
-		public void InitIntro()
+		public void Awake()
 		{
 			// lower fps for the loading screen
 			QualitySettings.vSyncCount = 0;
 			Application.targetFrameRate = 60;
 
+			// init hexa menus
+			HexaMenus.Init();
+
 			// setup scene loaded hook
 			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
 			{
-				HexaMod.OnGameSceneStart();
+				HexaMenus.startupScreen.fader.fadeState = false;
+				ActionText("Loaded Game");
+				HexaGlobal.OnGameSceneStart();
 			};
-
-			// remove the old company logo faders
-			foreach (var fader in GetComponentsInChildren<ImgFade>())
-			{
-				Destroy(fader);
-			};
-
-
-			// setup the loading text (fontless for now)
-			textObject = new GameObject("loadText", typeof(RectTransform));
-			textObject.transform.SetParent(transform, false);
-			text = textObject.AddComponent<UnityEngine.UI.Text>();
-			text.fontSize = 200;
-			text.rectTransform.sizeDelta = new Vector2(5000f, 5000f);
-			text.alignment = TextAnchor.MiddleCenter;
 
 			// begin the startup routine
 			if (!VoiceChat.testMode)
 			{
 				InitHexaMod();
+			}
+			else
+			{
+				ActionText("Voice Chat Test Mode Enabled");
 			}
 		}
 
@@ -65,14 +61,6 @@ namespace HexaMod
 			}
 		}
 
-		private GameObject textObject;
-		private UnityEngine.UI.Text text;
-
-		void Update()
-		{
-			Camera.current.backgroundColor = new Color(0.05f, 0.05f, 0.05f);
-		}
-
 		string lastActionText = string.Empty;
 		void ActionText(string actionText)
 		{
@@ -80,7 +68,7 @@ namespace HexaMod
 			{
 
 				Mod.Print(actionText);
-				text.text = actionText;
+				HexaMenus.startupScreen.loadingText.SetText(actionText);
 				lastActionText = actionText;
 			}
 
@@ -117,27 +105,38 @@ namespace HexaMod
 			QualitySettings.shadowDistance *= 0.75f;
 			QualitySettings.shadowProjection = ShadowProjection.CloseFit;
 
-			ActionText("Loading HexaModInitResourcesBundle");
+			ActionText("Loading HexaModInitResourcesBundle\n(Init)");
 			yield return 0;
-			HexaMod.InitStartupBundle();
-			text.font = HexaMod.startupBundle.LoadAsset<Font>("Assets/ModResources/Init/Font/osd.ttf");
-			var loadingAnimation = HexaMod.startupBundle.LoadAsset<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
-			Instantiate(loadingAnimation).transform.SetParent(transform, false);
+			HexaGlobal.InitStartupBundle();
+			ActionText("Loading HexaModInitResourcesBundle\n(Font)");
+			var fontLoadRequest = HexaGlobal.startupBundle.LoadAssetAsync<Font>("Assets/ModResources/Init/Font/osd.ttf");
+			yield return fontLoadRequest;
+			LoadingText.loadingFont = fontLoadRequest.asset as Font;
+			ActionText("Loading HexaModInitResourcesBundle\n(Loading Animation)");
+			var loadingAnimationRequest = HexaGlobal.startupBundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
+			yield return loadingAnimationRequest;
+			LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
 			if (!Environment.GetCommandLineArgs().Contains("SkipTranscodeProcessStart"))
 			{
 				ActionText("Init VoiceChat\n(Transcode Process)");
 				yield return 0;
-				VoiceChat.Init(); // this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
+				VoiceChat.Init();
+			}
+			else
+			{
+				ActionText("Init VoiceChat\n(Without Transcode Process)");
+				yield return 0;
+				VoiceChat.InitWithoutTranscodeProcess();
 			}
 			ActionText("Loading HexaModCoreResourcesBundle");
 			yield return 0;
-			HexaMod.InitCoreBundle();
+			HexaGlobal.InitCoreBundle();
 			ActionText("Patching Game");
 			yield return 0;
-			Mod.Instance.harmony.PatchAll(Assembly.GetExecutingAssembly());
+			Mod.instance.harmony.PatchAll(Assembly.GetExecutingAssembly());
 			ActionText("Init HexaMod");
 			yield return 0;
-			HexaMod.Init();
+			HexaGlobal.Init();
 			yield return 0;
 			ActionText($"Loading Asset Bundles\n(?/?)");
 			while (!Assets.loadedAssets)

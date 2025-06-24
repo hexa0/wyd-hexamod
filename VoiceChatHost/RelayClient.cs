@@ -115,8 +115,6 @@ namespace VoiceChatHost
 				{
 					onSpeakingStateAction.Invoke(clientMessage.clientId, clientMessage.body[0] == 1);
 				}
-
-				Console.WriteLine($"client {clientMessage.clientId}'s voice chat state updated to {clientMessage.body[0]}");
 			});
 
 			client.OnMessage(HVCMessage.Opus, delegate (DecodedVoiceChatMessage message, IPEndPoint from)

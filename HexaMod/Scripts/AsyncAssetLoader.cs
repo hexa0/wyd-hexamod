@@ -7,6 +7,13 @@ namespace HexaMod
 {
 	public class AsyncAssetLoader : MonoBehaviour
 	{
+		public static AsyncAssetLoader instance;
+
+		void Awake()
+		{
+			instance = this;
+		}
+
 		public void LoadAsset(string filename, string file)
 		{
 			Mod.Print($"load asset bundle {filename}");

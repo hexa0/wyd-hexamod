@@ -12,10 +12,10 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPostfix]
 		static void MorePlayersByDefaultPatch(ref PhotonNetworkManager __instance)
 		{
-			__instance.maxPlayer = HexaMod.defaultMaxPlayers;
+			__instance.maxPlayer = HexaGlobal.defaultMaxPlayers;
 			for (int i = 0; i < __instance.maxPlayerText.Length; i++)
 			{
-				__instance.maxPlayerText[i].text = HexaMod.defaultMaxPlayers.ToString();
+				__instance.maxPlayerText[i].text = HexaGlobal.defaultMaxPlayers.ToString();
 			}
 		}
 

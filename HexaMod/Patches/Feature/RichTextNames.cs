@@ -21,11 +21,13 @@ namespace HexaMod.Voice
 			foreach (Text name in __instance.daddyNames)
 			{
 				name.supportRichText = true;
+				name.lineSpacing = 0.3f;
 			}
 
 			foreach (Text name in __instance.babyNames)
 			{
 				name.supportRichText = true;
+				name.lineSpacing = 0.3f;
 			}
 		}
 	}

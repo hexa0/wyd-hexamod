@@ -17,7 +17,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPrefix]
 		static void PickUpScrollWheelPatch(ref PickUp __instance)
 		{
-			if (HexaMod.persistentLobby.lobbySettings.modernGrabbing)
+			if (HexaPersistentLobby.instance.lobbySettings.modernGrabbing)
 			{
 				if (__instance.held && __instance.GetComponent<PhotonView>().isMine)
 				{
@@ -39,7 +39,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPrefix]
 		static bool PickUpVelocityPatch(ref PickUp __instance)
 		{
-			if (HexaMod.persistentLobby.lobbySettings.modernGrabbing)
+			if (HexaPersistentLobby.instance.lobbySettings.modernGrabbing)
 			{
 				if (__instance.held && __instance.target)
 				{

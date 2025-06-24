@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HexaMod.UI;
+using HexaMod.UI.Element.VoiceChatUI.Debug;
 using UnityEngine;
 
 namespace HexaMod.Voice
@@ -23,6 +25,8 @@ namespace HexaMod.Voice
 			audioSource.dopplerLevel = 0f;
 		}
 
+		bool isWrittenTo = false;
+
 		private VoiceChat.AudioBuffer NextBuffer()
 		{
 			lock (buffers)
@@ -32,34 +36,34 @@ namespace HexaMod.Voice
 				{
 					buffer = lastBuffer;
 
-					bool speaking = false;
+					//bool speaking = false;
 
-					if (VoiceChat.speakingStates.ContainsKey(clientId))
-					{
-						if (VoiceChat.speakingStates[clientId])
-						{
-							speaking = true;
-						}
-					}
+					//if (VoiceChat.speakingStates.ContainsKey(clientId))
+					//{
+					//	if (VoiceChat.speakingStates[clientId])
+					//	{
+					//		speaking = true;
+					//	}
+					//}
 
-					if (speaking)
-					{
-						for (int i = 0; i < buffer.samples.Length; i++)
-						{
-							buffer.samples[i] = (short)(buffer.samples[i] * 0.85f); // haha discord funni
-						}
-					}
-					else
-					{
-						circularBuffer.Write(new short[circularBuffer.capacity]);
-						circularBuffer.realReadHead = 0;
-						circularBuffer.realWriteHead = 256;
+					//if (speaking)
+					//{
+					//	//for (int i = 0; i < buffer.samples.Length; i++)
+					//	//{
+					//	//	buffer.samples[i] = (short)(buffer.samples[i] * 0.85f); // haha discord funni
+					//	//}
+					//}
+					//else
+					//{
+					//	circularBuffer.Write(new short[circularBuffer.capacity]);
+					//	circularBuffer.realReadHead = 0;
+					//	circularBuffer.realWriteHead = 256;
 
-						for (int i = 0; i < buffer.samples.Length; i++)
-						{
-							buffer.samples[i] = 0;
-						}
-					}
+					//	for (int i = 0; i < buffer.samples.Length; i++)
+					//	{
+					//		buffer.samples[i] = 0;
+					//	}
+					//}
 				}
 				else
 				{
@@ -71,7 +75,7 @@ namespace HexaMod.Voice
 			}
 		}
 
-		private CircularShortBuffer circularBuffer = new CircularShortBuffer(48000 * 2);
+		private CircularShortBuffer circularBuffer = new CircularShortBuffer(48000);
 		private static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
 		{
 			Buffer.BlockCopy(source, sourceIndex * 2, destination, destinationIndex * 2, length * 2);
@@ -79,12 +83,31 @@ namespace HexaMod.Voice
 
 		private short[] NextChunk(int chunkSize)
 		{
+			bool tooCloseToWriteHead = false;
+
+			if (isWrittenTo && !circularBuffer.IsEnough(chunkSize))
+			{
+				isWrittenTo = false;
+
+				if (!VoiceChat.speakingStates.ContainsKey(clientId) || VoiceChat.speakingStates[clientId])
+				{
+					tooCloseToWriteHead = true;
+				}
+				else
+				{
+					circularBuffer.Write(new short[circularBuffer.capacity]);
+					circularBuffer.realReadHead = 0;
+					circularBuffer.realWriteHead = 0;
+				}
+			}
+
 			if (buffers != null)
 			{
 				lock (buffers)
 				{
 					foreach (VoiceChat.AudioBuffer buffer in buffers.ToArray())
 					{
+						isWrittenTo = true;
 						circularBuffer.Write(buffer.samples);
 						lastBuffer = buffer;
 					}
@@ -93,14 +116,9 @@ namespace HexaMod.Voice
 				}
 			}
 
-			if (!circularBuffer.IsEnough(chunkSize))
+			if (tooCloseToWriteHead)
 			{
-				circularBuffer.realReadHead = circularBuffer.realWriteHead - 256;
-
-				short[] enough = new short[chunkSize];
-				CopyData(NextBuffer().samples, 0, enough, 0, chunkSize);
-
-				circularBuffer.Write(enough);
+				circularBuffer.realReadHead = circularBuffer.realWriteHead - (lastBuffer.samples.Length * VoiceChat.underrunPreventionSize);
 			}
 
 			short[] read = circularBuffer.Read(chunkSize);
@@ -140,6 +158,20 @@ namespace HexaMod.Voice
 				volumeL *= 2f;
 				volumeR *= 2f;
 			}
+		}
+
+		ShortCircularBufferDebugView bufferDebug;
+
+		void Awake()
+		{
+			bufferDebug = new ShortCircularBufferDebugView(circularBuffer);
+			HexaMenus.voiceChatDebugOverlay.elementStack.AddChild(bufferDebug);
+		}
+
+		void OnDestroy()
+		{
+			HexaMenus.voiceChatDebugOverlay.elementStack.RemoveChild(bufferDebug);
+			Destroy(bufferDebug.gameObject);
 		}
 
 		private void OnAudioFilterRead(float[] data, int outputChannels)

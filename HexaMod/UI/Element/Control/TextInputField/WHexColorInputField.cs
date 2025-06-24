@@ -1,11 +1,10 @@
 ﻿using UnityEngine.Events;
 using UnityEngine;
-using HexaMod.Util;
 using System.Collections.Generic;
 
-namespace HexaMod.UI.Elements
+namespace HexaMod.UI.Element.Control.TextInputField
 {
-	public class WYDHexColorInputField : WYDTextInputField
+	public class WHexColorInputField : WTextInputField
 	{
 		internal string lastValidInput;
 		internal readonly List<UnityAction<Color, string>> changedActions = new List<UnityAction<Color, string>>();
@@ -43,7 +42,7 @@ namespace HexaMod.UI.Elements
 			}
 		}
 
-		public WYDHexColorInputField() : base()
+		public WHexColorInputField() : base()
 		{
 			SetCharacterLimit(7)
 				.AddChangedListener((string hex) =>
@@ -68,14 +67,14 @@ namespace HexaMod.UI.Elements
 			}
 		}
 
-		public WYDHexColorInputField AddChangedListener(UnityAction<Color, string> action)
+		public WHexColorInputField AddChangedListener(UnityAction<Color, string> action)
 		{
 			changedActions.Add(action);
 
 			return this;
 		}
 
-		public WYDHexColorInputField AddChangedListeners(UnityAction<Color, string>[] actions)
+		public WHexColorInputField AddChangedListeners(UnityAction<Color, string>[] actions)
 		{
 			foreach (UnityAction<Color, string> action in actions)
 			{
@@ -85,14 +84,14 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDHexColorInputField AddSubmitListener(UnityAction<Color, string> action)
+		public WHexColorInputField AddSubmitListener(UnityAction<Color, string> action)
 		{
 			submitActions.Add(action);
 
 			return this;
 		}
 
-		public WYDHexColorInputField AddSubmitListeners(UnityAction<Color, string>[] actions)
+		public WHexColorInputField AddSubmitListeners(UnityAction<Color, string>[] actions)
 		{
 			foreach (UnityAction<Color, string> action in actions)
 			{
@@ -102,7 +101,7 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDHexColorInputField(string name, string title, string defaultColorHex, Transform menu, Vector2 position, UnityAction<Color, string>[] changedActions, UnityAction<Color, string>[] submitActions) : this()
+		public WHexColorInputField(string name, string title, string defaultColorHex, Transform menu, Vector2 position, UnityAction<Color, string>[] changedActions, UnityAction<Color, string>[] submitActions) : this()
 		{
 			this.SetName(name)
 				.SetParent(menu)

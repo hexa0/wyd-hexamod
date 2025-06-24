@@ -86,15 +86,15 @@ namespace HexaMod
 				doorOpen = door.openSound;
 				doorClose = door.closeSound;
 
-				daddySong = HexaMod.networkManager.daddySong;
-				babySong = HexaMod.networkManager.babySong;
-				hgSong = HexaMod.networkManager.hgSong;
-				dadlympicSong = HexaMod.networkManager.dadlympicSong;
-				dadNightmareSongDad = HexaMod.networkManager.dadNightmareSongDad;
-				dadNightmareSongBaby = HexaMod.networkManager.dadNightmareSongBaby;
+				daddySong = HexaGlobal.networkManager.daddySong;
+				babySong = HexaGlobal.networkManager.babySong;
+				hgSong = HexaGlobal.networkManager.hgSong;
+				dadlympicSong = HexaGlobal.networkManager.dadlympicSong;
+				dadNightmareSongDad = HexaGlobal.networkManager.dadNightmareSongDad;
+				dadNightmareSongBaby = HexaGlobal.networkManager.dadNightmareSongBaby;
 				if (!gameStarted)
 				{
-					titleSong = HexaMod.networkManager.aud.clip;
+					titleSong = HexaGlobal.networkManager.aud.clip;
 				}
 
 				didCache = true;
@@ -109,7 +109,7 @@ namespace HexaMod
 			{
 				string filename = Path.GetFileName(file);
 
-				HexaMod.asyncAssetLoader.LoadAsset(filename, file);
+				AsyncAssetLoader.instance.LoadAsset(filename, file);
 			}
 
 			foreach (string subDirectory in Directory.GetDirectories(directory))
@@ -261,7 +261,7 @@ namespace HexaMod
 		{
 			TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
 
-			if (babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.GetId("hungryGames"))
+			if (babySpawn.hgSpawns != null && HexaGlobal.networkManager.curGameMode == GameModes.GetId("hungryGames"))
 			{
 				spawn = babySpawn.hgSpawns;
 			}
@@ -326,14 +326,14 @@ namespace HexaMod
 			{
 				Mod.Print("got dad spawn.");
 				dadSpawn.Init();
-				HexaMod.networkManager.dadSpawnPos = dadSpawn.GetSpawn(0);
+				HexaGlobal.networkManager.dadSpawnPos = dadSpawn.GetSpawn(0);
 			}
 
 			if (babySpawn)
 			{
 				Mod.Print("got baby spawn.");
 				babySpawn.Init();
-				HexaMod.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
+				HexaGlobal.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
 
 				if (babySpawn.hgSpawns != null)
 				{
@@ -353,7 +353,7 @@ namespace HexaMod
 
 			if (lowSpawn && midSpawn && specialSpawn && keySpawn)
 			{
-				ItemSpawner itemSpawner = HexaMod.networkManager.itemSpawner.GetComponent<ItemSpawner>();
+				ItemSpawner itemSpawner = HexaGlobal.networkManager.itemSpawner.GetComponent<ItemSpawner>();
 				itemSpawner.lowTierPos = new GameObject[itemSpawner.lowTierObj.Length];
 				itemSpawner.midTierPos = new GameObject[itemSpawner.midTierObj.Length];
 				itemSpawner.specialPos = specialSpawn.spots;
@@ -378,8 +378,8 @@ namespace HexaMod
 			{
 				// prevent StartClocks from throwing an error
 
-				HexaMod.gameStateController.clocks = new GameObject[] { };
-				HexaMod.gameStateController.radio = HexaMod.gameStateController.gameObject.AddComponent<AudioSource>();
+				HexaGlobal.gameStateController.clocks = new GameObject[] { };
+				HexaGlobal.gameStateController.radio = HexaGlobal.gameStateController.gameObject.AddComponent<AudioSource>();
 			}
 
 			Mod.Print("done with item spawns.");
@@ -390,30 +390,30 @@ namespace HexaMod
 
 			if (customLevelMusic != null)
 			{
-				HexaMod.networkManager.daddySong = customLevelMusic.DadTheme;
-				HexaMod.networkManager.babySong = customLevelMusic.BabyTheme;
-				HexaMod.networkManager.dadlympicSong = customLevelMusic.DadlympicTheme;
-				HexaMod.networkManager.hgSong = customLevelMusic.HungryGamesTheme;
-				HexaMod.networkManager.dadNightmareSongDad = customLevelMusic.DadNightmaresDadTheme;
-				HexaMod.networkManager.dadNightmareSongBaby = customLevelMusic.DadNightmaresBabyTheme;
+				HexaGlobal.networkManager.daddySong = customLevelMusic.DadTheme;
+				HexaGlobal.networkManager.babySong = customLevelMusic.BabyTheme;
+				HexaGlobal.networkManager.dadlympicSong = customLevelMusic.DadlympicTheme;
+				HexaGlobal.networkManager.hgSong = customLevelMusic.HungryGamesTheme;
+				HexaGlobal.networkManager.dadNightmareSongDad = customLevelMusic.DadNightmaresDadTheme;
+				HexaGlobal.networkManager.dadNightmareSongBaby = customLevelMusic.DadNightmaresBabyTheme;
 				if (!gameStarted)
 				{
-					HexaMod.networkManager.aud.clip = customLevelMusic.TitleTheme;
-					HexaMod.networkManager.aud.Play();
+					HexaGlobal.networkManager.aud.clip = customLevelMusic.TitleTheme;
+					HexaGlobal.networkManager.aud.Play();
 				}
 			}
 			else
 			{
-				HexaMod.networkManager.daddySong = StaticAssets.daddySong;
-				HexaMod.networkManager.babySong = StaticAssets.babySong;
-				HexaMod.networkManager.dadlympicSong = StaticAssets.dadlympicSong;
-				HexaMod.networkManager.hgSong = StaticAssets.hgSong;
-				HexaMod.networkManager.dadNightmareSongDad = StaticAssets.dadNightmareSongDad;
-				HexaMod.networkManager.dadNightmareSongBaby = StaticAssets.dadNightmareSongBaby;
+				HexaGlobal.networkManager.daddySong = StaticAssets.daddySong;
+				HexaGlobal.networkManager.babySong = StaticAssets.babySong;
+				HexaGlobal.networkManager.dadlympicSong = StaticAssets.dadlympicSong;
+				HexaGlobal.networkManager.hgSong = StaticAssets.hgSong;
+				HexaGlobal.networkManager.dadNightmareSongDad = StaticAssets.dadNightmareSongDad;
+				HexaGlobal.networkManager.dadNightmareSongBaby = StaticAssets.dadNightmareSongBaby;
 				if (!gameStarted)
 				{
-					HexaMod.networkManager.aud.clip = StaticAssets.titleSong;
-					HexaMod.networkManager.aud.Play();
+					HexaGlobal.networkManager.aud.clip = StaticAssets.titleSong;
+					HexaGlobal.networkManager.aud.Play();
 				}
 			}
 
@@ -435,11 +435,11 @@ namespace HexaMod
 			loadedLevel = null;
 			loadedLevelInstance = null;
 			defaultLevelObjects.Clear();
-			gameStarted = HexaMod.networkManager.gameStarted;
+			gameStarted = HexaGlobal.networkManager.gameStarted;
 
 			if (PhotonNetwork.inRoom)
 			{
-				HexaMod.networkManager.gameStarted = true;
+				HexaGlobal.networkManager.gameStarted = true;
 			}
 
 			AttemptToLoadCurrentLevel();
@@ -451,7 +451,7 @@ namespace HexaMod
 
 			foreach (ModLevel level in levels)
 			{
-				if (level.levelPrefab.name == HexaMod.persistentLobby.lobbySettings.mapName)
+				if (level.levelPrefab.name == HexaPersistentLobby.instance.lobbySettings.mapName)
 				{
 					LoadLevel(level);
 					return;

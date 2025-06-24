@@ -15,7 +15,7 @@ using Object = UnityEngine.Object;
 
 namespace HexaMod
 {
-	public static class HexaMod
+	public static class HexaGlobal
 	{
 		public static string assetDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		public static AssetBundle coreBundle;
@@ -30,12 +30,14 @@ namespace HexaMod
 		public static RematchHelper rematchHelper;
 		public static EventSystem eventSystem;
 		public static RpcChatExtended textChat;
-		public static AsyncAssetLoader asyncAssetLoader;
-		public static HexaPersistentLobby persistentLobby;
-		public static TabOutMute tabOutMute;
-		public static PreferenceLinker preferenceLinker;
+		public static HexaModPersistence hexaModPersistence = new GameObject("HexaModPersistent").AddComponent<HexaModPersistence>();
 		public static HexaLobby hexaLobby;
 		public static MainUI mainUI;
+
+		public static void Load()
+		{
+			// call this to start loading the class and setup all of the static properties
+		}
 
 		public static void Init()
 		{
@@ -43,18 +45,10 @@ namespace HexaMod
 
 			GameModes.DefineStandardGameModes();
 
-			Mod.Print("Setup HexaModPersistance");
-
-			GameObject persistentGameObject = new GameObject();
-			Object.DontDestroyOnLoad(persistentGameObject);
-
-			persistentGameObject.name = "HexaModPersistent";
-			persistentGameObject.AddComponent<HexaModPersistence>();
-
 			Mod.Print("Setup Levels");
 			Assets.Init();
 			Mod.Print("Setup HexaPersistentLobby");
-			persistentLobby.Init();
+			HexaPersistentLobby.instance.Init();
 		}
 
 		public static void InitCoreBundle()
@@ -99,9 +93,11 @@ namespace HexaMod
 
 				if (!PhotonNetwork.inRoom)
 				{
-					persistentLobby.Reset();
+					HexaPersistentLobby.instance.Reset();
 				}
 			}
+
+			HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", false);
 		}
 
 		public static void EnableInterpolationForAll()
@@ -123,11 +119,11 @@ namespace HexaMod
 		{
 			networkManager.ConnectToPhoton();
 			networkManager.gameName = instanceGuid;
-			persistentLobby.Reset();
+			HexaPersistentLobby.instance.Reset();
 			// PhotonNetwork.player.ID will be uninitialized at -1, 1 will always be our id in a test game so we set that
-			persistentLobby.dads[1] = spawnAsDad;
+			HexaPersistentLobby.instance.dads[1] = spawnAsDad;
 			networkManager.isDad = spawnAsDad;
-			Menus.title.menuController.DeactivateAll();
+			WYDMenus.title.menuController.DeactivateAll();
 			testGameWaitingForConn = true;
 			networkManager.curGameMode = GameModes.GetId("familyGathering");
 		}

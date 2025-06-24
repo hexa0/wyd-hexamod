@@ -35,6 +35,7 @@ namespace VoiceChatHost
 		static int micBits = 16;
 
 		internal static bool listening = false;
+		internal static bool expectedToDrop = false;
 		internal static WaveInEvent waveIn = new WaveInEvent
 		{
 			DeviceNumber = 0,
@@ -83,7 +84,7 @@ namespace VoiceChatHost
 			string relayIp = Encoding.ASCII.GetString(message.body);
 			IPEndPoint newRelayEndPoint = new IPEndPoint(IPAddress.Parse(relayIp), HexaVoiceChat.Ports.relay);
 
-			Console.WriteLine($"relay set to {newRelayEndPoint}");
+			Console.WriteLine($"relay changed");
 
 			if (relay != null)
 			{
@@ -329,6 +330,35 @@ namespace VoiceChatHost
 			{
 				waveIn.NumberOfBuffers = message.body[0];
 			});
+			server.OnMessage(HVCMessage.SetMicChannels, (DecodedVoiceChatMessage message, IPEndPoint from) =>
+			{
+				byte channels = message.body[0];
+
+				if (channels == micChannels)
+				{
+					return;
+				}
+
+				Console.WriteLine($"set mic channels: {message.body[0]}");
+
+				micChannels = channels;
+				EncodingSetup.channels = channels;
+
+				waveIn.WaveFormat = new WaveFormat(
+					rate: micSampleRate,
+					bits: micBits,
+					channels: micChannels
+				);
+
+				EncodingSetup.channels = message.body[0];
+				EncodingSetup.CommitChannels();
+
+				if (listening)
+				{
+					expectedToDrop = true;
+					waveIn.StopRecording();
+				}
+			});
 			server.OnMessage(HVCMessage.SetBitrate, (DecodedVoiceChatMessage message, IPEndPoint from) =>
 			{
 				Bitrate preset = (Bitrate)message.body[0];
@@ -351,7 +381,17 @@ namespace VoiceChatHost
 				if (listening)
 				{
 					listening = false;
-					Console.WriteLine("mic dropout, attempt to reconnect");
+
+					if (!expectedToDrop) // expected drops are for when the recording state needs to be reset if the wave format is changed, as such don't log a warning in those situations
+					{
+						expectedToDrop = false;
+						Console.WriteLine("mic dropout, attempt to reconnect");
+					}
+					else
+					{
+						Console.WriteLine("Mic Reactivated");
+					}
+
 					try
 					{
 						waveIn.StartRecording();

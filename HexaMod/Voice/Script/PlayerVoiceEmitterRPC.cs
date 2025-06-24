@@ -56,9 +56,9 @@ namespace HexaMod.Voice
 
 		public void FixedUpdate()
 		{
-			if (HexaMod.gameStateController != null && voiceSource != null)
+			if (HexaGlobal.gameStateController != null && voiceSource != null)
 			{
-				if (HexaMod.gameStateController.gameOver)
+				if (HexaGlobal.gameStateController.gameOver)
 				{
 					voiceSource.spatialBlend = 0f;
 				}

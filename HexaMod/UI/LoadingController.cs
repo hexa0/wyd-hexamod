@@ -1,24 +1,14 @@
 ﻿using System.Collections.Generic;
+using HexaMod.UI.Menus;
 using UnityEngine;
 using static HexaMod.UI.Util.Menu;
-using static HexaMod.UI.Util.Menu.Menus;
+using static HexaMod.UI.Util.Menu.WYDMenus;
 
 namespace HexaMod.UI
 {
 	public class LoadingController : MonoBehaviour
 	{
-		private static GameObject loadingAnimation = HexaMod.startupBundle.LoadAsset<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation1080.prefab");
-		private GameObject currentLoadingAnimation;
 		private Dictionary<string, bool> tasks = new Dictionary<string, bool>();
-
-		public LoadingController Init()
-		{
-			currentLoadingAnimation = Instantiate(loadingAnimation);
-			currentLoadingAnimation.transform.SetParent(menuCanvas.transform, false);
-			currentLoadingAnimation.SetActive(currentlyShown);
-
-			return this;
-		}
 
 		public void ResetTasks()
 		{
@@ -42,8 +32,11 @@ namespace HexaMod.UI
 			{
 				currentlyShown = loadingShown;
 
-				currentLoadingAnimation.SetActive(loadingShown);
-				title.root.Find("Version").gameObject.SetActive(!loadingShown);
+				HexaMenus.loadingOverlay.fader.fadeState = loadingShown;
+				if (title != null)
+				{
+					title.root.Find("Version").gameObject.SetActive(!loadingShown);
+				}
 			}
 		}
 

@@ -14,12 +14,12 @@ namespace HexaMod.Patches.Fixes
 
 			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
 			{
-				DadPowerUps powerups = HexaMod.networkManager.playerObj.GetComponent<DadPowerUps>();
+				DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
 				Traverse powerupFields = Traverse.Create(powerups);
 				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 				bigAction.ActionDone("Chore Completed");
 				var audio = bigAction.GetComponent<AudioSource>();
-				audio.clip = HexaMod.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount + 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
+				audio.clip = HexaGlobal.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount + 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
 				audio.Play();
 			}
 		}
@@ -32,12 +32,12 @@ namespace HexaMod.Patches.Fixes
 
 			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
 			{
-				DadPowerUps powerups = HexaMod.networkManager.playerObj.GetComponent<DadPowerUps>();
+				DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
 				Traverse powerupFields = Traverse.Create(powerups);
 				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 				bigAction.ActionDone("Chore Completed");
 				var audio = bigAction.GetComponent<AudioSource>();
-				audio.clip = HexaMod.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount - 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
+				audio.clip = HexaGlobal.coreBundle.LoadAsset<AudioClip>($"Assets/ModResources/Core/Audio/Chore/ChoreCompletion{Mathf.Clamp(__instance.curDishCount - 1 + (16 - __instance.totalDishes), 0, 16)}.wav");
 				audio.Play();
 			}
 		}
@@ -50,7 +50,7 @@ namespace HexaMod.Patches.Fixes
 			if (__instance.curDishCount >= __instance.totalDishes && !__instance.isDone)
 			{
 				Mod.Print($"Chore \"{__instance.smallActionMessage}\" has finished");
-				if (HexaMod.networkManager.isDad)
+				if (HexaGlobal.networkManager.isDad)
 				{
 					ChallengeManager ChallengeManager = null;
 
@@ -62,7 +62,7 @@ namespace HexaMod.Patches.Fixes
 					if (ChallengeManager == null)
 					{
 						Mod.Print($"Trigger Random PowerUp!");
-						DadPowerUps powerups = HexaMod.networkManager.playerObj.GetComponent<DadPowerUps>();
+						DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
 						Traverse fields = Traverse.Create(powerups);
 						ActionText bigAction = fields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 						bigAction.ActionDone("Chore Completed");

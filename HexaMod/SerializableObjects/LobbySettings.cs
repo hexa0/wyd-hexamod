@@ -1,7 +1,6 @@
 ﻿using System.Linq;
-using HexaMod.UI.Elements;
+using HexaMod.UI.Element.Control.SwitchInput;
 using HexaMod.Util;
-using UnityStandardAssets.Water;
 
 namespace HexaMod.SerializableObjects
 {
@@ -34,45 +33,45 @@ namespace HexaMod.SerializableObjects
 		public byte GameMode = 0; // TODO: switching game modes in the lobby & quit to lobby instead of the menu button
 		public string mapName = Assets.defaultLevelName;
 		public string relay = "127.0.0.1";
-		public string voiceRoom = HexaMod.instanceGuid;
+		public string voiceRoom = HexaGlobal.instanceGuid;
 		public ushort roundNumber = 0;
 
-		public static WYDSwitchOption<ShufflePlayersMode>[] shuffleOptions = new WYDSwitchOption<ShufflePlayersMode>[]
+		public static WSwitchOption<ShufflePlayersMode>[] shuffleOptions = new WSwitchOption<ShufflePlayersMode>[]
 		{
-			new WYDSwitchOption<ShufflePlayersMode>()
+			new WSwitchOption<ShufflePlayersMode>()
 			{
 				name = "Keep Teams",
 				value = ShufflePlayersMode.Off
 			},
 
-			new WYDSwitchOption<ShufflePlayersMode>()
+			new WSwitchOption<ShufflePlayersMode>()
 			{
 				name = "Alternate Teams",
 				value = ShufflePlayersMode.Alternate
 			},
 
-			new WYDSwitchOption<ShufflePlayersMode>()
+			new WSwitchOption<ShufflePlayersMode>()
 			{
 				name = "Shuffle Teams (Unfinished DO NOT USE)",
 				value = ShufflePlayersMode.Shuffle
 			}
 		};
 
-		public static WYDSwitchOption<SpawnLocationMode>[] spawnOptions = new WYDSwitchOption<SpawnLocationMode>[]
+		public static WSwitchOption<SpawnLocationMode>[] spawnOptions = new WSwitchOption<SpawnLocationMode>[]
 {
-			new WYDSwitchOption<SpawnLocationMode>()
+			new WSwitchOption<SpawnLocationMode>()
 			{
 				name = "Vanilla Spawns",
 				value = SpawnLocationMode.Vanilla
 			},
 
-			new WYDSwitchOption<SpawnLocationMode>()
+			new WSwitchOption<SpawnLocationMode>()
 			{
 				name = "Ideal Spawns",
 				value = SpawnLocationMode.Ideal
 			},
 
-			new WYDSwitchOption<SpawnLocationMode>()
+			new WSwitchOption<SpawnLocationMode>()
 			{
 				name = "All Spawns",
 				value = SpawnLocationMode.All

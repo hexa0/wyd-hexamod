@@ -4,35 +4,35 @@ using UnityEngine;
 using static HexaMod.UI.Util.Menu;
 using System.Collections.Generic;
 
-namespace HexaMod.UI.Elements
+namespace HexaMod.UI.Element.Control.SwitchInput
 {
-	public class WYDSwitchOption<Type>
+	public class WSwitchOption<Type>
 	{
 		public string name;
 		public Type value;
 		public int index;
 	}
-	public class WYDSwitchInput<Type> : WYDUIElement
+	public class WSwitchInput<Type> : HexaUIElement
 	{
-		internal static GameObject boundsTemplate = HexaMod.coreBundle.LoadAsset<GameObject>("Assets/ModResources/Core/TemplateBoundingBox/switchElementBoundingBox.prefab");
+		internal static GameObject boundsTemplate = HexaGlobal.coreBundle.LoadAsset<GameObject>("Assets/ModResources/Core/TemplateBoundingBox/switchElementBoundingBox.prefab");
 		public Text label;
 		public Text value;
 		public Button lowerButton;
 		public Button higherButton;
 
-		internal List<UnityAction<WYDSwitchOption<Type>>> changedActions = new List<UnityAction<WYDSwitchOption<Type>>>();
-		internal List<WYDSwitchOption<Type>> options = new List<WYDSwitchOption<Type>>();
+		internal List<UnityAction<WSwitchOption<Type>>> changedActions = new List<UnityAction<WSwitchOption<Type>>>();
+		internal List<WSwitchOption<Type>> options = new List<WSwitchOption<Type>>();
 		private int currentOption = 0;
 
-		public WYDSwitchInput<Type> Select(int selection)
+		public WSwitchInput<Type> Select(int selection)
 		{
 			if (selection >= 0 && selection <= options.Count)
 			{
 				SetOption(selection);
 
-				WYDSwitchOption<Type> option = options[currentOption];
+				WSwitchOption<Type> option = options[currentOption];
 
-				foreach (UnityAction<WYDSwitchOption<Type>> action in changedActions)
+				foreach (UnityAction<WSwitchOption<Type>> action in changedActions)
 				{
 					action.Invoke(option);
 				}
@@ -61,12 +61,11 @@ namespace HexaMod.UI.Elements
 			}
 		}
 
-		public WYDSwitchInput() : base()
+		public WSwitchInput() : base()
 		{
-			Transform videoOptionsMenu = Menus.title.FindMenu("VideoOptionsMenu");
+			Transform videoOptionsMenu = WYDMenus.title.FindMenu("VideoOptionsMenu");
 
 			gameObject = Object.Instantiate(boundsTemplate, videoOptionsMenu);
-			rectTransform = gameObject.GetComponent<RectTransform>();
 
 			GameObject higher = Object.Instantiate(videoOptionsMenu.Find("HigherRes").gameObject, gameObject.transform, true);
 			GameObject lower = Object.Instantiate(videoOptionsMenu.Find("LowerRes").gameObject, gameObject.transform, true);
@@ -104,38 +103,38 @@ namespace HexaMod.UI.Elements
 			res.name = "label";
 		}
 
-		public WYDSwitchInput<Type> SetText(string text)
+		public WSwitchInput<Type> SetText(string text)
 		{
 			label.text = text;
 			return this;
 		}
 
-		public WYDSwitchInput<Type> SetValueText(string text)
+		public WSwitchInput<Type> SetValueText(string text)
 		{
 			value.text = text;
 			return this;
 		}
 
-		public WYDSwitchInput<Type> SetParent(Transform parent)
+		public WSwitchInput<Type> SetParent(Transform parent)
 		{
 			return this.SetParent(parent, true);
 		}
 
-		public WYDSwitchInput<Type> SetOption(int optionId)
+		public WSwitchInput<Type> SetOption(int optionId)
 		{
 			currentOption = optionId;
 			SetValueText(options[currentOption].name);
 			return this;
 		}
 
-		public WYDSwitchInput<Type> LinkToPreference(Preference<int> preference)
+		public WSwitchInput<Type> LinkToPreference(Preference<int> preference)
 		{
 			SetOption(Mathf.Min(preference.Value, options.Count - 1))
-				.AddListener((WYDSwitchOption<Type> option) => preference.Value = option.index);
+				.AddListener((WSwitchOption<Type> option) => preference.Value = option.index);
 			return this;
 		}
 
-		public WYDSwitchInput<Type> AddOption(WYDSwitchOption<Type> option)
+		public WSwitchInput<Type> AddOption(WSwitchOption<Type> option)
 		{
 			option.index = options.Count;
 			options.Add(option);
@@ -144,24 +143,24 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDSwitchInput<Type> AddOptions(WYDSwitchOption<Type>[] options)
+		public WSwitchInput<Type> AddOptions(WSwitchOption<Type>[] options)
 		{
-			foreach (WYDSwitchOption<Type> option in options)
+			foreach (WSwitchOption<Type> option in options)
 			{
 				AddOption(option);
 			}
 			return this;
 		}
 
-		public WYDSwitchInput<Type> AddListener(UnityAction<WYDSwitchOption<Type>> action)
+		public WSwitchInput<Type> AddListener(UnityAction<WSwitchOption<Type>> action)
 		{
 			changedActions.Add(action);
 			return this;
 		}
 
-		public WYDSwitchInput<Type> AddListeners(UnityAction<WYDSwitchOption<Type>>[] actions)
+		public WSwitchInput<Type> AddListeners(UnityAction<WSwitchOption<Type>>[] actions)
 		{
-			foreach (UnityAction<WYDSwitchOption<Type>> action in actions)
+			foreach (UnityAction<WSwitchOption<Type>> action in actions)
 			{
 				AddListener(action);
 			}
@@ -169,7 +168,7 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDSwitchInput(string name, string title, int defaultSelection, WYDSwitchOption<Type>[] options, Transform menu, Vector2 position, UnityAction<WYDSwitchOption<Type>>[] changedActions) : this()
+		public WSwitchInput(string name, string title, int defaultSelection, WSwitchOption<Type>[] options, Transform menu, Vector2 position, UnityAction<WSwitchOption<Type>>[] changedActions) : this()
 		{
 			this.SetName(name)
 				.SetParent(menu, true)

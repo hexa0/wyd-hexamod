@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.SerializableObjects;
+using HexaMod.UI;
 using HexaMod.UI.Util;
 using HexaMod.Util;
 using HexaMod.Voice;
 using UnityEngine;
-using static HexaMod.HexaPersistentLobby;
 using static HexaMod.UI.Util.Menu;
 
 namespace HexaMod
@@ -17,7 +18,7 @@ namespace HexaMod
 		public static class HexaLobbyState
 		{
 			public static ushort spawnIndex;
-			public static int loadedPlayers = 0;
+			public static List<int> loadedPlayers = new List<int>();
 			public static bool handledPlayersLoaded = false;
 			public static Action onPlayersLoadedAction;
 		}
@@ -46,35 +47,45 @@ namespace HexaMod
 			}
 		}
 
+		public void SendReadyToMasterClient()
+		{
+			PlayerConnectedObject player = new PlayerConnectedObject
+			{
+				isDad = HexaGlobal.networkManager.isDad
+			};
+
+			if (HexaPersistentLobby.instance.dads.ContainsKey(PhotonNetwork.player.ID))
+			{
+				player.isDad = HexaPersistentLobby.instance.dads[PhotonNetwork.player.ID];
+			}
+
+			netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
+
+			if (PhotonNetwork.isMasterClient)
+			{
+				netView.RPC("MasterReadyRPC", PhotonTargets.Others);
+			}
+		}
+
 		public void Awake()
 		{
 			netView = GetComponent<PhotonView>();
 
-			HexaLobbyState.loadedPlayers = 0;
+			HexaLobbyState.loadedPlayers.Clear();
 			HexaLobbyState.handledPlayersLoaded = false;
 
 			if (PhotonNetwork.inRoom)
 			{
-				PlayerConnectedObject player = new PlayerConnectedObject
-				{
-					isDad = HexaMod.networkManager.isDad
-				};
-
-				if (HexaMod.persistentLobby.dads.ContainsKey(PhotonNetwork.player.ID))
-				{
-					player.isDad = HexaMod.persistentLobby.dads[PhotonNetwork.player.ID];
-				}
-
-				netView.RPC("PlayerLoadedRPC", PhotonTargets.MasterClient, PlayerConnectedObject.serializer.Serialize(player));
-				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
+				SendReadyToMasterClient();
+				HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", true);
 			}
 
-			HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
+			HexaPersistentLobby.instance.lobbySettingsChanged.AddListener(delegate ()
 			{
 				if (VoiceChatRoomsHook.inRoom)
 				{
-					VoiceChat.ConnectToRelay(HexaMod.persistentLobby.lobbySettings.relay);
-					VoiceChat.JoinVoiceRoom(HexaMod.persistentLobby.lobbySettings.voiceRoom);
+					VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay, HexaPersistentLobby.instance.lobbySettings.voiceRoom);
+					VoiceChat.JoinVoiceRoom(HexaPersistentLobby.instance.lobbySettings.voiceRoom);
 				}
 			});
 		}
@@ -88,13 +99,13 @@ namespace HexaMod
 
 		public void Update()
 		{
-			if (HexaMod.testGameWaitingForConn || waitingForTestRoom)
+			if (HexaGlobal.testGameWaitingForConn || waitingForTestRoom)
 			{
 				if (!waitingForTestRoom)
 				{
 					if (PhotonNetwork.connectedAndReady)
 					{
-						HexaMod.testGameWaitingForConn = false;
+						HexaGlobal.testGameWaitingForConn = false;
 						waitingForTestRoom = true;
 
 						RoomOptions roomOptions = new RoomOptions
@@ -104,7 +115,7 @@ namespace HexaMod
 							MaxPlayers = 1
 						};
 						PhotonNetwork.CreateRoom(
-							"FG_" + HexaMod.networkManager.gameName + HexaMod.networkManager.gameNum,
+							"FG_" + HexaGlobal.networkManager.gameName + HexaGlobal.networkManager.gameNum,
 							roomOptions,
 							PhotonNetwork.lobby
 						);
@@ -115,7 +126,7 @@ namespace HexaMod
 					if (PhotonNetwork.room != null)
 					{
 						waitingForTestRoom = false;
-						HexaMod.networkManager.StartMatch_FG();
+						HexaGlobal.networkManager.StartMatch_FG();
 					}
 				}
 			}
@@ -123,7 +134,7 @@ namespace HexaMod
 
 		public void TryNetworkLobbySettings(LobbySettings newSettings)
 		{
-			newSettings.voiceRoom = HexaMod.instanceGuid;
+			newSettings.voiceRoom = HexaGlobal.instanceGuid;
 			if (PhotonNetwork.isMasterClient && PhotonNetwork.inRoom)
 			{
 				netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.serializer.Serialize(newSettings) });
@@ -136,14 +147,26 @@ namespace HexaMod
 		}
 
 		[PunRPC]
+		public void MasterReadyRPC()
+		{
+			if (!PhotonNetwork.isMasterClient && !HexaLobbyState.handledPlayersLoaded)
+			{
+				SendReadyToMasterClient();
+			}
+		}
+
+		[PunRPC]
 		public void PlayerLoadedRPC(byte[] playerConnectedData, PhotonMessageInfo info)
 		{
+			if (HexaLobbyState.handledPlayersLoaded) { return; }
+			if (HexaLobbyState.loadedPlayers.Contains(info.sender.ID)) { return; }
+
 			PlayerConnectedObject player = PlayerConnectedObject.serializer.Deserialize(playerConnectedData);
-			HexaLobbyState.loadedPlayers++;
+			HexaLobbyState.loadedPlayers.Add(info.sender.ID);
 
-			Mod.Print($"got new ready player with name \"{GetPlayerName(info.sender)}\" and isDad = {player.isDad} {HexaLobbyState.loadedPlayers}/{PhotonNetwork.room.PlayerCount}");
+			Mod.Print($"got new ready player with name \"{GetPlayerName(info.sender)}\" and isDad = {player.isDad} {HexaLobbyState.loadedPlayers.Count}/{PhotonNetwork.room.PlayerCount}");
 
-			if (HexaLobbyState.onPlayersLoadedAction != null && !HexaLobbyState.handledPlayersLoaded && HexaLobbyState.loadedPlayers == PhotonNetwork.room.PlayerCount)
+			if (HexaLobbyState.onPlayersLoadedAction != null && !HexaLobbyState.handledPlayersLoaded && HexaLobbyState.loadedPlayers.Count == PhotonNetwork.room.PlayerCount)
 			{
 				Mod.Print("Got all players.");
 				HexaLobbyState.onPlayersLoadedAction();
@@ -151,8 +174,8 @@ namespace HexaMod
 
 			if (PhotonNetwork.room.IsOpen && info.sender != PhotonNetwork.masterClient)
 			{
-				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
+				var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
+				Transform hostMenu = WYDMenus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				if (player.isDad)
@@ -168,7 +191,7 @@ namespace HexaMod
 
 		public void WaitForPlayers(Action onPlayersLoaded, float timeoutSeconds = 5f)
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", true);
 
 			Mod.Print("Waiting for players.");
 
@@ -180,15 +203,15 @@ namespace HexaMod
 				}
 
 				HexaLobbyState.onPlayersLoadedAction = null;
-				HexaLobbyState.loadedPlayers = 0;
+				HexaLobbyState.loadedPlayers.Clear();
 
 				Mod.Print("All players ready.");
 				HexaLobbyState.handledPlayersLoaded = true;
-				HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
+				HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", false);
 				onPlayersLoaded();
 			};
 
-			if (HexaLobbyState.loadedPlayers >= PhotonNetwork.room.PlayerCount)
+			if (HexaLobbyState.loadedPlayers.Count >= PhotonNetwork.room.PlayerCount)
 			{
 				Mod.Print("We already have all players.");
 				HexaLobbyState.onPlayersLoadedAction();
@@ -213,16 +236,16 @@ namespace HexaMod
 		[PunRPC]
 		public void SetLobbySettingsRPC(byte[] newSettings)
 		{
-			HexaMod.persistentLobby.lobbySettings = LobbySettings.serializer.Deserialize(newSettings);
-			HexaMod.persistentLobby.CommitChanges();
+			HexaPersistentLobby.instance.lobbySettings = LobbySettings.serializer.Deserialize(newSettings);
+			HexaPersistentLobby.instance.CommitChanges();
 		}
 
 		public void SetupMatch()
 		{
-			RematchHelper rematchHelper = HexaMod.rematchHelper;
-			PhotonNetworkManager networkManager = HexaMod.networkManager;
-			GameStateController gameStateController = HexaMod.gameStateController;
-			HexaPersistentLobby lobby = HexaMod.persistentLobby;
+			RematchHelper rematchHelper = HexaGlobal.rematchHelper;
+			PhotonNetworkManager networkManager = HexaGlobal.networkManager;
+			GameStateController gameStateController = HexaGlobal.gameStateController;
+			HexaPersistentLobby lobby = HexaPersistentLobby.instance;
 			LobbySettings lobbySettings = lobby.lobbySettings;
 
 			var privateRematchFields = Traverse.Create(rematchHelper);
@@ -241,7 +264,7 @@ namespace HexaMod
 				}
 
 				Destroy(rematchHelper.gameObject);
-				HexaMod.rematchHelper = null;
+				HexaGlobal.rematchHelper = null;
 			}
 
 			rematchHelper.allowSpec = lobbySettings.allowSpectating && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
@@ -288,18 +311,18 @@ namespace HexaMod
 				}
 			}
 
-			Menu.Menus.title.menuController.DeactivateAll();
-			Destroy(HexaMod.rematchHelper);
+			Menu.WYDMenus.title.menuController.DeactivateAll();
+			Destroy(HexaGlobal.rematchHelper);
 
-			HexaMod.networkManager.fader.SendMessage("Fade");
+			HexaGlobal.networkManager.fader.SendMessage("Fade");
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				HexaMod.hexaLobby.enabled = true;
+				HexaGlobal.hexaLobby.enabled = true;
 
-				HexaMod.hexaLobby.WaitForPlayers(delegate ()
+				HexaGlobal.hexaLobby.WaitForPlayers(delegate ()
 				{
-					HexaMod.hexaLobby.StartMatch();
+					HexaGlobal.hexaLobby.StartMatch();
 				}, 5f);
 			}
 		}
@@ -308,7 +331,7 @@ namespace HexaMod
 		{
 			Assets.InitScene();
 
-			if (HexaMod.rematchHelper != null && PhotonNetwork.inRoom)
+			if (HexaGlobal.rematchHelper != null && PhotonNetwork.inRoom)
 			{
 				SetupMatch();
 			}
@@ -319,21 +342,21 @@ namespace HexaMod
 			if (PhotonNetwork.isMasterClient)
 			{
 				MatchStartObject matchStartObject = new MatchStartObject()
-					.DetermineSpawns(HexaMod.persistentLobby.lobbySettings);
+					.DetermineSpawns(HexaPersistentLobby.instance.lobbySettings);
 
 				netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { !PhotonNetwork.room.IsOpen, MatchStartObject.serializer.Serialize(matchStartObject) });
 
-				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+				var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
 
 				if (PhotonNetwork.room.IsOpen == false)
 				{
 					if (mode.respawnRPC != null)
 					{
-						HexaMod.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
+						HexaGlobal.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
 					}
 					else
 					{
-						HexaMod.networkManager.RespawnPlayers();
+						HexaGlobal.networkManager.RespawnPlayers();
 					}
 				}
 			}
@@ -342,10 +365,9 @@ namespace HexaMod
 		[PunRPC]
 		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
 		{
-			HexaMod.networkManager.fader.SendMessage("Fade");
-			HexaMod.textChat.chat.CheckWho();
+			HexaGlobal.networkManager.fader.SendMessage("Fade");
+			HexaGlobal.textChat.chat.CheckWho();
 
-			HexaLobbyState.loadedPlayers = PhotonNetwork.room.PlayerCount;
 			HexaLobbyState.handledPlayersLoaded = true;
 
 			MatchStartObject matchStartObject = MatchStartObject.serializer.Deserialize(matchStartObjectData);
@@ -361,15 +383,19 @@ namespace HexaMod
 				Mod.Warn("fail to set HexaLobbyState.spawnIndex:\n", e);
 			}
 
-			var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+			var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
 
-			HexaMod.mainUI.loadingController.SetTaskState("MatchLoad", false);
+			HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", false);
+
 			if (inGame)
 			{
-				HexaMod.networkManager.fader.SendMessage("Fade");
+				VoiceChat.SetMicrophoneChannels(1);
+
+				HexaGlobal.networkManager.fader.SendMessage("Fade");
+
 				if (mode.name == "daddysNightmare")
 				{
-					Countdown countdown = Menu.Menus.title.FindMenu("GameStart").Find("Countdown").gameObject.GetComponent<Countdown>();
+					Countdown countdown = WYDMenus.title.FindMenu("GameStart").Find("Countdown").gameObject.GetComponent<Countdown>();
 
 					Instantiate(countdown.sound);
 					countdown.sky.SendMessage("Switch");
@@ -379,9 +405,11 @@ namespace HexaMod
 
 			if (!inGame)
 			{
-				var hostMenuId = Menu.Menus.title.GetMenuId(mode.hostMenuName);
+				VoiceChat.SetMicrophoneChannels(2);
 
-				Menu.Menus.title.menuController.ChangeToMenu(hostMenuId);
+				var hostMenuId = WYDMenus.title.GetMenuId(mode.hostMenuName);
+
+				WYDMenus.title.menuController.ChangeToMenu(hostMenuId);
 
 				StartCoroutine(HexaModReturnedLobbyInit());
 			}
@@ -389,8 +417,8 @@ namespace HexaMod
 
 		IEnumerator HexaModReturnedLobbyInit()
 		{
-			var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-			Transform hostMenu = Menu.Menus.title.FindMenu(mode.hostMenuName);
+			var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
+			Transform hostMenu = Menu.WYDMenus.title.FindMenu(mode.hostMenuName);
 
 			yield return new WaitForEndOfFrame();
 
@@ -400,7 +428,7 @@ namespace HexaMod
 			{
 				if (mode.canShuffle)
 				{
-					if (!HexaMod.networkManager.isDad)
+					if (!HexaGlobal.networkManager.isDad)
 					{
 						playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
@@ -411,7 +439,7 @@ namespace HexaMod
 				}
 				else
 				{
-					if (HexaMod.networkManager.isDad)
+					if (HexaGlobal.networkManager.isDad)
 					{
 						playerList.AddDaddy(PhotonNetwork.playerName, PhotonNetwork.player);
 					}
@@ -426,8 +454,31 @@ namespace HexaMod
 		void OnCreatedRoom()
 		{
 			Mod.Print($"RoomCreated");
-			VoiceChat.ConnectToRelay(HexaMod.persistentLobby.lobbySettings.relay);
-			VoiceChat.JoinVoiceRoom(HexaMod.instanceGuid);
+			VoiceChat.SetMicrophoneChannels(2);
+			VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay);
+			VoiceChat.JoinVoiceRoom(HexaGlobal.instanceGuid);
+		}
+
+		void OnJoinedRoom()
+		{
+			HexaLobbyState.handledPlayersLoaded = true;
+
+			if (!PhotonNetwork.isMasterClient)
+			{
+				VoiceChat.SetMicrophoneChannels(2);
+			}
+		}
+
+		void OnMasterClientSwitched(PhotonPlayer player)
+		{
+			Mod.Print($"master client switched to peer {player.ID}");
+			if (player == PhotonNetwork.player)
+			{
+				HexaPersistentLobby.instance.SetInOtherLobby(false);
+
+				//VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay);
+				//VoiceChat.JoinVoiceRoom(HexaGlobal.instanceGuid);
+			}
 		}
 
 		void OnPhotonPlayerConnected(PhotonPlayer player)
@@ -436,10 +487,10 @@ namespace HexaMod
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				HexaMod.hexaLobby.TryNetworkLobbySettings(HexaMod.persistentLobby.lobbySettings);
+				HexaGlobal.hexaLobby.TryNetworkLobbySettings(HexaPersistentLobby.instance.lobbySettings);
 
-				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
+				var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
+				Transform hostMenu = WYDMenus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				if (mode.defaultTeamIsDad)
@@ -451,7 +502,7 @@ namespace HexaMod
 					playerList.AddBaby(GetPlayerName(player), player);
 				}
 
-				HexaMod.textChat.SendUnformattedChatMessage($"<color=lime>►</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> joined.");
+				HexaGlobal.textChat.SendUnformattedChatMessage($"<color=lime>►</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> joined.");
 			}
 		}
 
@@ -462,17 +513,17 @@ namespace HexaMod
 			{
 				// player left/all players left chat messages
 
-				HexaMod.textChat.SendUnformattedChatMessage($"<color=red>◄</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> left.");
+				HexaGlobal.textChat.SendUnformattedChatMessage($"<color=red>◄</color> <b><color=\"#ed6553\">{GetPlayerName(player)}</color></b> left.");
 
-				if (!Menus.title.menuController.menus[Menus.title.menuController.curMenu].activeInHierarchy && PhotonNetwork.playerList.Length <= 1)
+				if (!WYDMenus.title.menuController.menus[WYDMenus.title.menuController.curMenu].activeInHierarchy && PhotonNetwork.playerList.Length <= 1)
 				{
-					HexaMod.textChat.SendServerMessage("All players have left the game.");
+					HexaGlobal.textChat.SendServerMessage("All players have left the game.");
 				}
 
 				// lobby player list
 
-				var mode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
-				Transform hostMenu = Menus.title.FindMenu(mode.hostMenuName);
+				var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
+				Transform hostMenu = WYDMenus.title.FindMenu(mode.hostMenuName);
 				PlayerNames playerList = hostMenu.GetComponentInChildren<PlayerNames>(true);
 
 				for (int i = 0; i < playerList.daddyPlayerIds.Count; i++)
@@ -497,11 +548,11 @@ namespace HexaMod
 
 				// abandoned screen
 
-				if (GameModes.gameModes[HexaMod.networkManager.curGameMode].twoPlayer)
+				if (GameModes.gameModes[HexaGlobal.networkManager.curGameMode].twoPlayer)
 				{
 					GameObject BabyCam = GameObject.Find("BabyCam");
 					GameObject DadCam = GameObject.Find("DadCam");
-					HexaMod.gameStateController.DisableInGameUI();
+					HexaGlobal.gameStateController.DisableInGameUI();
 
 					if (BabyCam)
 					{
@@ -510,9 +561,9 @@ namespace HexaMod
 						BabyCam.transform.parent.GetComponent<NetworkMovement>().enabled = false;
 						BabyCam.SendMessage("ActivateWinCam");
 
-						if (!HexaMod.networkManager.isDad)
+						if (!HexaGlobal.networkManager.isDad)
 						{
-							Menus.inGame.menuController.ChangeToMenu(3);
+							WYDMenus.inGame.menuController.ChangeToMenu(3);
 						}
 					}
 
@@ -523,16 +574,16 @@ namespace HexaMod
 						DadCam.transform.parent.GetComponent<NetworkMovement>().enabled = false;
 						DadCam.SendMessage("ActivateWinCam");
 
-						if (HexaMod.networkManager.isDad)
+						if (HexaGlobal.networkManager.isDad)
 						{
-							Menus.inGame.menuController.ChangeToMenu(4);
+							WYDMenus.inGame.menuController.ChangeToMenu(4);
 						}
 					}
 
 					if (!BabyCam && !DadCam)
 					{
 						yield return new WaitForSeconds(3f);
-						HexaMod.networkManager.SomeoneDisconnected();
+						HexaGlobal.networkManager.SomeoneDisconnected();
 					}
 				}
 			}
@@ -541,11 +592,16 @@ namespace HexaMod
 		[PunRPC]
 		public void ReturnToLobby()
 		{
-			HexaMod.persistentLobby.ResetRound();
-			HexaMod.persistentLobby.dads[PhotonNetwork.player.ID] = HexaMod.networkManager.isDad;
-			GameObject menuCamera = GameObject.Find("BackendObjects").Find("MenuCamera");
-			menuCamera.SetActive(true);
+			if (PhotonNetwork.isMasterClient)
+			{
+				HexaPersistentLobby.instance.ResetRound();
+				HexaPersistentLobby.instance.dads[PhotonNetwork.player.ID] = HexaGlobal.networkManager.isDad;
+			}
+
 			Camera currentCamera = Camera.current;
+
+			GameObject menuCamera = GameObject.Find("BackendObjects").Find("MenuCamera");
+
 			Camera menuCameraComponent = menuCamera.GetComponent<Camera>();
 			menuCameraComponent.enabled = true;
 			menuCameraComponent.fieldOfView = currentCamera.fieldOfView;
@@ -555,12 +611,14 @@ namespace HexaMod
 			menuCamera.transform.position = currentCamera.transform.position;
 			menuCamera.transform.rotation = currentCamera.transform.rotation;
 
+			menuCamera.SetActive(true);
+
 			if (PhotonNetwork.isMasterClient)
 			{
 				PhotonNetwork.room.IsOpen = true;
 				PhotonNetwork.room.IsVisible = true;
 				netView.RPC("ReturnToLobby", PhotonTargets.Others);
-				HexaMod.networkManager.netView.RPC("Rematch", PhotonTargets.All);
+				HexaGlobal.networkManager.netView.RPC("Rematch", PhotonTargets.All);
 				PhotonNetwork.DestroyAll();
 			}
 		}

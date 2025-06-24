@@ -25,7 +25,7 @@ namespace HexaMod.Patches.Feature
 			clips[i] = __instance.aud.clip;
 
 			index = 0;
-			new System.Random(HexaMod.persistentLobby.lobbySettings.roundNumber).Shuffle(clips);
+			new System.Random(HexaPersistentLobby.instance.lobbySettings.roundNumber).Shuffle(clips);
 		}
 
 		[HarmonyPatch("RPCInteract")]

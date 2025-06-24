@@ -21,7 +21,9 @@ namespace VoiceChatHost.Opus
 		public void CommitChannels() => ResetDecoder();
 		public void CommitSampleRate() => ResetDecoder();
 
-		public int Decode(ReadOnlySpan<byte> in_data, Span<float> out_pcm, int frame_size, bool decode_fec = false) => decoder.Decode(in_data, out_pcm, frame_size, decode_fec);
+		public int Decode(ReadOnlySpan<byte> in_data, Span<float> out_pcm, int frame_size) {
+			return decoder.Decode(in_data, out_pcm, frame_size, false);
+		}
 
 		public DecodingSetup(int sampleRate, int channels)
 		{

@@ -13,7 +13,7 @@ namespace HexaMod.Patches.Fixes
 		{
 			AudioSource audioEmitter = __instance.GetComponent<AudioSource>();
 
-			if (__instance.gameObject.name == HexaMod.networkManager.playerObj.name && __instance.GetComponent<PhotonView>().isMine)
+			if (__instance.gameObject.name == HexaGlobal.networkManager.playerObj.name && __instance.GetComponent<PhotonView>().isMine)
 			{
 				audioEmitter.bypassEffects = true;
 				// audioEmitter.panStereo = -0.4f;

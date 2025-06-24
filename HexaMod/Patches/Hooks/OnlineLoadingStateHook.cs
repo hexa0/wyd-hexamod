@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.UI;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -10,58 +11,58 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void CreateRoom()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("RoomCreate", true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("RoomCreate", true);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "JoinRoom", new Type[] { typeof(string)})]
 		[HarmonyPrefix]
 		static void JoinRoom()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("RoomJoin", true);
-			HexaMod.persistentLobby.SetInOtherLobby(true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("RoomJoin", true);
+			HexaPersistentLobby.instance.SetInOtherLobby(true);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "LeaveRoom")]
 		[HarmonyPrefix]
 		static void LeaveRoom()
 		{
-			HexaMod.persistentLobby.SetInOtherLobby(false);
-			HexaMod.persistentLobby.Reset();
+			HexaPersistentLobby.instance.SetInOtherLobby(false);
+			HexaPersistentLobby.instance.Reset();
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "Disconnect")]
 		[HarmonyPrefix]
 		static void Disconnect()
 		{
-			HexaMod.persistentLobby.SetInOtherLobby(false);
+			HexaPersistentLobby.instance.SetInOtherLobby(false);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "JoinLobby", new Type[] { typeof(TypedLobby) })]
 		[HarmonyPrefix]
 		static void JoinLobby()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("LobbyJoin", true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("LobbyJoin", true);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "LeaveLobby")]
 		[HarmonyPrefix]
 		static void LeaveLobby()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("LobbyJoin", false);
+			HexaMenus.loadingOverlay.controller.SetTaskState("LobbyJoin", false);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "ConnectUsingSettings")]
 		[HarmonyPrefix]
 		static void ConnectUsingSettings()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("PhotonConnect", true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("PhotonConnect", true);
 		}
 
 		[HarmonyPatch(typeof(PhotonNetworkManager), "JoinWithTag")]
 		[HarmonyPrefix]
 		static void JoinWithTag()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("RoomLookForOrCreateTag", true);
+			HexaMenus.loadingOverlay.controller.SetTaskState("RoomLookForOrCreateTag", true);
 		}
 	}
 }

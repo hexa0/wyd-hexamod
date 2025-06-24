@@ -2,12 +2,28 @@
 using UnityEngine.Events;
 using UnityEngine;
 using UnityEngine.UI;
-using static Mono.Security.X509.X520;
+using static HexaMod.UI.Element.Control.ButtonSoundBehavior;
 
-namespace HexaMod.UI.Elements
+namespace HexaMod.UI.Element.Control.TextButton
 {
-	public class WYDTextButton : WYDUIElement
+	public class WTextButton : HexaUIElement
 	{
+		public UISound ButtonUpSound {
+			set => buttonSoundBehavior.ButtonUpSound = value;
+		}
+
+		public UISound ButtonDownSound
+		{
+			set => buttonSoundBehavior.ButtonDownSound = value;
+		}
+
+		public UISound HoverSound
+		{
+			set => buttonSoundBehavior.HoverSound = value;
+		}
+
+		ButtonSoundBehavior buttonSoundBehavior;
+
 		public static Vector2 gap = new Vector2(320f, 168f);
 		public enum FontSizes : int
 		{
@@ -23,64 +39,87 @@ namespace HexaMod.UI.Elements
 			set { button.image = value; }
 		}
 
-		public WYDTextButton ClearEvents()
+		public WTextButton ClearEvents()
 		{
 			button.onClick.RemoveAllListeners();
 			button.onClick = new Button.ButtonClickedEvent();
 			return this;
 		}
 
-		public WYDTextButton SetInteractable(bool interactable)
+		public WTextButton SetInteractable(bool interactable)
 		{
 			button.interactable = interactable;
 			return this;
 		}
 
-		public WYDTextButton SetText(string text)
+		public WTextButton SetText(string text)
 		{
 			label.text = text;
 			label.supportRichText = true;
 			return this;
 		}
 
-		public WYDTextButton SetTextAuto(string text)
+		public WTextButton SetTextAuto(string text)
 		{
 			SetText(text)
 				.AutoFontSize();
 			return this;
 		}
 
-		public WYDTextButton SetSprite(Sprite sprite)
+		public WTextButton SetSprite(Sprite sprite)
 		{
 			image.sprite = sprite;
 			return this;
 		}
 
-		public WYDTextButton SetSpriteColor(Color color)
+		public WTextButton SetSpriteColor(Color color)
 		{
 			image.color = color;
 			return this;
 		}
 
-		public WYDTextButton SetFontSize(int size)
+		public WTextButton SetFontSize(int size)
 		{
 			label.fontSize = size;
 			return this;
 		}
 
-		public WYDTextButton AutoFontSize()
+		public WTextButton AutoFontSize()
 		{
 			SetFontSize(label.text.Length > 7 ? FontSizes.Small : FontSizes.Regular);
 			return this;
 		}
 
-		public WYDTextButton SetFontSize(FontSizes size)
+		public WTextButton SetFontSize(FontSizes size)
 		{
 			label.fontSize = (int)size;
 			return this;
 		}
 
-		public WYDTextButton SetColors(ColorBlock colors)
+		public WTextButton SetButtonSound(UISound sound)
+		{
+			return SetButtonDownSound(sound).SetButtonUpSound(sound);
+		}
+
+		public WTextButton SetButtonUpSound(UISound sound)
+		{
+			ButtonUpSound = sound;
+			return this;
+		}
+
+		public WTextButton SetButtonDownSound(UISound sound)
+		{
+			ButtonDownSound = sound;
+			return this;
+		}
+
+		public WTextButton SetButtonHoverSound(UISound sound)
+		{
+			HoverSound = sound;
+			return this;
+		}
+
+		public WTextButton SetColors(ColorBlock colors)
 		{
 			ColorBlock newColors = button.colors;
 
@@ -93,14 +132,14 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDTextButton AddListener(UnityAction action)
+		public WTextButton AddListener(UnityAction action)
 		{
 			button.onClick.AddListener(action);
 
 			return this;
 		}
 
-		public WYDTextButton AddListeners(UnityAction[] actions)
+		public WTextButton AddListeners(UnityAction[] actions)
 		{
 			foreach (UnityAction action in actions)
 			{
@@ -110,19 +149,24 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDTextButton(GameObject baseButton) : base()
+		public WTextButton(GameObject baseButton) : base()
 		{
 			gameObject = baseButton;
-			rectTransform = gameObject.GetComponent<RectTransform>();
 			button = gameObject.GetComponent<Button>();
 			label = button.transform.GetChild(0).GetComponent<Text>();
+
+			buttonSoundBehavior = button.gameObject.GetComponent<ButtonSoundBehavior>();
+			if (!buttonSoundBehavior)
+			{
+				buttonSoundBehavior = button.gameObject.AddComponent<ButtonSoundBehavior>();
+			}
 
 			ClearEvents();
 		}
 
-		public WYDTextButton() : this(Object.Instantiate(UITemplates.buttonTemplate.gameObject)) { }
+		public WTextButton() : this(Object.Instantiate(UITemplates.buttonTemplate.gameObject)) { }
 
-		public WYDTextButton(string name, string text, Transform menu, Vector2 position, UnityAction[] actions) : this()
+		public WTextButton(string name, string text, Transform menu, Vector2 position, UnityAction[] actions) : this()
 		{
 			this.SetName(name)
 				.SetParent(menu)
@@ -131,7 +175,7 @@ namespace HexaMod.UI.Elements
 				.AddListeners(actions);
 		}
 
-		public WYDTextButton(string name, string text, Button toReplace, UnityAction[] actions) : this(toReplace.gameObject)
+		public WTextButton(string name, string text, Button toReplace, UnityAction[] actions) : this(toReplace.gameObject)
 		{
 			this.SetName(name)
 				.SetParent(toReplace.transform.parent)
@@ -140,11 +184,12 @@ namespace HexaMod.UI.Elements
 				.AddListeners(actions);
 		}
 
-		public static WYDTextButton MakeBackButton(MenuUtil menu, Transform root, string backMenu = null)
+		public static WTextButton MakeBackButton(MenuUtil menu, Transform root, string backMenu = null)
 		{
-			return new WYDTextButton()
+			return new WTextButton()
 				.SetName("backButton")
 				.SetTextAuto("Back")
+				.SetButtonSound(UISound.Back)
 				.SetParent(root.transform)
 				.SetPosition(170f, 90f)
 				.AddListener(() =>

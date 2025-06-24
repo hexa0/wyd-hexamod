@@ -6,9 +6,9 @@ using HexaMod.Util;
 using System.Linq;
 using HexaMod.ScriptableObjects;
 using HexaMod.Voice;
-using static HexaMod.UI.Util.Menu.Menus;
-using HexaMod.UI.Elements;
-using HexaMod.UI.Elements.Extended;
+using static HexaMod.UI.Util.Menu.WYDMenus;
+using HexaMod.UI.Element;
+using HexaMod.UI.Element.Extended;
 using HexaMod.SerializableObjects;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -16,6 +16,12 @@ using UnityStandardAssets.Characters.FirstPerson;
 using HexaMod.Settings;
 using VoiceChatShared;
 using System;
+using HexaMod.UI.Element.Control.TextButton;
+using HexaMod.UI.Element.Control.SwitchInput;
+using HexaMod.UI.Element.Control.ToggleButton;
+using HexaMod.UI.Element.Control.TextInputField;
+using HexaMod.UI.Element.VoiceChatUI;
+using HexaMod.UI.Element.Control;
 
 namespace HexaMod.UI
 {
@@ -36,12 +42,12 @@ namespace HexaMod.UI
 			}
 			public static void TestDadButton()
 			{
-				HexaMod.MakeTestGame(true);
+				HexaGlobal.MakeTestGame(true);
 			}
 
 			public static void TestBabyButton()
 			{
-				HexaMod.MakeTestGame(false);
+				HexaGlobal.MakeTestGame(false);
 			}
 
 			public static void SetShirtColor(Color color, string hex)
@@ -101,10 +107,10 @@ namespace HexaMod.UI
 				Mod.Print($"change to {mapName}");
 				PlayerPrefs.SetString("HMV2_CustomMap", mapName);
 
-				HexaMod.textChat.SendServerMessage($"Map changed to {mapName}.");
+				HexaGlobal.textChat.SendServerMessage($"Map changed to {mapName}.");
 
-				HexaMod.persistentLobby.lobbySettings.mapName = mapName;
-				HexaMod.persistentLobby.CommitChanges();
+				HexaPersistentLobby.instance.lobbySettings.mapName = mapName;
+				HexaPersistentLobby.instance.CommitChanges();
 			}
 		}
 
@@ -114,7 +120,7 @@ namespace HexaMod.UI
 
 			foreach (var level in Assets.levels)
 			{
-				if (level.levelPrefab.name == HexaMod.persistentLobby.lobbySettings.mapName)
+				if (level.levelPrefab.name == HexaPersistentLobby.instance.lobbySettings.mapName)
 				{
 					foundLevel = level;
 					break;
@@ -142,7 +148,7 @@ namespace HexaMod.UI
 
 		public void OnLevelsLoaded()
 		{
-			HexaMod.mainUI.loadingController.SetTaskState("LoadingMaps", false);
+			HexaMenus.loadingOverlay.controller.SetTaskState("LoadingMaps", false);
 
 			UpdateUIForLobbyState();
 
@@ -152,7 +158,7 @@ namespace HexaMod.UI
 
 			GameObject menu = title.NewMenu("ChangeMap");
 			int menuId = title.GetMenuId(menu.name);
-			WYDTextButton backButton = WYDTextButton.MakeBackButton(title, menu.transform);
+			WTextButton backButton = WTextButton.MakeBackButton(title, menu.transform);
 			title.menuController.startBtn[menuId] = backButton.gameObject;
 
 			Vector2 center = new Vector2(1920f / 2f, 1080f / 2f);
@@ -167,18 +173,17 @@ namespace HexaMod.UI
 				float x = Mathf.Floor(i / 5f) - (width / 2f);
 				float y = -(i % 5) + (height / 2f) + 0.5f;
 
-				new WYDMapButton(level)
+				new MapButton(level)
 					.SetParent(menu.transform)
 					.SetPosition(center + new Vector2(
-						WYDTextButton.gap.x * x,
-						WYDTextButton.gap.y * y
+						WTextButton.gap.x * x,
+						WTextButton.gap.y * y
 					))
 					.AddListener(() => { ButtonCallbacks.ChangeLevel(level.levelPrefab.name); });
 			}
 		}
 
 		public static Text mapInfo;
-		public LoadingController loadingController;
 
 		public void Init()
 		{
@@ -188,14 +193,13 @@ namespace HexaMod.UI
 			}
 
 			UITemplates.Init();
-			loadingController = gameObject.AddComponent<LoadingController>().Init();
 
-			if (HexaMod.persistentLobby.lobbySettingsChanged == null)
+			if (HexaPersistentLobby.instance.lobbySettingsChanged == null)
 			{
 				throw new System.Exception("HexaMod.hexaLobby.lobbySettingsChanged is null");
 			}
 
-			HexaMod.persistentLobby.lobbySettingsChanged.AddListener(delegate ()
+			HexaPersistentLobby.instance.lobbySettingsChanged.AddListener(delegate ()
 			{
 				if (Assets.StaticAssets.didCache)
 				{
@@ -214,20 +218,20 @@ namespace HexaMod.UI
 			{ // HexaMod Options Menu
 				void MakeButton(Button originalButton, MenuUtil menu)
 				{
-					new WYDTextButton()
+					new WTextButton()
 						.SetName("hexaModOptions")
 						.SetParent(originalButton.transform.parent)
-						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * 0.95f, 0f))
+						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WTextButton.gap.x * 0.95f, 0f))
 						.SetText("Hexa Mod")
-						.SetFontSize(WYDTextButton.FontSizes.Small)
+						.SetFontSize(WTextButton.FontSizes.Small)
 						.AddListener(() =>
 						{
 							menu.menuController.ChangeToMenu(menu.GetMenuId("HexaModOptions"));
 						});
 
-					new WYDMatchSettingsButton()
+					new MatchSettingsButton()
 						.SetParent(originalButton.transform.parent)
-						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WYDTextButton.gap.x * -0.95f, 0f))
+						.SetPosition(new Vector2(originalButton.transform.localPosition.x, originalButton.transform.localPosition.y) + new Vector2(WTextButton.gap.x * -0.95f, 0f))
 						.AddListener(() =>
 						{
 							menu.menuController.ChangeToMenu(menu.GetMenuId("MatchSettings"));
@@ -236,49 +240,56 @@ namespace HexaMod.UI
 
 				void MakeMenu(GameObject menu, MenuUtil menuUtil)
 				{
-					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = WYDTextButton.MakeBackButton(menuUtil, menu.transform).gameObject;
+					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = WTextButton.MakeBackButton(menuUtil, menu.transform).gameObject;
 
 					Vector2 bottomLeft = new Vector2(0f, 200f);
 					float gap = 15f;
 
-					LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
+					LobbySettings ls = HexaPersistentLobby.instance.lobbySettings;
 
 					var devices = VoiceChat.GetDevices();
-					WYDSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WYDSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
+					WSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
 
 					for (int i = 0; i < devices.Length; i++)
 					{
-						deviceOptions[i] = new WYDSwitchOption<VoiceChat.MicrophoneDevice>()
+						deviceOptions[i] = new WSwitchOption<VoiceChat.MicrophoneDevice>()
 						{
 							name = $"({i + 1}/{devices.Length}) : {devices[i].capabilities.ProductName}",
 							value = devices[i]
 						};
 					}
 
-					WYDSwitchOption<int>[] audioBitrateOptions = new WYDSwitchOption<int>[Enum.GetValues(typeof(Bitrate)).Length];
+					WSwitchOption<int>[] audioBitrateOptions = new WSwitchOption<int>[Enum.GetValues(typeof(Bitrate)).Length];
 
 					for (int i = 0; i < audioBitrateOptions.Length;i++)
 					{
 						int value = (byte)Enum.GetValues(typeof(Bitrate)).GetValue(i);
 
-						audioBitrateOptions[i] = new WYDSwitchOption<int>()
+						audioBitrateOptions[i] = new WSwitchOption<int>()
 						{
 							name = Enum.GetName(typeof(Bitrate), value).Replace("Bitrate_Preset_", ""),
 							value = value
 						};
 					}
 
-					WYDUIElement[] options = {
+					HexaUIElement[] options = {
 						// Audio
 
-						new WYDBooleanControl()
+						new WToggleControl()
 							.SetName("micRnNoise")
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
 							.SetText("Microphone Denoising (RNNoise)")
 							.LinkToPreference(VoiceChat.denoisingEnabled),
 
-						new WYDSwitchInput<int>()
+						new WToggleControl()
+							.SetName("voiceChatDebugOverlayEnabled")
+							.SetParent(menu.transform)
+							.SetPosition(200f, 0f)
+							.SetText("Voice Chat Debug Overlay")
+							.LinkToPreference(VoiceChat.debugOverlayEnabled),
+
+						new WSwitchInput<int>()
 							.SetName("microphoneBitrate")
 							.SetParent(menu.transform)
 							.SetPosition(45f, 0f)
@@ -286,7 +297,7 @@ namespace HexaMod.UI
 							.AddOptions(audioBitrateOptions)
 							.LinkToPreference(VoiceChat.microphoneBitrate),
 
-						new WYDSwitchInput<VoiceChat.MicrophoneDevice>()
+						new WSwitchInput<VoiceChat.MicrophoneDevice>()
 							.SetName("microphoneDevice")
 							.SetParent(menu.transform)
 							.SetPosition(45f, 0f)
@@ -294,11 +305,11 @@ namespace HexaMod.UI
 							.AddOptions(deviceOptions)
 							.LinkToPreference(VoiceChat.microphoneDeviceId),
 
-						new WYDMicrophoneIndicator()
+						new MicrophoneIndicator()
 							.SetParent(menu.transform)
 							.SetPosition(45f, 0f),
 
-						new WYDBooleanControl()
+						new WToggleControl()
 							.SetName("tabOutMute")
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
@@ -307,7 +318,7 @@ namespace HexaMod.UI
 						
 						// UI
 
-						new WYDBooleanControl()
+						new WToggleControl()
 							.SetName("uiRefresh")
 							.SetParent(menu.transform)
 							.SetPosition(200f, 0f)
@@ -333,13 +344,13 @@ namespace HexaMod.UI
 			{ // Return To Lobby Override
 				if (PhotonNetwork.isMasterClient)
 				{
-					WYDTextButton hexaModOptions = new WYDTextButton(
+					WTextButton hexaModOptions = new WTextButton(
 						"returnToLobby", "Return To\nLobby", inGame.FindMenu("OptionsMenu (1)").Find("ReturnToMenu").GetComponent<Button>(),
 						new UnityAction[] {
 							() => {
 								if (PhotonNetwork.room != null)
 								{
-									HexaMod.hexaLobby.ReturnToLobby();
+									HexaGlobal.hexaLobby.ReturnToLobby();
 								}
 								else
 								{
@@ -350,14 +361,16 @@ namespace HexaMod.UI
 							}
 						}
 					);
+
+					hexaModOptions.SetButtonSound(UISound.Back);
 				}
 
-				WYDTextButton backButton = new WYDTextButton(
+				WTextButton backButton = new WTextButton(
 					"back", "Back", inGame.FindMenu("OptionsMenu (1)").Find("Back").GetComponent<Button>(),
 					new UnityAction[] {
 						() => {
-							FirstPersonController firstPersonController = HexaMod.networkManager.playerObj.GetComponent<FirstPersonController>();
-							InGameMenuHelper inGameMenuHelper = HexaMod.networkManager.playerObj.GetComponentInChildren<InGameMenuHelper>();
+							FirstPersonController firstPersonController = HexaGlobal.networkManager.playerObj.GetComponent<FirstPersonController>();
+							InGameMenuHelper inGameMenuHelper = HexaGlobal.networkManager.playerObj.GetComponentInChildren<InGameMenuHelper>();
 							inGameMenuHelper.menuOn = false;
 							inGame.menuController.DeactivateAll();
 							firstPersonController.haltInput = false;
@@ -369,7 +382,7 @@ namespace HexaMod.UI
 			{ // Title Screen
 				Mod.Print("edit title screen");
 
-				title.root.Find("Version").GetComponent<Text>().text = HexaMod.networkManager.version;
+				title.root.Find("Version").GetComponent<Text>().text = HexaGlobal.networkManager.version;
 
 				// booooring
 				title.FindMenu("SplashMenu").Find("Return To New WYD").gameObject.SetActive(false);
@@ -385,31 +398,31 @@ namespace HexaMod.UI
 
 				Vector2 TopLeft = new Vector2(-160f, -118f);
 
-				WYDTextButton testDad = new WYDTextButton()
+				WTextButton testDad = new WTextButton()
 					.SetName("testDad")
 					.SetTextAuto("Test\nDad")
 					.SetParent(title.FindMenu("SplashMenu"))
 					.SetPosition(TopLeft + new Vector2(
-						WYDTextButton.gap.x * -1,
-						WYDTextButton.gap.y * 0
+						WTextButton.gap.x * -1,
+						WTextButton.gap.y * 0
 					))
 					.AddListener(ButtonCallbacks.TestDadButton);
 
-				WYDTextButton testBaby = new WYDTextButton()
+				WTextButton testBaby = new WTextButton()
 					.SetName("testBaby")
 					.SetTextAuto("Test\nBaby")
 					.SetParent(title.FindMenu("SplashMenu"))
 					.SetPosition(TopLeft + new Vector2(
-						WYDTextButton.gap.x * -1,
-						WYDTextButton.gap.y * -1
+						WTextButton.gap.x * -1,
+						WTextButton.gap.y * -1
 					))
 					.AddListener(ButtonCallbacks.TestBabyButton);
 
-				new WYDMatchSettingsButton()
+				new MatchSettingsButton()
 					.SetParent(title.FindMenu("SplashMenu"))
 					.SetPosition(TopLeft + new Vector2(
-							WYDTextButton.gap.x * -1,
-							WYDTextButton.gap.y * -2
+							WTextButton.gap.x * -1,
+							WTextButton.gap.y * -2
 					))
 					.AddListener(ButtonCallbacks.MatchSettingsButton);
 
@@ -431,25 +444,25 @@ namespace HexaMod.UI
 				Vector2 bottomLeft = new Vector2(720f, -350f);
 				float gap = 15f;
 
-				WYDSwitchOption<string>[] dadModelOptions = new WYDSwitchOption<string>[Assets.dadCharacterModels.Count + 1];
-				WYDSwitchOption<Material>[] dadShirtOptions = new WYDSwitchOption<Material>[Assets.shirts.Count + 1];
+				WSwitchOption<string>[] dadModelOptions = new WSwitchOption<string>[Assets.dadCharacterModels.Count + 1];
+				WSwitchOption<Material>[] dadShirtOptions = new WSwitchOption<Material>[Assets.shirts.Count + 1];
 
-				WYDSwitchOption<string>[] babyModelOptions = new WYDSwitchOption<string>[Assets.babyCharacterModels.Count + 1];
+				WSwitchOption<string>[] babyModelOptions = new WSwitchOption<string>[Assets.babyCharacterModels.Count + 1];
 
-				dadModelOptions[0] = new WYDSwitchOption<string>
+				dadModelOptions[0] = new WSwitchOption<string>
 				{
 					name = "Dad (Original)",
 					value = "default"
 				};
 
-				dadShirtOptions[0] = new WYDSwitchOption<Material>
+				dadShirtOptions[0] = new WSwitchOption<Material>
 				{
 					name = "Solid Color Shirt",
 					value = Assets.defaultShirt.shirtMaterial
 				};
 
 
-				babyModelOptions[0] = new WYDSwitchOption<string>
+				babyModelOptions[0] = new WSwitchOption<string>
 				{
 					name = "Baby (Original)",
 					value = "default"
@@ -462,7 +475,7 @@ namespace HexaMod.UI
 
 				for (int i = 0; i < Assets.dadCharacterModels.Count; i++)
 				{
-					dadModelOptions[i + 1] = new WYDSwitchOption<string>
+					dadModelOptions[i + 1] = new WSwitchOption<string>
 					{
 						name = Assets.dadCharacterModels[i].modelNameReadable,
 						value = Assets.dadCharacterModels[i].name
@@ -476,7 +489,7 @@ namespace HexaMod.UI
 
 				for (int i = 0; i < Assets.shirts.Count; i++)
 				{
-					dadShirtOptions[i + 1] = new WYDSwitchOption<Material>
+					dadShirtOptions[i + 1] = new WSwitchOption<Material>
 					{
 						name = Assets.shirts[i].name,
 						value = Assets.shirts[i].shirtMaterial
@@ -491,7 +504,7 @@ namespace HexaMod.UI
 
 				for (int i = 0; i < Assets.babyCharacterModels.Count; i++)
 				{
-					babyModelOptions[i + 1] = new WYDSwitchOption<string>
+					babyModelOptions[i + 1] = new WSwitchOption<string>
 					{
 						name = Assets.babyCharacterModels[i].modelNameReadable,
 						value = Assets.babyCharacterModels[i].name
@@ -503,8 +516,8 @@ namespace HexaMod.UI
 					}
 				}
 
-				WYDUIElement[] options = {
-					new WYDHexColorInputField()
+				HexaUIElement[] options = {
+					new WHexColorInputField()
 						.SetName("shirtColor")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-468.4f, 0f)
@@ -514,7 +527,7 @@ namespace HexaMod.UI
 						.SetText("Shirt Color (Hex)")
 						.SetFieldText(GetCurrentShirtColorHex()),
 
-					new WYDHexColorInputField()
+					new WHexColorInputField()
 						.SetName("skinColor")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-468.4f, 0f)
@@ -524,7 +537,7 @@ namespace HexaMod.UI
 						.SetText("Skin Color (Hex)")
 						.SetFieldText(GetCurrentSkinColorHex()),
 
-					new WYDSwitchInput<Material>()
+					new WSwitchInput<Material>()
 						.SetName("dadShirtMaterial")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-880f, 0f)
@@ -537,7 +550,7 @@ namespace HexaMod.UI
 							ButtonCallbacks.SaveDadShirt(option.name);
 						}),
 
-					new WYDSwitchInput<string>()
+					new WSwitchInput<string>()
 						.SetName("dadCharacterModel")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-880f, 0f)
@@ -550,7 +563,7 @@ namespace HexaMod.UI
 							ButtonCallbacks.SaveDadModel(option.value);
 						}),
 
-					new WYDSwitchInput<string>()
+					new WSwitchInput<string>()
 						.SetName("babyCharacterModel")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-880f, 0f)
@@ -559,8 +572,8 @@ namespace HexaMod.UI
 						.Select(babyCharacterDefault)
 						.AddListener(option =>
 						{
-							ButtonCallbacks.SetBabyModel(option.name);
-							ButtonCallbacks.SaveBabyModel(option.name);
+							ButtonCallbacks.SetBabyModel(option.value);
+							ButtonCallbacks.SaveBabyModel(option.value);
 						}),
 				};
 
@@ -577,7 +590,7 @@ namespace HexaMod.UI
 				{
 					Transform menu = title.FindMenu(menuName);
 
-					new WYDMatchSettingsButton()
+					new MatchSettingsButton()
 						.SetParent(menu)
 						.SetPosition(790f, 445.5f)
 						.AddListener(ButtonCallbacks.MatchSettingsButton);
@@ -590,13 +603,13 @@ namespace HexaMod.UI
 				{
 					GameObject menu = menuUtil.NewMenu("MatchSettings");
 					int menuId = menuUtil.GetMenuId(menu.name);
-					WYDTextButton backButton = WYDTextButton.MakeBackButton(menuUtil, menu.transform);
+					WTextButton backButton = WTextButton.MakeBackButton(menuUtil, menu.transform);
 					menuUtil.menuController.startBtn[menuId] = backButton.gameObject;
 
-					new WYDChangeMapButton(inGame)
+					new ChangeMapButton(inGame)
 						.SetParent(menu.transform)
 						.SetPosition(backButton.gameObject.transform.localPosition + new Vector3(
-							WYDTextButton.gap.x,
+							WTextButton.gap.x,
 							0f,
 							0f
 						))
@@ -605,128 +618,128 @@ namespace HexaMod.UI
 					Vector2 bottomLeft = new Vector2(0f, 200f);
 					float gap = 15f;
 
-					LobbySettings ls = HexaMod.persistentLobby.lobbySettings;
+					LobbySettings ls = HexaPersistentLobby.instance.lobbySettings;
 
-					WYDUIElement[] options = {
-						new WYDSwitchInput<ShufflePlayersMode>(
+					HexaUIElement[] options = {
+						new WSwitchInput<ShufflePlayersMode>(
 							"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
 							menu.transform, new Vector2(45f, 0f),
-							new UnityAction<WYDSwitchOption<ShufflePlayersMode>>[] {
-								(WYDSwitchOption<ShufflePlayersMode> option) => {
-									HexaMod.persistentLobby.lobbySettings.shufflePlayers = option.value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
+							new UnityAction<WSwitchOption<ShufflePlayersMode>>[] {
+								(WSwitchOption<ShufflePlayersMode> option) => {
+									HexaPersistentLobby.instance.lobbySettings.shufflePlayers = option.value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
 								}
 							}
 						),
 
-						new WYDSwitchInput<SpawnLocationMode>(
+						new WSwitchInput<SpawnLocationMode>(
 							"spawnMode", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
 							menu.transform, new Vector2(45f, 0f),
-							new UnityAction<WYDSwitchOption<SpawnLocationMode>>[] {
-								delegate (WYDSwitchOption<SpawnLocationMode> option) {
-									HexaMod.persistentLobby.lobbySettings.spawnMode = option.value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"spawnMode changed to {option.value}");
+							new UnityAction<WSwitchOption<SpawnLocationMode>>[] {
+								delegate (WSwitchOption<SpawnLocationMode> option) {
+									HexaPersistentLobby.instance.lobbySettings.spawnMode = option.value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"spawnMode changed to {option.value}");
 								}
 							}
 						),
 
 						// TODO: move this into a map specific settings menu
-						new WYDBooleanControl(
+						new WToggleControl(
 							"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.disablePets = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"disablePets changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.disablePets = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"disablePets changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"doorSounds", "Door Interact Sounds", ls.doorSounds, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.doorSounds = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"doorSounds changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.doorSounds = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"doorSounds changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"ventSounds", "Vent Interact Sounds", ls.ventSounds, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.ventSounds = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"ventSounds changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.ventSounds = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"ventSounds changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.modernGrabbing = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"modernGrabbing changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.modernGrabbing = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"modernGrabbing changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.allMustDie = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"allMustDie changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.allMustDie = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"allMustDie changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"spectatingAllowed", "Spectating Allowed", ls.allowSpectating, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.allowSpectating = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"spectatingAllowed changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.allowSpectating = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"spectatingAllowed changed to {value}");
 								}
 							}
 						),
 
-						new WYDBooleanControl(
+						new WToggleControl(
 							"cheats", "Cheats", ls.cheats, menu.transform,
 							new Vector2(200f, 0f),
 							new UnityAction<bool>[] {
 								delegate (bool value) {
-									HexaMod.persistentLobby.lobbySettings.cheats = value;
-									HexaMod.persistentLobby.CommitChanges();
-									HexaMod.textChat.SendServerMessage($"cheats changed to {value}");
+									HexaPersistentLobby.instance.lobbySettings.cheats = value;
+									HexaPersistentLobby.instance.CommitChanges();
+									HexaGlobal.textChat.SendServerMessage($"cheats changed to {value}");
 								}
 							}
 						),
 
-						new WYDSensitiveTextInputField()
+						new WSensitiveTextInputField()
 							.SetName("relayServer")
 							.SetParent(menu.transform)
 							.SetPosition(455f, 0f)
 							.SetText("Voice Chat Relay")
 							.SetFieldText(ls.relay)
 							.AddSubmitListener((string text) => {
-								HexaMod.persistentLobby.lobbySettings.relay = text;
-								HexaMod.persistentLobby.CommitChanges();
-								HexaMod.textChat.SendServerMessage("Voice chat relay server updated.");
+								HexaPersistentLobby.instance.lobbySettings.relay = text;
+								HexaPersistentLobby.instance.CommitChanges();
+								HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");
 							})
 					};
 
@@ -734,19 +747,19 @@ namespace HexaMod.UI
 					{
 						for (int i = 0; i < options.Count(); i++)
 						{
-							WYDUIElement control = options[i];
+							HexaUIElement control = options[i];
 
-							if (control is WYDBooleanControl && control.gameObject.name == "cheats")
+							if (control is WToggleControl && control.gameObject.name == "cheats")
 							{
 
-								(control as WYDBooleanControl).control.interactable = false;
+								(control as WToggleControl).control.interactable = false;
 							}
 						}
 					}
 
 					for (int i = 0; i < options.Count(); i++)
 					{
-						WYDUIElement control = options[i];
+						HexaUIElement control = options[i];
 
 						control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
 						bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
@@ -778,9 +791,9 @@ namespace HexaMod.UI
 		{
 			yield return new WaitForSeconds(0.1f);
 
-			if (HexaMod.persistentLobby.lobbySettingsFailed == true)
+			if (HexaPersistentLobby.instance.lobbySettingsFailed == true)
 			{
-				HexaMod.persistentLobby.lobbySettingsFailed = false;
+				HexaPersistentLobby.instance.lobbySettingsFailed = false;
 
 				Mod.Warn("lobbySettingsFailed was true, switch to the lobby settings menus");
 				title.menuController.ChangeToMenu(title.GetMenuId("MatchSettings"));
@@ -815,43 +828,43 @@ namespace HexaMod.UI
 				UpdateUIForLobbyState();
 			}
 
-			if (loadingController.GetTaskState("RoomCreate"))
+			if (HexaMenus.loadingOverlay.controller.GetTaskState("RoomCreate"))
 			{
 				if (PhotonNetwork.room != null)
 				{
-					loadingController.SetTaskState("RoomCreate", false);
+					HexaMenus.loadingOverlay.controller.SetTaskState("RoomCreate", false);
 				}
 			}
 
-			if (loadingController.GetTaskState("RoomJoin"))
+			if (HexaMenus.loadingOverlay.controller.GetTaskState("RoomJoin"))
 			{
 				if (PhotonNetwork.room != null)
 				{
-					loadingController.SetTaskState("RoomJoin", false);
+					HexaMenus.loadingOverlay.controller.SetTaskState("RoomJoin", false);
 				}
 			}
 
-			if (loadingController.GetTaskState("LobbyJoin"))
+			if (HexaMenus.loadingOverlay.controller.GetTaskState("LobbyJoin"))
 			{
-				if (PhotonNetwork.insideLobby && PhotonNetwork.lobby.Name == HexaMod.networkManager.curLobby)
+				if (PhotonNetwork.insideLobby && PhotonNetwork.lobby.Name == HexaGlobal.networkManager.curLobby)
 				{
-					loadingController.SetTaskState("LobbyJoin", false);
+					HexaMenus.loadingOverlay.controller.SetTaskState("LobbyJoin", false);
 				}
 			}
 
-			if (loadingController.GetTaskState("PhotonConnect"))
+			if (HexaMenus.loadingOverlay.controller.GetTaskState("PhotonConnect"))
 			{
 				if (PhotonNetwork.connectedAndReady)
 				{
-					loadingController.SetTaskState("PhotonConnect", false);
+					HexaMenus.loadingOverlay.controller.SetTaskState("PhotonConnect", false);
 				}
 			}
 
-			if (loadingController.GetTaskState("RoomLookForOrCreateTag"))
+			if (HexaMenus.loadingOverlay.controller.GetTaskState("RoomLookForOrCreateTag"))
 			{
-				if (PhotonNetwork.inRoom && PhotonNetwork.room != null && PhotonNetwork.room.Name.StartsWith(HexaMod.networkManager.curTag))
+				if (PhotonNetwork.inRoom && PhotonNetwork.room != null && PhotonNetwork.room.Name.StartsWith(HexaGlobal.networkManager.curTag))
 				{
-					loadingController.SetTaskState("RoomLookForOrCreateTag", false);
+					HexaMenus.loadingOverlay.controller.SetTaskState("RoomLookForOrCreateTag", false);
 				}
 			}
 		}

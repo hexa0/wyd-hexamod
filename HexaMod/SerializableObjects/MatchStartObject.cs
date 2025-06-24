@@ -21,7 +21,7 @@ namespace HexaMod.SerializableObjects
 			uint totalDads = 0u;
 			uint totalBabies = 0u;
 
-			foreach (var item in HexaMod.persistentLobby.dads)
+			foreach (var item in HexaPersistentLobby.instance.dads)
 			{
 				if (item.Value)
 				{
@@ -52,7 +52,7 @@ namespace HexaMod.SerializableObjects
 			TeamSpawn dadSpawnObject = Assets.dadSpawn;
 			TeamSpawn babySpawnObject = Assets.babySpawn;
 
-			if (Assets.babySpawn.hgSpawns != null && HexaMod.networkManager.curGameMode == GameModes.GetId("hungryGames"))
+			if (Assets.babySpawn.hgSpawns != null && HexaGlobal.networkManager.curGameMode == GameModes.GetId("hungryGames"))
 			{
 				babySpawnObject = Assets.babySpawn.hgSpawns;
 			}
@@ -90,7 +90,7 @@ namespace HexaMod.SerializableObjects
 			shuffleRNG.Shuffle(shuffledDadSpawns);
 			shuffleRNG.Shuffle(shuffledBabySpawns);
 
-			foreach (var item in HexaMod.persistentLobby.dads)
+			foreach (var item in HexaPersistentLobby.instance.dads)
 			{
 				if (item.Value)
 				{

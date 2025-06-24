@@ -35,7 +35,7 @@ namespace HexaMod.Util
 
 		public void Start()
 		{
-			isSelf = HexaMod.networkManager.playerObj == transform.gameObject;
+			isSelf = HexaGlobal.networkManager.playerObj == transform.gameObject;
 			if (PhotonNetwork.offlineMode)
 			{
 				isSelf = false;

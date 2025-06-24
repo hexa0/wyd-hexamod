@@ -125,7 +125,7 @@ namespace HexaMod.Patches.Hooks
 
 			string[] randomMessages = deathMessages.ContainsKey(deathCause) ? deathMessages[deathCause] : deathMessages[DeathCause.Unknown];
 
-			HexaMod.textChat.SendUnformattedChatMessage(
+			HexaGlobal.textChat.SendUnformattedChatMessage(
 				deathMessagePrefix + randomMessages[random.Next(0, randomMessages.Length - 1)].Replace(
 					"PLAYER",
 					$"<b><color=\"{chatColor}\">{PhotonNetwork.playerName}</color></b>"
@@ -153,11 +153,11 @@ namespace HexaMod.Patches.Hooks
 
 				if (photonView.isMine && babyChallengeManager && !babyChallengeManager.isComplete)
 				{
-					Menus.inGame.menuController.ChangeToMenu(12);
+					WYDMenus.inGame.menuController.ChangeToMenu(12);
 				}
 				else
 				{
-					HexaMod.gameStateController.BabyWins();
+					HexaGlobal.gameStateController.BabyWins();
 
 					if (photonView.isMine)
 					{
@@ -260,7 +260,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool Dead(ref BabyStats __instance)
 		{
-			GameMode gameMode = GameModes.gameModes[HexaMod.networkManager.curGameMode];
+			GameMode gameMode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
 
 			if (gameMode.babiesCanDie)
 			{

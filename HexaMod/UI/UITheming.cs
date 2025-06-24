@@ -1,7 +1,8 @@
 ﻿using static HexaMod.UI.Util.Menu;
-using static HexaMod.UI.Util.Menu.Menus;
+using static HexaMod.UI.Util.Menu.WYDMenus;
 using UnityEngine.UI;
 using UnityEngine;
+using HexaMod.UI.Element.Control;
 
 namespace HexaMod.UI
 {
@@ -9,12 +10,12 @@ namespace HexaMod.UI
 	{
 		public static void Init()
 		{
-			var spriteInputField128 = HexaMod.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/InputField128.png");
-			var spriteButton = HexaMod.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Button.png");
+			var spriteInputField128 = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/InputField128.png");
+			var spriteButton = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Button.png");
 
 			Mod.Print("do theming");
 			{ // Lobby Join Button
-				var gameJoiner = HexaMod.networkManager.gameJoiner;
+				var gameJoiner = HexaGlobal.networkManager.gameJoiner;
 				var joinButton = gameJoiner.GetComponentInChildren<Button>();
 				var joinImage = gameJoiner.GetComponentInChildren<Image>();
 
@@ -155,6 +156,8 @@ namespace HexaMod.UI
 								text.color = new Color(1f, 1f, 1f);
 								text.fontSize = (int)(text.fontSize * 0.8f);
 							}
+
+							buttonComponent.gameObject.AddComponent<ButtonSoundBehavior>();
 						}
 					}
 				}

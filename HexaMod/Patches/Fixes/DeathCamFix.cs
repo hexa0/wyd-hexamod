@@ -51,7 +51,7 @@ namespace HexaMod.Patches.Fixes
 
 		void LateUpdate()
 		{
-			if (HexaMod.gameStateController.gameOver)
+			if (HexaGlobal.gameStateController.gameOver)
 			{
 				deathCam.spectateMode = false;
 
@@ -93,7 +93,7 @@ namespace HexaMod.Patches.Fixes
 				transform.SetParent(target, true);
 			}
 
-			bool menuOpen = Menu.Menus.AnyMenuOpen();
+			bool menuOpen = Menu.WYDMenus.AnyMenuOpen();
 
 			if (Input.GetKeyDown(KeyCode.Space) && !menuOpen)
 			{

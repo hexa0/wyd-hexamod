@@ -1,6 +1,8 @@
-﻿namespace HexaMod.UI.Elements.Extended
+﻿using HexaMod.UI.Element.Control.TextButton;
+
+namespace HexaMod.UI.Element.Extended
 {
-	public class WYDChangeMapButton : WYDTextButton
+	public class ChangeMapButton : WTextButton
 	{
 		internal readonly bool inGame;
 
@@ -10,7 +12,7 @@
 
 			SetInteractable(!inGame && (PhotonNetwork.isMasterClient || PhotonNetwork.room == null));
 		}
-		public WYDChangeMapButton(bool inGame) : base()
+		public ChangeMapButton(bool inGame) : base()
 		{
 			this.inGame = inGame;
 

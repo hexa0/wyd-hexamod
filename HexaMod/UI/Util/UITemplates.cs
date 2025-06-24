@@ -1,4 +1,4 @@
-﻿using HexaMod.UI.Elements;
+﻿using HexaMod.UI.Element;
 using HexaMod.Util;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,9 +15,9 @@ namespace HexaMod.UI.Util
 		{
 			Mod.Print("init ui template references");
 
-			GameObject playLocalButton = Menu.Menus.title.FindMenu("SplashMenu").Find("PlayLocal").gameObject;
-			GameObject LobbyNameOriginal = Menu.Menus.title.FindMenu("OnlineMenu").Find("LobbyName").gameObject;
-			GameObject SetSpectateOriginal = Menu.Menus.title.FindMenu(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
+			GameObject playLocalButton = Menu.WYDMenus.title.FindMenu("SplashMenu").Find("PlayLocal").gameObject;
+			GameObject LobbyNameOriginal = Menu.WYDMenus.title.FindMenu("OnlineMenu").Find("LobbyName").gameObject;
+			GameObject SetSpectateOriginal = Menu.WYDMenus.title.FindMenu(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
 
 			LobbyNameOriginal.transform.GetChild(0).GetComponent<InputField>().characterLimit = 32;
 

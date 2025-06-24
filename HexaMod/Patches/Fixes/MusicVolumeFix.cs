@@ -10,7 +10,7 @@ namespace HexaMod.Patches.Fixes
 
 		static void UpdateVolume()
 		{
-			HexaMod.tabOutMute.UpdateFocusedState(HexaMod.tabOutMute.IsFocused());
+			TabOutMute.instance.UpdateFocusedState(TabOutMute.instance.IsFocused());
 		}
 
 		[HarmonyPatch(typeof(SetOptions), "Start")]
@@ -19,7 +19,7 @@ namespace HexaMod.Patches.Fixes
 		{
 			QualitySettings.antiAliasing = PlayerPrefs.GetInt("AntiAliasing", 0);
 			QualitySettings.vSyncCount = PlayerPrefs.GetInt("UseVSync", 1);
-			HexaMod.networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+			HexaGlobal.networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
 
 			return false; // MasterVolume is now handled by TabOutMuteBehavior
 		}

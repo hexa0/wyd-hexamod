@@ -10,7 +10,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void TrackBackstate(ref MenuController __instance, ref int val)
 		{
-			MenuUtil menu = Menu.Menus.GetMenuUtilForController(__instance);
+			MenuUtil menu = Menu.WYDMenus.GetMenuUtilForController(__instance);
 			if (!menu.goingBack)
 			{
 				menu.backstates[val] = menu.currentMenu;

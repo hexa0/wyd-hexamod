@@ -3,10 +3,11 @@ using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.Video;
 using HarmonyLib;
+using HexaMod.UI.Element.Control.TextButton;
 
-namespace HexaMod.UI.Elements.Extended
+namespace HexaMod.UI.Element.Extended
 {
-	public class WYDMapButton : WYDTextButton
+	public class MapButton : WTextButton
 	{
 		ModLevel level;
 
@@ -51,7 +52,7 @@ namespace HexaMod.UI.Elements.Extended
 			}
 		}
 
-		public WYDMapButton(ModLevel level) : base()
+		public MapButton(ModLevel level) : base()
 		{
 			this.level = level;
 

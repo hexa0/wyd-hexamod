@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,16 +42,6 @@ namespace HexaMod.Patches.Fixes
 			imageColor.a = 1 - alpha;
 
 			image.color = imageColor;
-
-			if (originalFader.fadingOut) { }
-			if ((HexaMod.networkManager.playerObj != null && HexaMod.networkManager.isDad) || HexaMod.networkManager.playerObj == null)
-			{
-				HexaMod.mainUI.loadingController.SetTaskState("onFade", originalFader.fadingOut && alpha <= 0.05f);
-			}
-			else
-			{
-				HexaMod.mainUI.loadingController.SetTaskState("onFade", false);
-			}
 		}
 	}
 	[HarmonyPatch(typeof(ImgFade))]

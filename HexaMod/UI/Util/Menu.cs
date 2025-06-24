@@ -104,10 +104,15 @@ namespace HexaMod.UI.Util
 	public static class Menu
 	{
 		public static Canvas menuCanvas;
-		public static class Menus
+		public static class WYDMenus
 		{
 			public static MenuUtil title;
 			public static MenuUtil inGame;
+			public static MenuUtil hexaMod = new MenuUtil()
+			{
+				root = PersistentCanvas.instance.canvas.transform.Find("Menus"),
+				menuController = PersistentCanvas.instance.canvas.GetComponent<MenuController>()
+			};
 
 			public static bool AnyMenuOpen()
 			{
@@ -135,14 +140,15 @@ namespace HexaMod.UI.Util
 			Mod.Print("init menu references");
 
 			menuCanvas = Object.FindObjectOfType<anvasHelper>().GetComponent<Canvas>();
+			menuCanvas.pixelPerfect = true; // sharper text
 
-			Menus.title = new MenuUtil();
-			Menus.inGame = new MenuUtil();
+			WYDMenus.title = new MenuUtil();
+			WYDMenus.inGame = new MenuUtil();
 
-			Menus.title.root = menuCanvas.Find("MainMenu").transform;
-			Menus.title.menuController = Menus.title.root.GetComponent<MenuController>();
-			Menus.inGame.root = menuCanvas.Find("InGameMenu").transform;
-			Menus.inGame.menuController = Menus.inGame.root.GetComponent<MenuController>();
+			WYDMenus.title.root = menuCanvas.Find("MainMenu").transform;
+			WYDMenus.title.menuController = WYDMenus.title.root.GetComponent<MenuController>();
+			WYDMenus.inGame.root = menuCanvas.Find("InGameMenu").transform;
+			WYDMenus.inGame.menuController = WYDMenus.inGame.root.GetComponent<MenuController>();
 
 			if (!PhotonNetwork.inRoom)
 			{

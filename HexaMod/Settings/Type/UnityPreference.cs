@@ -50,7 +50,7 @@ public class UnityPreference<T> : Preference<T> where T : IComparable
 				throw new SystemException($"Unsupported Type {typeName}");
 		}
 
-		HexaMod.HexaMod.preferenceLinker.TriggerUpdate(key);
+		PreferenceLinker.TriggerUpdate(key);
 	}
 
 	public UnityPreference(string key, T defaultValue) : base(key, defaultValue) { }

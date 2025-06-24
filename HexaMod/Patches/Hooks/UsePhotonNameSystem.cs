@@ -1,7 +1,6 @@
-﻿using Boo.Lang;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.UI;
-using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,14 +20,31 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void RefreshNameList(ref PlayerNames __instance)
 		{
+			string GetLobbyFormattedName(PhotonPlayer player)
+			{
+				string name = HexaLobby.GetPlayerName(player);
+				List<string> tags = new List<string>();
+
+				if (player.IsMasterClient)
+				{
+					tags.Add("[<color=yellow>Host</color>]");
+				}
+
+				tags.Add($"[Peer {player.ID}]");
+
+				name = $"{name}\n<size=5>{string.Join(" ", tags.ToArray())}</size>";
+
+				return name;
+			}
+
 			for (int i = 0; i < __instance.daddyPlayerNames.Count; i++)
 			{
-				__instance.daddyPlayerNames[i] = HexaLobby.GetPlayerName(__instance.daddyPlayerIds[i]);
+				__instance.daddyPlayerNames[i] = GetLobbyFormattedName(__instance.daddyPlayerIds[i]);
 			}
 
 			for (int i = 0; i < __instance.babyPlayerNames.Count; i++)
 			{
-				__instance.babyPlayerNames[i] = HexaLobby.GetPlayerName(__instance.babyPlayerIds[i]);
+				__instance.babyPlayerNames[i] = GetLobbyFormattedName(__instance.babyPlayerIds[i]);
 			}
 		}
 
@@ -60,9 +76,9 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool CheckWho(ref RpcChat __instance)
 		{
-			if (HexaMod.networkManager.curGameMode == 0)
+			if (HexaGlobal.networkManager.curGameMode == 0)
 			{
-				if (HexaMod.networkManager.isDad)
+				if (HexaGlobal.networkManager.isDad)
 				{
 					__instance.chatName = "Daddy";
 				}
@@ -141,7 +157,7 @@ namespace HexaMod.Patches.Hooks
 
 		public void FixedUpdate()
 		{
-			chat.maskGroup.blocksRaycasts = HexaMod.networkManager.gameStarted;
+			chat.maskGroup.blocksRaycasts = HexaGlobal.networkManager.gameStarted;
 		}
 
 		public void SendUnformattedChatMessage(string message)

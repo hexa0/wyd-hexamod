@@ -19,7 +19,7 @@ namespace HexaMod.Patches.Feature
 		{
 			if (SmoothCharacterControllerPatch.SmoothCharacterControllerPatchGlobal.isRunningFromPatch)
 			{
-				if (HexaMod.persistentLobby.lobbySettings.cheats)
+				if (HexaPersistentLobby.instance.lobbySettings.cheats)
 				{
 					if (Input.GetKeyDown("v"))
 					{

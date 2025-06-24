@@ -1,8 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using HexaMod.Voice;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HexaMod
 {
@@ -13,9 +13,14 @@ namespace HexaMod
 		public const string NAME = "com.hexa0.hexamod";
 		public const string VERSION = "0.0.0";
 
+		private static string[] GetLogs(params object[] messages)
+		{
+			return string.Concat(messages).Split('\n');
+		}
+
 		internal readonly Harmony harmony = new Harmony(GUID);
 
-		internal static Mod Instance;
+		internal static Mod instance;
 		internal static ManualLogSource log;
 
 		internal static int iFuckedUpAndNeedToDebugCounter = 0;
@@ -31,43 +36,77 @@ namespace HexaMod
 			iFuckedUpAndNeedToDebugCounter++;
 		}
 
-		internal static void Print(params object[] messages) {
-			log.LogInfo(string.Concat(messages));
+		internal static void Print(params object[] messages)
+		{
+			foreach (string message in GetLogs(messages))
+			{
+				log.LogInfo(message);
+			}
 		}
 
 		internal static void PrintDebug(params object[] messages)
 		{
-			log.LogDebug(string.Concat(messages));
+			foreach (string message in GetLogs(messages))
+			{
+				log.LogDebug(message);
+			}
 		}
 
 		internal static void Warn(params object[] messages)
 		{
-			log.LogWarning(string.Concat(messages));
+			foreach (string message in GetLogs(messages))
+			{
+				log.LogWarning(message);
+			}
 		}
 
 		internal static void Error(params object[] messages)
 		{
-			log.LogError(string.Concat(messages));
+			foreach (string message in GetLogs(messages))
+			{
+				log.LogError(message);
+			}
 		}
 
 		internal static void Fatal(params object[] messages)
 		{
-			log.LogFatal(string.Concat(messages));
+			foreach (string message in GetLogs(messages))
+			{
+				log.LogFatal(message);
+			}
 		}
 
 		void Awake()
 		{
 			// Plugin startup logic
-			if (Instance == null)
-			{
-				Instance = this;
-			}
+			instance = this;
 
 			log = BepInEx.Logging.Logger.CreateLogSource(GUID);
+			Print($"Loading plugin {GUID}!");
+			HexaGlobal.Load();
+			Print($"Plugin {GUID} is loaded!");
 
-			log.LogInfo($"Plugin {GUID} is loaded!");
+			var activeScene = SceneManager.GetActiveScene();
 
-			GameObject.Find("Canvas").AddComponent<IntroScript>().InitIntro();
+			if (activeScene.name == "CompanyLogo")
+			{
+				Destroy(GameObject.Find("Canvas"));
+			}
+
+			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
+			{
+				OnGameSceneStart();
+			};
+		}
+
+		public static void OnGameSceneStart()
+		{
+			var activeScene = SceneManager.GetActiveScene();
+
+			if (activeScene.name == "CompanyLogo")
+			{
+				Destroy(GameObject.Find("Canvas"));
+			}
 		}
 	}
 }

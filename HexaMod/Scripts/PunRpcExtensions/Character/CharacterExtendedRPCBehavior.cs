@@ -46,7 +46,7 @@ namespace HexaMod
 
 		IEnumerator SendInitalState()
 		{
-			if (gameObject == HexaMod.networkManager.playerObj)
+			if (gameObject == HexaGlobal.networkManager.playerObj)
 			{
 				yield return 0;
 

@@ -1,15 +1,15 @@
-﻿using UnityEngine.Events;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using HexaMod.UI.Element.Control.TextButton;
 using HexaMod.Voice;
 
-namespace HexaMod.UI.Elements.Extended
+namespace HexaMod.UI.Element.VoiceChatUI
 {
-	public class WYDMicrophoneIndicator : WYDTextButton
+	public class MicrophoneIndicator : WTextButton
 	{
-		private readonly static Sprite microphoneIcon = HexaMod.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Microphone512.png");
+		private readonly static Sprite microphoneIcon = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Microphone512.png");
 
-		public WYDMicrophoneIndicator() : base()
+		public MicrophoneIndicator() : base()
 		{
 			rectTransform.sizeDelta = new Vector2(50f, 50f);
 			rectTransform.pivot = new Vector2(0f, 0.5f);
@@ -20,7 +20,7 @@ namespace HexaMod.UI.Elements.Extended
 				.SetFontSize(15);
 		}
 
-		public WYDMicrophoneIndicator(string name, Transform menu, Vector2 position) : this()
+		public MicrophoneIndicator(string name, Transform menu, Vector2 position) : this()
 		{
 			this.SetName(name)
 				.SetParent(menu)

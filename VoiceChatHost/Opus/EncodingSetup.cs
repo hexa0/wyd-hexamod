@@ -25,6 +25,8 @@ namespace VoiceChatHost.Opus
 			encoder.UseVBR = true;
 			encoder.Complexity = 10;
 			encoder.SignalType = OpusSignal.OPUS_SIGNAL_VOICE;
+			encoder.UseInbandFEC = bitrateKB <= 40;
+			encoder.PacketLossPercent = 5;
 		}
 
 		public static void CommitChannels() => ResetEncoder();

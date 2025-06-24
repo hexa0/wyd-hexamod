@@ -31,7 +31,7 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void Update(ref InGameMenuHelper __instance)
 		{
-			bool mouseLocked = !Menu.Menus.AnyMenuOpen();
+			bool mouseLocked = !Menu.WYDMenus.AnyMenuOpen();
 
 			Cursor.visible = !mouseLocked;
 			Cursor.lockState = mouseLocked ? CursorLockMode.Locked : CursorLockMode.None;

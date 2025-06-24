@@ -6,12 +6,18 @@ namespace HexaMod
 {
 	public class TabOutMute : MonoBehaviour
 	{
+		public static TabOutMute instance;
 		internal static class VolumeState
 		{
 			public static bool lastTabbedOut = true;
 		}
 
-		public void Start()
+		void Awake()
+		{
+			instance = this;
+		}
+
+		void Start()
 		{
 			UpdateFocusedState(IsFocused());
 

@@ -16,6 +16,8 @@ namespace HexaMod.Voice
 		}
 		public long realWriteHead;
 		public long realReadHead;
+		public long lastWriteSize = 1;
+		public long lastReadSize = 1;
 
 		static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
 		{
@@ -37,12 +39,19 @@ namespace HexaMod.Voice
 
 		public void Write(short[] data)
 		{
+			if (realWriteHead < 0)
+			{
+				realWriteHead = 0;
+			}
+
 			if (data == null)
 			{
 				throw new ArgumentNullException(nameof(data));
 			}
 
 			int dataLength = data.Length;
+			lastWriteSize = dataLength;
+
 			if (dataLength == 0)
 			{
 				return;
@@ -77,6 +86,13 @@ namespace HexaMod.Voice
 
 		public short[] Read(int count)
 		{
+			lastReadSize = count;
+
+			if (realReadHead < 0)
+			{
+				realReadHead = 0;
+			}
+
 			if (count <= 0)
 			{
 				throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");

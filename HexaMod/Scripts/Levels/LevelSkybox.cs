@@ -18,7 +18,7 @@ namespace HexaMapAssemblies
 
 		public void Start()
 		{
-			if (dnmSkybox != null && HexaMod.HexaMod.networkManager.curGameMode == GameModes.GetId("daddysNightmare"))
+			if (dnmSkybox != null && HexaMod.HexaGlobal.networkManager.curGameMode == GameModes.GetId("daddysNightmare"))
 			{
 				sunSource.enabled = false;
 				dnmSkybox.Start();

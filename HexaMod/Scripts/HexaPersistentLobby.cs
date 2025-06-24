@@ -8,6 +8,12 @@ namespace HexaMod
 {
 	public class HexaPersistentLobby : MonoBehaviour
 	{
+		public static HexaPersistentLobby instance;
+		void Awake()
+		{
+			instance = this;
+		}
+
 		public void ResetRound()
 		{
 			lobbySettings.roundNumber = 0;
@@ -42,11 +48,11 @@ namespace HexaMod
 
 		private bool inOtherLobby = false;
 
-		public void SetInOtherLobby(bool inLobbyNew)
+		public void SetInOtherLobby(bool inOtherLobby)
 		{
-			inOtherLobby = inLobbyNew;
+			this.inOtherLobby = inOtherLobby;
 
-			if (!inLobbyNew)
+			if (!inOtherLobby)
 			{
 				lobbySettings = lobbySettingsBackup;
 				CommitChanges();
@@ -86,8 +92,8 @@ namespace HexaMod
 		{
 			currentLobbySettingsEvent.oldSettings = oldLobbySettings;
 			currentLobbySettingsEvent.newSettings = lobbySettings;
-			HexaMod.persistentLobby.lobbySettingsChanged.Invoke();
-			HexaMod.hexaLobby.SetLobbySettings(lobbySettings);
+			HexaPersistentLobby.instance.lobbySettingsChanged.Invoke();
+			HexaGlobal.hexaLobby.SetLobbySettings(lobbySettings);
 			oldLobbySettings = LobbySettings.serializer.MakeUnique(lobbySettings);
 			if (!inOtherLobby)
 			{

@@ -4,48 +4,47 @@ using UnityEngine;
 using HexaMod.UI.Util;
 using static UnityEngine.UI.InputField;
 
-namespace HexaMod.UI.Elements
+namespace HexaMod.UI.Element.Control.TextInputField
 {
-	public class WYDTextInputField : WYDUIElement
+	public class WTextInputField : HexaUIElement
 	{
 		public InputField field;
 		public Text label;
 
-		public WYDTextInputField SetText(string text)
+		public WTextInputField SetText(string text)
 		{
 			label.text = text;
 			return this;
 		}
 
-		public WYDTextInputField SetFieldText(string text)
+		public WTextInputField SetFieldText(string text)
 		{
 			field.text = text;
 			return this;
 		}
 
-		public WYDTextInputField SetCharacterLimit(int characterLimit)
+		public WTextInputField SetCharacterLimit(int characterLimit)
 		{
 			field.characterLimit = characterLimit;
 			return this;
 		}
 
-		public WYDTextInputField SetContentType(ContentType type)
+		public WTextInputField SetContentType(ContentType type)
 		{
 			field.contentType = type;
 			field.ForceLabelUpdate();
 			return this;
 		}
 
-		public WYDTextInputField SetFieldTextColor(Color color)
+		public WTextInputField SetFieldTextColor(Color color)
 		{
 			field.textComponent.color = color;
 			return this;
 		}
 
-		public WYDTextInputField() : base()
+		public WTextInputField() : base()
 		{
 			gameObject = Object.Instantiate(UITemplates.textInputFieldTemplate);
-			rectTransform = gameObject.GetComponent<RectTransform>();
 			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y * 1.25f);
 
 			field = gameObject.transform.GetChild(0).GetComponent<InputField>();
@@ -57,21 +56,21 @@ namespace HexaMod.UI.Elements
 			ClearEvents();
 		}
 
-		public WYDTextInputField ClearEvents()
+		public WTextInputField ClearEvents()
 		{
 			field.onValueChanged = new InputField.OnChangeEvent();
 			field.onEndEdit = new InputField.SubmitEvent();
 			return this;
 		}
 
-		public WYDTextInputField AddChangedListener(UnityAction<string> action)
+		public WTextInputField AddChangedListener(UnityAction<string> action)
 		{
 			field.onValueChanged.AddListener(action);
 
 			return this;
 		}
 
-		public WYDTextInputField AddChangedListeners(UnityAction<string>[] actions)
+		public WTextInputField AddChangedListeners(UnityAction<string>[] actions)
 		{
 			foreach (UnityAction<string> action in actions)
 			{
@@ -81,14 +80,14 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDTextInputField AddSubmitListener(UnityAction<string> action)
+		public WTextInputField AddSubmitListener(UnityAction<string> action)
 		{
 			field.onEndEdit.AddListener(action);
 
 			return this;
 		}
 
-		public WYDTextInputField AddSubmitListeners(UnityAction<string>[] actions)
+		public WTextInputField AddSubmitListeners(UnityAction<string>[] actions)
 		{
 			foreach (UnityAction<string> action in actions)
 			{
@@ -98,7 +97,7 @@ namespace HexaMod.UI.Elements
 			return this;
 		}
 
-		public WYDTextInputField(string name, string title, string defaultText, Transform menu, Vector2 position, UnityAction<string>[] changedActions, UnityAction<string>[] submitActions) : this()
+		public WTextInputField(string name, string title, string defaultText, Transform menu, Vector2 position, UnityAction<string>[] changedActions, UnityAction<string>[] submitActions) : this()
 		{
 			this.SetName(name)
 				.SetParent(menu)

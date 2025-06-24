@@ -14,7 +14,7 @@ namespace HexaMod.Patches.Fixes
 		{
 			if (__instance.curChatMessage != string.Empty)
 			{
-				HexaMod.textChat.SendLocalMessage(__instance.curChatMessage);
+				HexaGlobal.textChat.SendLocalMessage(__instance.curChatMessage);
 			}
 
 			__instance.CloseChat();
@@ -35,9 +35,9 @@ namespace HexaMod.Patches.Fixes
 			__instance.curChatMessage = string.Empty;
 			timer.Value = 0f;
 
-			if (HexaMod.networkManager.playerObj)
+			if (HexaGlobal.networkManager.playerObj)
 			{
-				HexaMod.networkManager.playerObj.GetComponent<FirstPersonController>().haltInput = false;
+				HexaGlobal.networkManager.playerObj.GetComponent<FirstPersonController>().haltInput = false;
 			}
 
 			__instance.maskGroup.interactable = false;

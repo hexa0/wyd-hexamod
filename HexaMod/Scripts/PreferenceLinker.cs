@@ -6,6 +6,8 @@ namespace HexaMod
 {
 	public class PreferenceLinker : MonoBehaviour
 	{
+		public static PreferenceLinker instance;
+
 		internal class PreferenceLinkerQueueItem
 		{
 			internal string preference;
@@ -15,7 +17,7 @@ namespace HexaMod
 		static internal Queue<PreferenceLinkerQueueItem> queue = new Queue<PreferenceLinkerQueueItem>();
 		public static void LinkTo(string preference, Action action)
 		{
-			if (!HexaMod.preferenceLinker)
+			if (!instance)
 			{
 				queue.Enqueue(new PreferenceLinkerQueueItem
 				{
@@ -27,7 +29,7 @@ namespace HexaMod
 			{
 				action.Invoke();
 
-				HexaMod.preferenceLinker.preferenceUpdated += (sender, updateEvent) =>
+				instance.preferenceUpdated += (sender, updateEvent) =>
 				{
 					if (updateEvent.preference == preference)
 					{
@@ -44,12 +46,20 @@ namespace HexaMod
 
 		private event EventHandler<PreferenceUpdateEvent> preferenceUpdated;
 
-		public void TriggerUpdate(string preference)
+		public static void TriggerUpdate(string preference)
 		{
-			preferenceUpdated.Invoke(this, new PreferenceUpdateEvent()
+			if (instance)
 			{
-				preference = preference
-			});
+				instance.preferenceUpdated.Invoke(instance, new PreferenceUpdateEvent()
+				{
+					preference = preference
+				});
+			}
+		}
+
+		void Awake()
+		{
+			instance = this;
 		}
 
 		void Start()

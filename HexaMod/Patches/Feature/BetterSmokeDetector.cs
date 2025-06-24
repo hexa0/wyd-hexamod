@@ -12,7 +12,7 @@ namespace HexaMod.Patches.Feature
 		{
 			if (Assets.loadedLevel != null && Assets.loadedLevel == Assets.defaultLevel)
 			{
-				__instance.beepSound.GetComponent<AudioSource>().clip = HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/SmokeDetector.wav");
+				__instance.beepSound.GetComponent<AudioSource>().clip = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/SmokeDetector.wav");
 			}
 		}
 	}

@@ -18,7 +18,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPrefix]
 		static void DoorSound(ref Door __instance)
 		{
-			if (HexaMod.persistentLobby.lobbySettings.doorSounds && ! __instance.locked)
+			if (HexaPersistentLobby.instance.lobbySettings.doorSounds && ! __instance.locked)
 			{
 				GameObject sound = __instance.openSound;
 

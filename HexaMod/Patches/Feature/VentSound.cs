@@ -6,8 +6,8 @@ namespace HexaMod.Patches.Feature
 	[HarmonyPatch(typeof(AirVent))]
 	internal class VentSound
 	{
-		static AudioClip ventOrignAudioClip = HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/VentUse01.wav");
-		static AudioClip ventGoalAudioClip = HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/VentUse02.wav");
+		static AudioClip ventOrignAudioClip = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/VentUse01.wav");
+		static AudioClip ventGoalAudioClip = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/VentUse02.wav");
 
 		[HarmonyPatch("Start")]
 		[HarmonyPostfix]
@@ -25,7 +25,7 @@ namespace HexaMod.Patches.Feature
 		[HarmonyPostfix]
 		static void RPCInteract(ref AirVent __instance, string inputName)
 		{
-			if (HexaMod.persistentLobby.lobbySettings.ventSounds && inputName.Substring(0, 3) == "Bab" && !__instance.broken && __instance.exitPos != null && __instance.correspondingVent != null)
+			if (HexaPersistentLobby.instance.lobbySettings.ventSounds && inputName.Substring(0, 3) == "Bab" && !__instance.broken && __instance.exitPos != null && __instance.correspondingVent != null)
 			{
 				__instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ventOrignAudioClip);
 				__instance.correspondingVent.gameObject.GetComponent<AudioSource>().PlayOneShot(ventGoalAudioClip);

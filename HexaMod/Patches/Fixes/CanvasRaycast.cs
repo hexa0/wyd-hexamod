@@ -10,7 +10,7 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool CanvasRaycastPatch(ref anvasHelper __instance)
 		{
-			if (!HexaMod.networkManager.gameStarted)
+			if (!HexaGlobal.networkManager.gameStarted)
 			{
 				Cursor.visible = true;
 				Cursor.lockState = CursorLockMode.None;

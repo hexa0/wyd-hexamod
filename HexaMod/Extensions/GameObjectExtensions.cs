@@ -19,6 +19,11 @@ public static class GameObjectExtensions
 		return aObject;
 	}
 
+	public static void SetParent<T>(this T aObject, Transform aParent) where T : Component
+	{
+		aObject.transform.SetParent(aParent);
+	}
+
 	public static GameObject SetParent(this GameObject aObject, GameObject aParent)
 	{
 		aObject.transform.SetParent(aParent.transform);

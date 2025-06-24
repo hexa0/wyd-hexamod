@@ -52,12 +52,17 @@ namespace HexaMod.Voice
 		internal static ManualLogSource voiceChatProcessLog = BepInEx.Logging.Logger.CreateLogSource("VoiceChatHost");
 		public static float shortMaxValueMul = 1f / short.MaxValue;
 
-		internal static int underrunPreventionSize = 4;
+		internal static int underrunPreventionSize = 2;
 
 		public static void Init()
 		{
-			InitUnityForVoiceChat();
+			InitWithoutTranscodeProcess();
 			InitTranscodeServerProcess();
+		}
+
+		public static void InitWithoutTranscodeProcess()
+		{
+			InitUnityForVoiceChat();
 		}
 
 		public static bool listening = false;
@@ -154,6 +159,7 @@ namespace HexaMod.Voice
 
 		public static void InitUnityForVoiceChat()
 		{
+			// this causes a hard crash if we call it while the scene is waiting to activate due to a race condition
 			// force stereo output and lower audio latency to make it suitable for voice
 			// we also force a standard sample rate of 48000 to avoid having to manually resample mic audio buffers
 
@@ -166,6 +172,7 @@ namespace HexaMod.Voice
 			AudioSettings.Reset(audioConfiguration);
 		}
 
+		public static readonly ModPreference<bool> debugOverlayEnabled = new ModPreference<bool>("VoiceChatDebugOverlay", false);
 		public static readonly ModPreference<int> microphoneDeviceId = new ModPreference<int>("MicrophoneDevice", 0).LinkTo(SetMicrophoneDeviceId);
 		public static readonly ModPreference<byte> microphoneBufferMillis = new ModPreference<byte>("MicrophoneBufferMillis", 20).LinkTo(SetMicrophoneBufferMillis);
 		public static readonly ModPreference<int> microphoneBitrate = new ModPreference<int>("MicrophoneBitrate", 2).LinkTo(SetMicrophoneBitrate);
@@ -210,7 +217,7 @@ namespace HexaMod.Voice
 			speakingStates[clientMessage.clientId] = clientMessage.body[0] == 1;
 		}
 
-		static string relayIp = null;
+		public static string relayIp = null;
 
 		public static void DisconnectFromRelay()
 		{
@@ -218,19 +225,18 @@ namespace HexaMod.Voice
 			relayIp = null;
 		}
 
-		public static void ConnectToRelay(string ip)
+		public static void ConnectToRelay(string ip, string reconnectRoom)
 		{
 			if (relayIp != ip)
 			{
-				relayIp = ip;
-
-				Mod.Print($"SetRelay {ip}");
-
-				string oldRoom = room;
-
 				if (room != null)
 				{
 					LeaveVoiceRoom();
+				}
+
+				if (relayIp != null)
+				{
+					DisconnectFromRelay();
 				}
 
 				voicechatTranscodeClient.SendMessage(
@@ -238,11 +244,18 @@ namespace HexaMod.Voice
 					Encoding.ASCII.GetBytes(ip)
 				);
 
-				if (oldRoom != null)
+				relayIp = ip;
+
+				if (reconnectRoom != null)
 				{
-					JoinVoiceRoom(oldRoom);
+					JoinVoiceRoom(reconnectRoom);
 				}
 			}
+		}
+
+		public static void ConnectToRelay(string ip)
+		{
+			ConnectToRelay(ip, room);
 		}
 
 		public static string room = null;
@@ -332,6 +345,14 @@ namespace HexaMod.Voice
 			{
 				voicechatTranscodeClient.SendMessage(HVCMessage.SetBitrate, UDP.AsData((byte)Enum.GetValues(typeof(Bitrate)).GetValue(bitrate)));
 			}
+		}
+
+		public static void SetMicrophoneChannels(byte channels)
+		{
+			if (transcodeServerReady)			{
+				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicChannels, UDP.AsData(channels));
+			}
+
 		}
 
 		public static void KeepTranscodeAliveThread()
