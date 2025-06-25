@@ -1,18 +1,17 @@
 ﻿using System.Net;
-using HexaVoiceChatShared.Net;
-using HexaVoiceChatShared.MessageProtocol;
+using VoiceChatShared.Enums;
+using VoiceChatShared.Net;
+using VoiceChatShared.Net.PeerConnection;
 
 namespace VoiceChatHost.Type
 {
 	public class VoiceRoom
 	{
 		public string roomName;
-		public Dictionary<ulong, IPEndPoint> clients = new Dictionary<ulong, IPEndPoint>();
-		public Dictionary<ulong, long> clientLastEvents = new Dictionary<ulong, long>();
-		public long lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		public VoiceChatServer server;
+		public List<ulong> clients = new List<ulong>();
+		public PeerDuelProtocolConnection<HVCMessage> server;
 
-		public VoiceRoom(string roomName, VoiceChatServer server)
+		public VoiceRoom(string roomName, PeerDuelProtocolConnection<HVCMessage> server)
 		{
 			Console.WriteLine($"room with hash {roomName} was created");
 
@@ -20,76 +19,84 @@ namespace VoiceChatHost.Type
 			this.server = server;
 		}
 
-		public void UpdateLastEvent()
-		{
-			lastEvent = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		}
+		public IPEndPoint GetClient(ulong client, bool reliable = true) => server.GetPeerEndPoint(client, reliable);
 
-		public void UpdateLastClientEvent(ulong clientId)
+		public void SendToClient(ulong client, NetMessage<HVCMessage> message, bool reliable = true)
 		{
-			if (!clientLastEvents.ContainsKey(clientId))
+			IPEndPoint clientEndPoint = GetClient(client, reliable);
+			if (clientEndPoint != null)
 			{
-				clientLastEvents.Add(clientId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+				if (reliable)
+				{
+					server.tcp.SendMessage(message, GetClient(client, reliable));
+				}
+				else
+				{
+					server.udp.SendMessage(message, GetClient(client, reliable));
+				}
 			}
 			else
 			{
-				clientLastEvents[clientId] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+				Console.WriteLine($"Failed to send message to client {client} in room {roomName}: server.GetPeerEndPoint failed to resolve an IPEndPoint.");
 			}
 		}
 
-		public void SendToClient(ulong client, byte[] message)
-		{
-			UpdateLastEvent();
-			server.Send(message, clients[client]);
-		}
-
-		public void SendToAllClients(byte[] message)
+		public void SendToAllClients(NetMessage<HVCMessage> message, bool reliable = true)
 		{
 			foreach (var client in clients)
 			{
-				SendToClient(client.Key, message);
+				SendToClient(client, message, reliable);
 			}
 		}
 
-		public void SendToAllClientsExcept(ulong excludedClientId, byte[] message)
+		public void SendToAllClientsExcept(ulong excludedClientId, NetMessage<HVCMessage> message, bool reliable = true)
 		{
-			UpdateLastClientEvent(excludedClientId);
-
 			foreach (var client in clients)
 			{
-				if (client.Key != excludedClientId)
+				if (client != excludedClientId)
 				{
-					SendToClient(client.Key, message);
+					SendToClient(client, message, reliable);
 				}
 			}
 		}
 
-		public void AddClient(ulong clientId, IPEndPoint clientEndPoint)
+		public void UpdatePeers()
 		{
-			if (!clients.ContainsKey(clientId))
+			byte[] peersMessage = new byte[clients.Count * 8];
+
+			for (int i = 0; i < clients.Count; i++)
 			{
-				Console.WriteLine($"client {clientId} joined room with hash {roomName}");
-				clients.Add(clientId, clientEndPoint);
+				Buffer.BlockCopy(BitConverter.GetBytes(clients[i]), 0, peersMessage, i * 8, 8);
 			}
 
-			if (!clientLastEvents.ContainsKey(clientId))
+			SendToAllClients(new NetMessage<HVCMessage>(
+				HVCMessage.VoiceRoomPeersUpdated,
+				peersMessage
+			));
+		}
+
+		public void AddClient(ulong peerId)
+		{
+			if (!clients.Contains(peerId))
 			{
-				clientLastEvents.Add(clientId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+				Console.WriteLine($"client {peerId} joined room with hash {roomName}");
+				clients.Add(peerId);
+				UpdatePeers();
 			}
 		}
 
-		public void RemoveClient(ulong clientId)
+		public void RemoveClient(ulong peerId)
 		{
-			Console.WriteLine($"client {clientId} left room with hash {roomName}");
+			Console.WriteLine($"client {peerId} left room with hash {roomName}");
 
-			if (clients.ContainsKey(clientId))
+			if (clients.Contains(peerId))
 			{
-				clients.Remove(clientId);
-				clientLastEvents.Remove(clientId);
+				clients.Remove(peerId);
+				UpdatePeers();
 			}
 			else
 			{
-				throw new Exception($"client {clientId} isn't apart of room {roomName} that they are trying to leave");
+				throw new Exception($"client {peerId} isn't apart of room {roomName} that they are trying to leave");
 			}
 		}
 	}

@@ -78,7 +78,6 @@ namespace HexaMod
 					deserializedSettings.roundNumber = 0;
 					oldLobbySettings = lobbySettings;
 					lobbySettings = deserializedSettings;
-					Mod.Print("Setup Saved Relay");
 				}
 			}
 			catch (Exception e)
@@ -92,7 +91,7 @@ namespace HexaMod
 		{
 			currentLobbySettingsEvent.oldSettings = oldLobbySettings;
 			currentLobbySettingsEvent.newSettings = lobbySettings;
-			HexaPersistentLobby.instance.lobbySettingsChanged.Invoke();
+			instance.lobbySettingsChanged.Invoke();
 			HexaGlobal.hexaLobby.SetLobbySettings(lobbySettings);
 			oldLobbySettings = LobbySettings.serializer.MakeUnique(lobbySettings);
 			if (!inOtherLobby)

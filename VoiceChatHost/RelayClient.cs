@@ -1,52 +1,47 @@
-﻿using HexaVoiceChatShared;
-using System.Net;
-using HexaVoiceChatShared.Net;
-using HexaVoiceChatShared.MessageProtocol;
+﻿using System.Net;
 using System.Text;
-using System.Diagnostics;
 using VoiceChatHost.Opus;
+using VoiceChatShared;
+using VoiceChatShared.Enums;
+using VoiceChatShared.Net.PeerConnection;
 
 namespace VoiceChatHost
 {
 	public class RelayClient
 	{
-		private readonly VoiceChatClient client;
-		public ulong clientId = (ulong)Process.GetCurrentProcess().Id;
+		private readonly PeerDuelProtocolConnection<HVCMessage> client;
+		RelayConnectionState m_state = RelayConnectionState.Disconnected;
+		public RelayConnectionState state {
+			get => m_state;
+			set {
+				if (m_state != value)
+				{
+					Console.WriteLine($"RelayClient: {value}");
+					m_state = value;
+				}
+			}
+		}
+		public ulong clientId = 0;
 		public Action<ulong, byte[], int, int, int> onOpusAction;
 		public Action<ulong, bool> onSpeakingStateAction;
 		public string room = null;
 
 		public void JoinRoom(string roomName)
 		{
-			client.SendClientWrappedMessage(
-				clientId,
-				HVCMessage.VoiceRoomJoin,
-				Encoding.ASCII.GetBytes(roomName)
-			);
-
 			room = roomName;
-		}
 
-		public void KeepRoomAlive()
-		{
-			if (room != null)
+			if (state == RelayConnectionState.Connected)
 			{
-				client.SendClientWrappedMessage(
-					clientId,
-					HVCMessage.VoiceRoomKeepAlive,
-					Encoding.ASCII.GetBytes(room)
+				client.tcp.SendMessage(
+					HVCMessage.VoiceRoomJoin,
+					Encoding.ASCII.GetBytes(roomName)
 				);
-			}
-			else
-			{
-				throw new Exception("cannot call KeepRoomAlive() when we aren't connected to a room.");
 			}
 		}
 
 		public void SetSpeakingState(bool speaking)
 		{
-			client.SendClientWrappedMessage(
-				clientId,
+			client.tcp.SendMessage(
 				HVCMessage.SpeakingStateUpdated,
 				speaking ? [1] : [0]
 			);
@@ -65,107 +60,108 @@ namespace VoiceChatHost
 			Buffer.BlockCopy(channels, 0, opusMessage, 8, 4);
 			Buffer.BlockCopy(encoded, 0, opusMessage, 12, encoded.Length);
 
-			//Buffer.BlockCopy(sampleCount, 0, opusMessage, 0, sampleCount.Length);
-			//Buffer.BlockCopy(encoded, 0, opusMessage, sampleCount.Length, encoded.Length);
-
-			client.SendClientWrappedMessage(
-				clientId,
+			client.udp.SendMessage(
 				HVCMessage.Opus,
 				opusMessage
 			);
 		}
 
-		public void LeaveRoom()
-		{
-			if (room != null)
-			{
-				client.SendClientWrappedMessage(
-					clientId,
-					HVCMessage.VoiceRoomLeave,
-					Encoding.ASCII.GetBytes(room)
-				);
-
-				room = null;
-			}
-			else
-			{
-				throw new Exception("cannot call LeaveRoom() when we aren't connected to a room.");
-			}
-		}
-
 		public void Close()
 		{
+			state = RelayConnectionState.Closed;
 			client.Close();
+		}
+
+		public void TryToConnect()
+		{
+			state = RelayConnectionState.Connecting;
+			client.Connect();
 		}
 
 		public RelayClient(string ip)
 		{
-			client = new VoiceChatClient(new IPEndPoint(
+			client = new PeerDuelProtocolConnection<HVCMessage>(new IPEndPoint(
 				IPAddress.Parse(ip),
 				HexaVoiceChat.Ports.relay
 			));
 
-			client.Connect();
-
-			client.OnMessage(HVCMessage.SpeakingStateUpdated, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
+			client.OnDisconnect(peer =>
 			{
-				DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
-				
-				if (onSpeakingStateAction != null)
+				if (state != RelayConnectionState.Closed)
 				{
-					onSpeakingStateAction.Invoke(clientMessage.clientId, clientMessage.body[0] == 1);
+					state = RelayConnectionState.Failed;
 				}
 			});
 
-			client.OnMessage(HVCMessage.Opus, delegate (DecodedVoiceChatMessage message, IPEndPoint from)
-			{
-				DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+			TryToConnect();
 
-				if (onOpusAction != null)
-				{
-					int samples = BitConverter.ToInt32(clientMessage.body, 0);
-					int sampleRate = BitConverter.ToInt32(clientMessage.body, 4);
-					int channels = BitConverter.ToInt32(clientMessage.body, 8);
-					byte[] opusFrame = new byte[clientMessage.body.Length - 12];
-					Buffer.BlockCopy(clientMessage.body, 12, opusFrame, 0, clientMessage.body.Length - 12);
-					onOpusAction.Invoke(clientMessage.clientId, opusFrame, samples, sampleRate, channels);
-				}
-			});
-
-			new Thread(new ThreadStart(RelayClientKeepAliveThread)).Start();
+			new Thread(new ThreadStart(ConnectThread)).Start();
 		}
 
-		public void RelayClientKeepAliveThread()
+		void ConnectThread()
 		{
-			while (true)
+			const int maxBackoffStart = 100; // start with 0.1 seconds
+			const int maxBackoff = 10000; // wait up to 10 seconds
+			int backoff = maxBackoffStart;
+			int attempts = 1;
+
+			while (state != RelayConnectionState.Closed)
 			{
-				if (room != null)
+				switch (state)
 				{
-					KeepRoomAlive();
+					case RelayConnectionState.Failed:
+						Console.WriteLine($"RelayClient: Attempting to reconnect (attempt {attempts})");
+						TryToConnect();
+
+						backoff = Math.Min(backoff * 2, maxBackoff);
+						attempts++;
+						break;
+					case RelayConnectionState.Connecting:
+						if (client.tcp.Connected)
+						{
+							state = RelayConnectionState.AllocatingId;
+
+							try
+							{
+								client.tcp.Once(HVCMessage.VoiceRoomPeerIdAllocated, (message, peer) => {
+									if (message.Body.Length == 8)
+									{
+										clientId = BitConverter.ToUInt64(message.Body, 0);
+										state = RelayConnectionState.Connected;
+
+										if (room != null)
+										{
+											JoinRoom(room);
+										}
+									}
+									else
+									{
+										state = RelayConnectionState.Failed;
+										throw new ArgumentException("RelayClient: Invalid VoiceRoomPeerIdAllocated message received.");
+									}
+								});
+
+								byte[] portData = new byte[4];
+
+								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.udp.ClientEndPoint.Port), 0, portData, 0, 2);
+								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.tcp.ClientEndPoint.Port), 0, portData, 2, 2);
+
+								client.tcp.SendMessage(HVCMessage.VoiceRoomAllocatePeerId, portData);
+							}
+							catch (Exception ex)
+							{
+								state = RelayConnectionState.Failed;
+								Console.WriteLine($"RelayClient: Failed to allocate peer ID {ex.Message}.");
+							}
+						}
+						break;
+					case RelayConnectionState.Connected:
+						backoff = maxBackoffStart;
+						attempts = 1;
+						break;
 				}
-				Thread.Sleep(1000);
-			}
-		}
 
-		public void RelayClientMainTestThread()
-		{
-			Console.WriteLine($"using clientid {clientId}");
-
-			JoinRoom("RelayClientTestRoom");
-
-			int leaveCountdown = 16;
-			bool wasSpeaking = false;
-
-			while (leaveCountdown > 0)
-			{
-				leaveCountdown--;
-				Thread.Sleep(500);
-				wasSpeaking = !wasSpeaking;
-				SetSpeakingState(wasSpeaking);
-			}
-
-			if (leaveCountdown == 0) {
-				LeaveRoom();
+				Thread.Sleep(backoff);
 			}
 		}
 	}

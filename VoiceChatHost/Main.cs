@@ -1,5 +1,5 @@
-﻿using HexaVoiceChatShared;
-using VoiceChatHost.Type;
+﻿using VoiceChatHost.Type;
+using VoiceChatShared;
 
 namespace VoiceChatHost
 {
@@ -29,7 +29,6 @@ namespace VoiceChatHost
 					throw new Exception($"unhandled HostType of {host.type}");
 				case Host.HostType.TestRelayClient:
 					RelayClient client = new RelayClient(args[1]);
-					new Thread(new ThreadStart(client.RelayClientMainTestThread)).Start();
 					break;
 				default:
 					throw new Exception($"unhandled HostType of {host.type}");

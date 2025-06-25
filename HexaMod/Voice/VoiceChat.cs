@@ -9,12 +9,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using BepInEx.Logging;
-using HexaVoiceChatShared.MessageProtocol;
-using HexaVoiceChatShared.Net;
 using NAudio.Wave;
 using UnityEngine;
-using HexaVoiceChatShared;
 using VoiceChatShared;
+using VoiceChatShared.Enums;
+using VoiceChatShared.Net;
+using VoiceChatShared.Net.PeerConnection;
 
 namespace HexaMod.Voice
 {
@@ -46,9 +46,9 @@ namespace HexaMod.Voice
 		public static bool testMode = false;
 		public static Dictionary<ulong, List<AudioBuffer>> audioBuffers = new Dictionary<ulong, List<AudioBuffer>>();
 		public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
-		public static VoiceChatClient voicechatTranscodeClient;
+		public static PeerDuelProtocolConnection<HVCMessage> transcodeClient;
 		private static int transcodeServerPort = 0;
-		public static Process internalTranscodeServerProcess;
+		public static Process transcodeProcess;
 		internal static ManualLogSource voiceChatProcessLog = BepInEx.Logging.Logger.CreateLogSource("VoiceChatHost");
 		public static float shortMaxValueMul = 1f / short.MaxValue;
 
@@ -58,6 +58,7 @@ namespace HexaMod.Voice
 		{
 			InitWithoutTranscodeProcess();
 			InitTranscodeServerProcess();
+			new Thread(new ThreadStart(TranscodeServerAutoRestartThread)).Start();
 		}
 
 		public static void InitWithoutTranscodeProcess()
@@ -69,54 +70,69 @@ namespace HexaMod.Voice
 
 		public static void StartListening()
 		{
-			voicechatTranscodeClient.SendMessage(HVCMessage.SetListening, UDP.AsData(true));
+			transcodeClient.udp.SendMessage(HVCMessage.SetListening, NetData.As(true));
 			listening = true;
 		}
 
 		public static void StopListening()
 		{
-			voicechatTranscodeClient.SendMessage(HVCMessage.SetListening, UDP.AsData(false));
+			transcodeClient.udp.SendMessage(HVCMessage.SetListening, NetData.As(false));
 			listening = false;
 		}
 
 		public static void InitTranscodeServerProcess()
 		{
-			Mod.Print("Start internalTranscodeServerProcess");
+			Mod.Print("Start transcodeProcess");
 
 			transcodeServerPort = FreePort();
 
-			internalTranscodeServerProcess = new Process()
+			transcodeProcess = new Process()
 			{
 				StartInfo = new ProcessStartInfo()
 				{
 					FileName = PathJoin.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice", "VoiceChatHost.exe"),
 					Arguments = $"{(Environment.GetCommandLineArgs().Contains("VoiceChatHostVerboseLogging") ? "tv" : "t")} 127.0.0.1 {transcodeServerPort}", // 39200
 					UseShellExecute = false,
-					RedirectStandardOutput = true,
 				}
 			};
 
-			internalTranscodeServerProcess.OutputDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
-			{
-				string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
-				foreach (string line in output.Split(new[] {'\r', '\n'}))
-				{
-					voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
-				}
-			});
+			ProcessStartInfo startInfo = transcodeProcess.StartInfo;
+			startInfo.RedirectStandardOutput = !startInfo.UseShellExecute;
+			startInfo.RedirectStandardError = !startInfo.UseShellExecute;
+			transcodeProcess.Start();
 
-			internalTranscodeServerProcess.Start();
-			internalTranscodeServerProcess.BeginOutputReadLine();
+			if (startInfo.RedirectStandardOutput)
+			{
+				transcodeProcess.OutputDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
+				{
+					string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
+					foreach (string line in output.Split(new[] { '\r', '\n' }))
+					{
+						voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
+					}
+				});
+
+				transcodeProcess.ErrorDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
+				{
+					string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
+					foreach (string line in output.Split(new[] { '\r', '\n' }))
+					{
+						voiceChatProcessLog.LogFatal(outLine.Data.Substring(0, outLine.Data.Length - 1));
+					}
+				});
+
+				transcodeProcess.BeginOutputReadLine();
+				transcodeProcess.BeginErrorReadLine();
+			}
 		}
 
-		public static bool transcodeServerReady = false;
-		static void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
+		public static bool transcodeReady = false;
+		static void OnHandshake(NetMessage<HVCMessage> message, IPEndPoint from)
 		{
-			if (!transcodeServerReady)
+			if (!transcodeReady)
 			{
-				Mod.Print($"Completed Handshake With Signature \"{Encoding.ASCII.GetString(message.body)}\" which should always match \"!\"");
-				transcodeServerReady = true;
-				new Thread(new ThreadStart(KeepTranscodeAliveThread)).Start();
+				Mod.Print($"Completed Handshake");
+				transcodeReady = true;
 				ConnectedToTranscodeServer();
 			}
 			else
@@ -135,26 +151,30 @@ namespace HexaMod.Voice
 
 		public static void InitTranscodeServerConnection()
 		{
-			Mod.Print("Start voicechatTranscodeClient");
+			if (transcodeClient != null)
+			{
+				Mod.Print("shutting down existing transcodeClient");
+				transcodeClient.Close();
+				transcodeClient = null;
+			}
 
-			voicechatTranscodeClient = new VoiceChatClient(new IPEndPoint(
+			Mod.Print("Start transcodeClient");
+
+			transcodeClient = new PeerDuelProtocolConnection<HVCMessage>(new IPEndPoint(
 				IPAddress.Parse("127.0.0.1"),
 				transcodeServerPort
 			));
 
-			voicechatTranscodeClient.Connect();
+			transcodeClient.Connect();
 
-			Mod.Print("On Message");
-
-			voicechatTranscodeClient.OnClientMessage(HVCMessage.PCMData, OnPCMData);
-			voicechatTranscodeClient.OnMessage(HVCMessage.SpeakingStateUpdated, OnSpeakingState);
-			voicechatTranscodeClient.OnMessage(HVCMessage.Handshake, OnHandshake);
+			transcodeClient.OnMessage(HVCMessage.PCMData, OnPCMData);
+			transcodeClient.OnMessage(HVCMessage.SpeakingStateUpdated, OnSpeakingState);
 		}
 
 		public static void SendTranscodeServerHandshake()
 		{
-			Mod.Print("Attempt Handshake");
-			voicechatTranscodeClient.SendMessage(HVCMessage.Handshake, new byte[1]);
+			transcodeClient.tcp.Once(HVCMessage.Handshake, OnHandshake);
+			transcodeClient.tcp.SendEventMessage(HVCMessage.Handshake);
 		}
 
 		public static void InitUnityForVoiceChat()
@@ -180,19 +200,19 @@ namespace HexaMod.Voice
 
 		public static float currentPeak = 0f;
 
-		static void OnPCMData(DecodedClientWrappedMessage message, IPEndPoint from)
+		static void OnPCMData(NetMessage<HVCMessage> message, IPEndPoint from)
 		{
-			int sampleRate = BitConverter.ToInt32(message.body, 0);
-			int channels = BitConverter.ToInt32(message.body, 4);
-			short[] pcm = new short[Mathf.CeilToInt((message.body.Length - 8) / 2f)];
-			Buffer.BlockCopy(message.body, 8, pcm, 0, message.body.Length - 8);
+			int sampleRate = BitConverter.ToInt32(message.Body, 0);
+			int channels = BitConverter.ToInt32(message.Body, 4);
+			short[] pcm = new short[Mathf.CeilToInt((message.Body.Length - 8) / 2f)];
+			Buffer.BlockCopy(message.Body, 8, pcm, 0, message.Body.Length - 8);
 
-			if (!audioBuffers.ContainsKey(message.clientId))
+			if (!audioBuffers.ContainsKey(message.Client))
 			{
-				audioBuffers.Add(message.clientId, new List<AudioBuffer>());
+				audioBuffers.Add(message.Client, new List<AudioBuffer>());
 			}
 
-			List<AudioBuffer> buffers = audioBuffers[message.clientId];
+			List<AudioBuffer> buffers = audioBuffers[message.Client];
 
 			lock (buffers)
 			{
@@ -211,17 +231,16 @@ namespace HexaMod.Voice
 			}
 		}
 
-		static void OnSpeakingState(DecodedVoiceChatMessage message, IPEndPoint from)
+		static void OnSpeakingState(NetMessage<HVCMessage> message, IPEndPoint from)
 		{
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
-			speakingStates[clientMessage.clientId] = clientMessage.body[0] == 1;
+			speakingStates[message.Client] = message.Body[0] == 1;
 		}
 
 		public static string relayIp = null;
 
 		public static void DisconnectFromRelay()
 		{
-			voicechatTranscodeClient.SendEventMessage(HVCMessage.DisconnectFromRelay);
+			transcodeClient.udp.SendEventMessage(HVCMessage.DisconnectFromRelay);
 			relayIp = null;
 		}
 
@@ -239,7 +258,7 @@ namespace HexaMod.Voice
 					DisconnectFromRelay();
 				}
 
-				voicechatTranscodeClient.SendMessage(
+				transcodeClient.udp.SendMessage(
 					HVCMessage.ConnectToRelay,
 					Encoding.ASCII.GetBytes(ip)
 				);
@@ -268,8 +287,7 @@ namespace HexaMod.Voice
 
 				Mod.Print($"JoinVoiceRoom {roomName}");
 
-				voicechatTranscodeClient.SendClientWrappedMessage(
-					testMode ? 0 : (ulong)PhotonNetwork.player.ID,
+				transcodeClient.udp.SendMessage(
 					HVCMessage.VoiceRoomJoin,
 					Encoding.ASCII.GetBytes(roomName)
 				);
@@ -280,9 +298,9 @@ namespace HexaMod.Voice
 
 		static void SetDenoiseEnabled(bool denoise)
 		{
-			if (transcodeServerReady)
+			if (transcodeReady)
 			{
-				voicechatTranscodeClient.SendMessage(HVCMessage.SetRNNoiseEnabled, new byte[] {
+				transcodeClient.udp.SendMessage(HVCMessage.SetRNNoiseEnabled, new byte[] {
 				(byte)(denoise ? 0x01 : 0x00)
 			});
 			}
@@ -290,9 +308,6 @@ namespace HexaMod.Voice
 
 		public static void LeaveVoiceRoom()
 		{
-			Mod.Print($"LeaveVoiceRoom {room}");
-			voicechatTranscodeClient.SendEventMessage(HVCMessage.VoiceRoomLeave);
-
 			room = null;
 			speakingStates.Clear();
 			audioBuffers.Clear();
@@ -325,90 +340,64 @@ namespace HexaMod.Voice
 
 		public static void SetMicrophoneDeviceId(int device)
 		{
-			if (transcodeServerReady)
+			if (transcodeReady)
 			{
-				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicDeviceId, UDP.AsData(device));
+				transcodeClient.udp.SendMessage(HVCMessage.SetMicDeviceId, NetData.As(device));
 			}
 		}
 
 		public static void SetMicrophoneBufferMillis(byte millis)
 		{
-			if (transcodeServerReady)
+			if (transcodeReady)
 			{
-				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicBufferMillis, UDP.AsData(millis));
+				transcodeClient.udp.SendMessage(HVCMessage.SetMicBufferMillis, NetData.As(millis));
 			}
 		}
 
 		public static void SetMicrophoneBitrate(int bitrate)
 		{
-			if (transcodeServerReady)
+			if (transcodeReady)
 			{
-				voicechatTranscodeClient.SendMessage(HVCMessage.SetBitrate, UDP.AsData((byte)Enum.GetValues(typeof(Bitrate)).GetValue(bitrate)));
+				transcodeClient.udp.SendMessage(HVCMessage.SetBitrate, NetData.As((byte)Enum.GetValues(typeof(Bitrate)).GetValue(bitrate)));
 			}
 		}
 
 		public static void SetMicrophoneChannels(byte channels)
 		{
-			if (transcodeServerReady)			{
-				voicechatTranscodeClient.SendMessage(HVCMessage.SetMicChannels, UDP.AsData(channels));
+			if (transcodeReady)			{
+				transcodeClient.udp.SendMessage(HVCMessage.SetMicChannels, NetData.As(channels));
 			}
 
 		}
 
-		public static void KeepTranscodeAliveThread()
+		public static void TranscodeServerAutoRestartThread()
 		{
 			while (true)
 			{
-				if (internalTranscodeServerProcess.HasExited)
+				if (transcodeProcess != null && transcodeProcess.HasExited)
 				{
-					Mod.Warn("transcode server has exited, restarting it");
+					Mod.Warn($"transcodeProcess was unexpectedly terminated with exit code {transcodeProcess.ExitCode}, restarting it");
 
-					internalTranscodeServerProcess = null;
-					transcodeServerReady = false;
+					transcodeProcess = null;
+					transcodeReady = false;
 
 					InitTranscodeServerProcess();
 
-					while (!transcodeServerReady)
+					while (!transcodeReady)
 					{
-						Thread.Sleep(100);
+						try { InitTranscodeServerConnection(); } catch { }
 
-						try
+						while (!transcodeClient.tcp.Connected && !transcodeProcess.HasExited)
 						{
-							InitTranscodeServerConnection();
-						}
-						catch (Exception e)
-						{
-							Mod.Warn(e);
+							Thread.Sleep(16);
 						}
 
-						Thread.Sleep(100);
+						try { SendTranscodeServerHandshake(); } catch { }
 
-						try
-						{
-							if (!transcodeServerReady)
-							{
-								SendTranscodeServerHandshake();
-							}
-						}
-						catch (Exception e)
-						{
-							Mod.Warn(e);
-						}
-
-						Thread.Sleep(100);
+						Thread.Sleep(500);
 					}
 
 					Mod.Warn("transcode has been re-initialized");
-				}
-
-
-				try
-				{
-					voicechatTranscodeClient.SendEventMessage(HVCMessage.KeepTranscodeAlive);
-				}
-				catch (Exception e)
-				{
-					Mod.Warn(e);
 				}
 
 				Thread.Sleep(500);

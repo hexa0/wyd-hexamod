@@ -133,8 +133,6 @@ namespace HexaMod.Voice
 			int players = playerNames.daddyPlayerIds.Count + playerNames.babyPlayerIds.Count;
 			emitters = new GameObject[players];
 
-			Mod.Print($"Making {players} VoiceEmitter object(s).");
-
 			for (int playerI = 0; playerI < players; playerI++)
 			{
 				emitters[playerI] = new GameObject($"voice {playerI}");
@@ -162,7 +160,6 @@ namespace HexaMod.Voice
 
 			int i = 0;
 			playerNames.daddyPlayerIds.ForEach(player => {
-				Mod.Print($"Setup VoiceEmitter {playerIndex} (dad)");
 				VoiceEmitter emitter = emitters[playerIndex].GetComponent<VoiceEmitter>();
 				emitter.clientId = (ulong)player.ID;
 				emitter.speakingObject = dadIndicators[i];
@@ -172,7 +169,6 @@ namespace HexaMod.Voice
 
 			i = 0;
 			playerNames.babyPlayerIds.ForEach(player => {
-				Mod.Print($"Setup VoiceEmitter {playerIndex} (baby)");
 				VoiceEmitter emitter = emitters[playerIndex].GetComponent<VoiceEmitter>();
 				emitter.clientId = (ulong)player.ID;
 				emitter.speakingObject = babyIndicators[i];

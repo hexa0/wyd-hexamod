@@ -151,7 +151,7 @@ namespace HexaMod
 			ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
 			yield return 0;
 			int attempts = 0;
-			while (!VoiceChat.transcodeServerReady)
+			while (!VoiceChat.transcodeReady)
 			{
 				ActionText($"Init VoiceChat\n(Transcode Connection)\n(Attempt {attempts})");
 				yield return 0;
@@ -165,25 +165,18 @@ namespace HexaMod
 					Mod.Warn(e);
 				}
 
-				yield return 0;
-
-				try
+				while (!VoiceChat.transcodeClient.tcp.Connected)
 				{
-					if (!VoiceChat.transcodeServerReady)
-					{
-						VoiceChat.SendTranscodeServerHandshake();
-					}
-					else
-					{
-						Mod.Print("Cancelled Handshake, Already Completed Handshake");
-					}
-				}
-				catch (Exception e)
-				{
-					Mod.Warn(e);
+					yield return 0;
 				}
 
-				yield return 0;
+				VoiceChat.SendTranscodeServerHandshake();
+
+				float startHandshake = Time.time;
+				while (!VoiceChat.transcodeReady && (Time.time - startHandshake) < 1f)
+				{
+					yield return 0;
+				}
 
 				attempts++;
 			}

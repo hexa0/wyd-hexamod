@@ -14,7 +14,6 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
 using HexaMod.Settings;
-using VoiceChatShared;
 using System;
 using HexaMod.UI.Element.Control.TextButton;
 using HexaMod.UI.Element.Control.SwitchInput;
@@ -22,6 +21,7 @@ using HexaMod.UI.Element.Control.ToggleButton;
 using HexaMod.UI.Element.Control.TextInputField;
 using HexaMod.UI.Element.VoiceChatUI;
 using HexaMod.UI.Element.Control;
+using VoiceChatShared.Enums;
 
 namespace HexaMod.UI
 {

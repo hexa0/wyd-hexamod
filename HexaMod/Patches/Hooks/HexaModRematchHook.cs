@@ -8,23 +8,14 @@ namespace HexaMod.Patches.Hooks
 {
 	internal class HexaModRematcher : MonoBehaviour
 	{
-		public IEnumerator HexaModRematchAsync(float fadeSpeed = 1f)
+		public bool rematchInProgress = false;
+		public IEnumerator HexaModRematchAsync()
 		{
-			AsyncOperation sceneLoadOperation = SceneManager.LoadSceneAsync(1);
-			sceneLoadOperation.allowSceneActivation = false;
-			yield return new WaitForSeconds((1f / fadeSpeed) - 0.1f);
-			HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", true);
-			yield return new WaitForSeconds(0.1f);
-			sceneLoadOperation.allowSceneActivation = true;
-		}
-	}
-	[HarmonyPatch(typeof(MenuController))]
-	internal class HexaModRematchHook
-	{
-		[HarmonyPatch("Rematch")]
-		[HarmonyPrefix]
-		static bool Rematch(ref MenuController __instance)
-		{
+			if (rematchInProgress)
+			{
+				yield break; // Prevent multiple rematch requests
+			}
+
 			Camera currentCamera = Camera.current;
 
 			GameObject menuCamera = GameObject.Find("BackendObjects").Find("MenuCamera");
@@ -46,7 +37,22 @@ namespace HexaMod.Patches.Hooks
 			}
 
 			HexaMenus.fadeOverlay.fader.fadeState = true;
-			__instance.SendMessage("HexaModRematchAsync", HexaMenus.fadeOverlay.fader.fadeSpeed);
+			AsyncOperation sceneLoadOperation = SceneManager.LoadSceneAsync(1);
+			sceneLoadOperation.allowSceneActivation = false;
+			yield return new WaitForSeconds((1f / HexaMenus.fadeOverlay.fader.fadeSpeed) - 0.1f);
+			HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", true);
+			yield return new WaitForSeconds(0.1f);
+			sceneLoadOperation.allowSceneActivation = true;
+		}
+	}
+	[HarmonyPatch(typeof(MenuController))]
+	internal class HexaModRematchHook
+	{
+		[HarmonyPatch("Rematch")]
+		[HarmonyPrefix]
+		static bool Rematch(ref MenuController __instance)
+		{
+			__instance.SendMessage("HexaModRematchAsync");
 
 			return false;
 		}

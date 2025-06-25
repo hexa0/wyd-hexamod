@@ -12,13 +12,13 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static bool Quit()
 		{
-			if (VoiceChat.internalTranscodeServerProcess != null)
+			if (VoiceChat.transcodeProcess != null)
 			{
 				Mod.Print("Closing internalTranscodeServerProcess.");
 				try
 				{
-					VoiceChat.internalTranscodeServerProcess.Kill();
-					VoiceChat.internalTranscodeServerProcess = null;
+					VoiceChat.transcodeProcess.Kill();
+					VoiceChat.transcodeProcess = null;
 				}
 				catch
 				{

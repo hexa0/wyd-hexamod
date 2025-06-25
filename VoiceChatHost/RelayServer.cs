@@ -1,115 +1,175 @@
 ﻿using System.Net;
 using System.Text;
-using HexaVoiceChatShared;
-using HexaVoiceChatShared.Net;
-using HexaVoiceChatShared.MessageProtocol;
 using VoiceChatHost.Type;
+using VoiceChatShared;
+using VoiceChatShared.Enums;
+using VoiceChatShared.Net;
+using VoiceChatShared.Net.PeerConnection;
 
 namespace VoiceChatHost
 {
 	public class RelayServer
 	{
-		private VoiceChatServer server;
+		private PeerDuelProtocolConnection<HVCMessage> server;
 		private Dictionary<string, VoiceRoom> rooms = new Dictionary<string, VoiceRoom>();
 
-		private void VoiceRoomJoinOrKeepAlive(DecodedVoiceChatMessage message, IPEndPoint from)
+		void SetPeer(NetMessage<HVCMessage> message, IPEndPoint peer)
 		{
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+			ushort tcpPort = BitConverter.ToUInt16(message.Body, 0);
+			ushort udpPort = BitConverter.ToUInt16(message.Body, 2);
 
-			VoiceRoom room;
-			string roomName = Encoding.ASCII.GetString(clientMessage.body);
-
-			if (rooms.ContainsKey(roomName))
+			// Find an available ID for the peer
+			ulong assignedId = 0;
+			while (server.tcpPeerIds.ContainsKey(assignedId) || server.udpPeerIds.ContainsKey(assignedId))
 			{
-				room = rooms[roomName];
-				room.UpdateLastEvent();
-				room.UpdateLastClientEvent(clientMessage.clientId);
-			}
-			else
-			{
-				room = new VoiceRoom(roomName, server);
-				rooms.Add(roomName, room);
+				assignedId++;
 			}
 
-			room.AddClient(clientMessage.clientId, from);
+			server.AddTCPPeer(new IPEndPoint(peer.Address, tcpPort), assignedId);
+			server.AddUDPPeer(new IPEndPoint(peer.Address, udpPort), assignedId);
+
+			server.tcp.SendMessage(
+				new NetMessage<HVCMessage>(
+					HVCMessage.VoiceRoomPeerIdAllocated,
+					BitConverter.GetBytes(assignedId)
+				),
+				peer
+			);
 		}
 
-		private void VoiceRoomLeave(DecodedVoiceChatMessage message, IPEndPoint from)
+		void SetUDPPeer(NetMessage<HVCMessage> message, IPEndPoint peer)
 		{
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
-			string roomName = Encoding.ASCII.GetString(clientMessage.body);
+			ulong peerId = BitConverter.ToUInt64(message.Body, 0);
 
-			if (rooms.ContainsKey(roomName))
-			{
-				rooms[roomName].RemoveClient(clientMessage.clientId);
-			}
+			server.AddUDPPeer(peer, peerId);
 		}
 
-		private void ForwardToOthersInRoom(DecodedVoiceChatMessage message, IPEndPoint from)
+		void VoiceRoomJoin(NetMessage<HVCMessage> message, IPEndPoint peer)
 		{
-			DecodedClientWrappedMessage clientMessage = ClientWrappedMessage.DecodeMessage(message.body);
+			ulong peerId = server.GetPeerClientId(peer);
 
 			foreach (var room in rooms)
 			{
-				if (room.Value.clients.ContainsKey(clientMessage.clientId))
+				if (room.Value.clients.Contains(peerId))
 				{
-					room.Value.SendToAllClientsExcept(
-						clientMessage.clientId,
-						message.raw
-					);
-
-					return;
+					room.Value.RemoveClient(peerId);
 				}
+			}
+
+			string roomName = Encoding.ASCII.GetString(message.Body);
+
+			VoiceRoom roomToJoin;
+
+			if (rooms.ContainsKey(roomName))
+			{
+				roomToJoin = rooms[roomName];
+			}
+			else
+			{
+				roomToJoin = new VoiceRoom(roomName, server);
+				rooms.Add(roomName, roomToJoin);
+			}
+
+			roomToJoin.AddClient(peerId);
+		}
+
+		void PeerDisconnected(IPEndPoint peer)
+		{
+			ulong peerId = server.GetPeerClientId(peer);
+
+			foreach (var room in rooms)
+			{
+				if (room.Value.clients.Contains(peerId))
+				{
+					room.Value.RemoveClient(peerId);
+				}
+			}
+
+			server.RemovePeer(peerId);
+		}
+
+		void OnHandshake(NetMessage<HVCMessage> message, IPEndPoint from)
+		{
+			server.tcp.SendEventMessage(HVCMessage.Handshake, from);
+		}
+
+		private VoiceRoom GetVoiceRoomForPeer(IPEndPoint peer)
+		{
+			ulong peerId = server.GetPeerClientId(peer);
+
+			foreach (var room in rooms)
+			{
+				if (room.Value.clients.Contains(peerId))
+				{
+					return room.Value;
+				}
+			}
+
+			return null;
+		}
+
+		void OnFowardData(NetMessage<HVCMessage> message, IPEndPoint peer, bool reliable = true)
+		{
+			ulong peerId = server.GetPeerClientId(peer);
+			VoiceRoom room = GetVoiceRoomForPeer(peer);
+
+			if (room != null)
+			{
+				byte[] newBody = new byte[message.Body.Length + 8];
+				Buffer.BlockCopy(BitConverter.GetBytes(peerId), 0, newBody, 0, 8);
+				Buffer.BlockCopy(message.Body, 0, newBody, 8, message.Body.Length);
+
+				NetMessage<HVCMessage> newMessage = new NetMessage<HVCMessage>(
+					message.Type,
+					newBody
+				);
+
+				room.SendToAllClientsExcept(peerId, newMessage, reliable);
 			}
 		}
 
-		private void OnHandshake(DecodedVoiceChatMessage message, IPEndPoint from)
-		{
-			Console.WriteLine($"got handshake, respond to {from}");
-			server.SendEventMessage(HVCMessage.Handshake, from);
-		}
+		void OnReliableFowardData(NetMessage<HVCMessage> message, IPEndPoint peer) => OnFowardData(message, peer, true);
+		void OnUnreliableFowardData(NetMessage<HVCMessage> message, IPEndPoint peer) => OnFowardData(message, peer, false);
 
 		public RelayServer(string ip)
 		{
-			server = new VoiceChatServer(new IPEndPoint(
+			IPEndPoint endPoint = new IPEndPoint(
 				IPAddress.Parse(ip),
 				HexaVoiceChat.Ports.relay
-			));
+			);
 
-			server.OnMessage(HVCMessage.VoiceRoomJoin, VoiceRoomJoinOrKeepAlive);
-			server.OnMessage(HVCMessage.VoiceRoomKeepAlive, VoiceRoomJoinOrKeepAlive);
-			server.OnMessage(HVCMessage.VoiceRoomLeave, VoiceRoomLeave);
-			server.OnMessage(HVCMessage.Opus, ForwardToOthersInRoom);
-			server.OnMessage(HVCMessage.SpeakingStateUpdated, ForwardToOthersInRoom);
+			server = new PeerDuelProtocolConnection<HVCMessage>(endPoint);
+			server.Listen();
+
+			server.OnMessage(HVCMessage.VoiceRoomAllocatePeerId, SetPeer);
+			server.OnMessage(HVCMessage.VoiceRoomJoin, VoiceRoomJoin);
+			server.OnDisconnect(PeerDisconnected);
+			server.OnMessage(HVCMessage.Opus, OnUnreliableFowardData);
+			server.OnMessage(HVCMessage.SpeakingStateUpdated, OnReliableFowardData);
 			server.OnMessage(HVCMessage.Handshake, OnHandshake);
 
-			new Thread(new ThreadStart(RelayServerMainThread)).Start();
+			new Thread(new ThreadStart(RoomCleanupThread)).Start();
 		}
 
-		private void RelayServerMainThread()
+		void RoomCleanupThread()
 		{
 			while (true)
 			{
 				long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-				foreach (var room in rooms)
+
+				lock (rooms)
 				{
-					if (room.Value.clients.Count == 0 || (now - room.Value.lastEvent > 10))
+					foreach (var room in rooms)
 					{
-						Console.WriteLine($"room {room.Key} was destroyed");
-						rooms.Remove(room.Key);
-					}
-					else
-					{
-						foreach (var lastEvent in room.Value.clientLastEvents)
+						if (room.Value.clients.Count == 0)
 						{
-							if (now - lastEvent.Value > 3)
-							{
-								room.Value.RemoveClient(lastEvent.Key);
-							}
+							Console.WriteLine($"room {room.Key} was destroyed");
+							rooms.Remove(room.Key);
 						}
 					}
 				}
-				Thread.Sleep(100);
+
+				Thread.Sleep(1000);
 			}
 		}
 	}
