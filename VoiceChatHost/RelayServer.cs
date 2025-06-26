@@ -115,13 +115,10 @@ namespace VoiceChatHost
 
 			if (room != null)
 			{
-				byte[] newBody = new byte[message.Body.Length + 8];
-				Buffer.BlockCopy(BitConverter.GetBytes(peerId), 0, newBody, 0, 8);
-				Buffer.BlockCopy(message.Body, 0, newBody, 8, message.Body.Length);
-
 				NetMessage<HVCMessage> newMessage = new NetMessage<HVCMessage>(
 					message.Type,
-					newBody
+					message.Body,
+					peerId // retransmit the packet to the other clients with the correct peerId
 				);
 
 				room.SendToAllClientsExcept(peerId, newMessage, reliable);

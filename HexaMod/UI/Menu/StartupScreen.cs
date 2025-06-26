@@ -35,7 +35,8 @@ namespace HexaMod.UI.Menus
 
 			loadingText = new LoadingText()
 				.SetParent(fader.rectTransform, false)
-				.SetPivot(0f, 0.5f);
+				.SetPivot(0f, 0.5f)
+				.EnableLogging();
 
 			cornerLoadingAnimation = new CornerLoadingAnimation()
 				.SetParent(fader.rectTransform, false);

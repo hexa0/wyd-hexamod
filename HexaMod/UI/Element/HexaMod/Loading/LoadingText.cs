@@ -9,6 +9,10 @@ namespace HexaMod.UI.Element.HexaMod.Loading
 		public static Font loadingFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
 		Font currentFont = loadingFont;
 
+		RectTransform textParent;
+
+		public bool enableLogging = false;
+
 		public override void Update()
 		{
 			base.Update();
@@ -27,20 +31,47 @@ namespace HexaMod.UI.Element.HexaMod.Loading
 			text.fontSize = (int)(rectTransform.rect.height * 0.5f);
 		}
 
-		public void SetText(string text)
+		public LoadingText SetText(string text)
 		{
-			this.text.text = text;
+			if (this.text.text != text)
+			{
+				if (enableLogging) {
+					Mod.Print(text);
+				}
+				this.text.text = text;
+			}
+
+			return this;
+		}
+
+		public LoadingText EnableLogging()
+		{
+			enableLogging = true;
+			return this;
+		}
+
+		public LoadingText SetAlignment(TextAnchor alignment)
+		{
+			text.alignment = alignment;
+			return this;
 		}
 
 		public LoadingText() : base()
 		{
 			gameObject = new GameObject("loadingText", typeof(RectTransform));
-			text = gameObject.AddComponent<Text>();
+
+			textParent = new GameObject("loadingText", typeof(RectTransform)).GetComponent<RectTransform>();
+			textParent.SetParent(rectTransform, false);
+			textParent.ScaleWithParent();
+
+			text = textParent.gameObject.AddComponent<Text>();
 			text.font = currentFont;
 			text.supportRichText = true;
-			text.alignment = TextAnchor.MiddleCenter;
 
-			this.SetPivot(0f, 0.5f);
+			// gameObject.AddComponent<Image>().color = Color.magenta;
+
+			this.SetPivot(0f, 0.5f)
+				.SetAlignment(TextAnchor.MiddleCenter);
 		}
 	}
 }

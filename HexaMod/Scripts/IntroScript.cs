@@ -25,7 +25,7 @@ namespace HexaMod
 			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
 			{
 				HexaMenus.startupScreen.fader.fadeState = false;
-				ActionText("Loaded Game");
+				SetLoadingText("Loaded Game");
 				HexaGlobal.OnGameSceneStart();
 			};
 
@@ -36,7 +36,7 @@ namespace HexaMod
 			}
 			else
 			{
-				ActionText("Voice Chat Test Mode Enabled");
+				SetLoadingText("Voice Chat Test Mode Enabled");
 			}
 		}
 
@@ -61,19 +61,7 @@ namespace HexaMod
 			}
 		}
 
-		string lastActionText = string.Empty;
-		void ActionText(string actionText)
-		{
-			if (lastActionText != actionText)
-			{
-
-				Mod.Print(actionText);
-				HexaMenus.startupScreen.loadingText.SetText(actionText);
-				lastActionText = actionText;
-			}
-
-		}
-
+		void SetLoadingText(string loadingText) => HexaMenus.startupScreen.loadingText.SetText(loadingText);
 
 		AsyncOperation sceneLoadOperation;
 
@@ -105,88 +93,46 @@ namespace HexaMod
 			QualitySettings.shadowDistance *= 0.75f;
 			QualitySettings.shadowProjection = ShadowProjection.CloseFit;
 
-			ActionText("Loading HexaModInitResourcesBundle\n(Init)");
+			VoiceChat.Init();
+
+			SetLoadingText("Loading HexaModInitResourcesBundle\n(Init)");
 			yield return 0;
 			HexaGlobal.InitStartupBundle();
-			ActionText("Loading HexaModInitResourcesBundle\n(Font)");
+			SetLoadingText("Loading HexaModInitResourcesBundle\n(Font)");
 			var fontLoadRequest = HexaGlobal.startupBundle.LoadAssetAsync<Font>("Assets/ModResources/Init/Font/osd.ttf");
+			var loadingAnimationRequest = HexaGlobal.startupBundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
 			yield return fontLoadRequest;
 			LoadingText.loadingFont = fontLoadRequest.asset as Font;
-			ActionText("Loading HexaModInitResourcesBundle\n(Loading Animation)");
-			var loadingAnimationRequest = HexaGlobal.startupBundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
+			SetLoadingText("Loading HexaModInitResourcesBundle\n(Loading Animation)");
 			yield return loadingAnimationRequest;
 			LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
-			if (!Environment.GetCommandLineArgs().Contains("SkipTranscodeProcessStart"))
-			{
-				ActionText("Init VoiceChat\n(Transcode Process)");
-				yield return 0;
-				VoiceChat.Init();
-			}
-			else
-			{
-				ActionText("Init VoiceChat\n(Without Transcode Process)");
-				yield return 0;
-				VoiceChat.InitWithoutTranscodeProcess();
-			}
-			ActionText("Loading HexaModCoreResourcesBundle");
+			SetLoadingText("Loading HexaModCoreResourcesBundle");
 			yield return 0;
 			HexaGlobal.InitCoreBundle();
-			ActionText("Patching Game");
+			SetLoadingText("Patching Game");
 			yield return 0;
 			Mod.instance.harmony.PatchAll(Assembly.GetExecutingAssembly());
-			ActionText("Init HexaMod");
+			SetLoadingText("Init HexaMod");
 			yield return 0;
 			HexaGlobal.Init();
 			yield return 0;
-			ActionText($"Loading Asset Bundles\n(?/?)");
+			SetLoadingText($"Loading Asset Bundles\n(?/?)");
 			while (!Assets.loadedAssets)
 			{
-				ActionText($"Loading Asset Bundles\n({Assets.loadedBundles}/{Assets.bundlesToLoad})");
+				SetLoadingText($"Loading Asset Bundles\n({Assets.loadedBundles}/{Assets.bundlesToLoad})");
 				yield return 0;
 			}
-			ActionText("Start Scene Load");
+			SetLoadingText("Start Scene Load");
 			yield return 0;
 			sceneLoadOperation = SceneManager.LoadSceneAsync(1);
 			sceneLoadOperation.allowSceneActivation = false;
-			ActionText("Init VoiceChat\n(Transcode Connection)\n(Attempt 0)");
-			yield return 0;
-			int attempts = 0;
-			while (!VoiceChat.transcodeReady)
-			{
-				ActionText($"Init VoiceChat\n(Transcode Connection)\n(Attempt {attempts})");
-				yield return 0;
-
-				try
-				{
-					VoiceChat.InitTranscodeServerConnection();
-				}
-				catch (Exception e)
-				{
-					Mod.Warn(e);
-				}
-
-				while (!VoiceChat.transcodeClient.tcp.Connected)
-				{
-					yield return 0;
-				}
-
-				VoiceChat.SendTranscodeServerHandshake();
-
-				float startHandshake = Time.time;
-				while (!VoiceChat.transcodeReady && (Time.time - startHandshake) < 1f)
-				{
-					yield return 0;
-				}
-
-				attempts++;
-			}
-			ActionText($"Loading Game\n(0%)");
+			SetLoadingText($"Loading Game\n(0%)");
 			yield return 0;
 			Application.targetFrameRate = 0;
 			sceneLoadOperation.allowSceneActivation = true;
 			while (!sceneLoadOperation.isDone)
 			{
-				ActionText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
+				SetLoadingText($"Loading Game\n({Math.Round(sceneLoadOperation.progress * 100, 2)}%)");
 				yield return 0;
 			}
 		}

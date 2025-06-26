@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using HexaMod.UI.Menus;
+using System.Linq;
+using HarmonyLib;
 using UnityEngine;
-using static HexaMod.UI.Util.Menu;
 using static HexaMod.UI.Util.Menu.WYDMenus;
 
 namespace HexaMod.UI
@@ -40,6 +40,18 @@ namespace HexaMod.UI
 			}
 		}
 
+		private static Dictionary<string, string> taskNames = new Dictionary<string, string>()
+		{
+			{ "PhotonConnect", "Connecting to Photon" },
+			{ "LobbyJoin", "Fetching lobby list" },
+			{ "RoomLookForOrCreateTag", "Searching for lobby" },
+			{ "RoomCreate", "Creating lobby" },
+			{ "RoomJoin", "Joining lobby" },
+			{ "LevelLoad", "Loading Game" },
+			{ "MatchLoad", "Waiting for others to load" }
+		}
+;
+
 		private float lastWasWorking = 0f;
 		private void Update()
 		{
@@ -53,6 +65,28 @@ namespace HexaMod.UI
 			else
 			{
 				ShowLoading((Time.time - lastWasWorking) < 0.1f);
+			}
+
+			List<string> activeTasks = new List<string>();
+			foreach (var task in tasks)
+			{
+				if (task.Value)
+				{
+					if (taskNames.ContainsKey(task.Key))
+					{
+						activeTasks.Add(taskNames[task.Key]);
+					}
+					else
+					{
+						Mod.Warn($"Unknown task name: {task.Key}");
+						activeTasks.Add(task.Key);
+					}
+				}
+			}
+
+			if (activeTasks.Count > 0)
+			{
+				HexaMenus.loadingOverlay.cornerLoadingAnimation.loadingText.SetText(string.Join(", ", activeTasks.ToArray()));
 			}
 		}
 	}

@@ -56,14 +56,8 @@ namespace HexaMod.Voice
 
 		public static void Init()
 		{
-			InitWithoutTranscodeProcess();
-			InitTranscodeServerProcess();
-			new Thread(new ThreadStart(TranscodeServerAutoRestartThread)).Start();
-		}
-
-		public static void InitWithoutTranscodeProcess()
-		{
 			InitUnityForVoiceChat();
+			InitTranscode();
 		}
 
 		public static bool listening = false;
@@ -147,6 +141,14 @@ namespace HexaMod.Voice
 			SetMicrophoneDeviceId(microphoneDeviceId.Value);
 			SetMicrophoneBufferMillis(microphoneBufferMillis.Value);
 			SetMicrophoneBitrate(microphoneBitrate.Value);
+
+			if (room != null && relayIp != null)
+			{
+				string oldRelay = relayIp;
+				string oldRoom = room;
+				DisconnectFromRelay();
+				ConnectToRelay(oldRelay, oldRoom);
+			}
 		}
 
 		public static void InitTranscodeServerConnection()
@@ -169,6 +171,15 @@ namespace HexaMod.Voice
 
 			transcodeClient.OnMessage(HVCMessage.PCMData, OnPCMData);
 			transcodeClient.OnMessage(HVCMessage.SpeakingStateUpdated, OnSpeakingState);
+			transcodeClient.OnDisconnect(peer =>
+			{
+				if (transcodeReady)
+				{
+					Mod.Fatal($"transcodeClient unexpectedly has disconnected");
+					transcodeReady = false;
+					InitTranscode();
+				}
+			});
 		}
 
 		public static void SendTranscodeServerHandshake()
@@ -242,6 +253,7 @@ namespace HexaMod.Voice
 		{
 			transcodeClient.udp.SendEventMessage(HVCMessage.DisconnectFromRelay);
 			relayIp = null;
+			room = null;
 		}
 
 		public static void ConnectToRelay(string ip, string reconnectRoom)
@@ -370,37 +382,30 @@ namespace HexaMod.Voice
 
 		}
 
-		public static void TranscodeServerAutoRestartThread()
+		static void InitTranscode()
 		{
-			while (true)
+			new Thread(new ThreadStart(TranscodeServerStartupThread)).Start();
+		}
+
+		public static void TranscodeServerStartupThread()
+		{
+			try
 			{
-				if (transcodeProcess != null && transcodeProcess.HasExited)
+				InitTranscodeServerProcess();
+				InitTranscodeServerConnection();
+
+				while (!transcodeClient.tcp.Connected && !transcodeProcess.HasExited)
 				{
-					Mod.Warn($"transcodeProcess was unexpectedly terminated with exit code {transcodeProcess.ExitCode}, restarting it");
-
-					transcodeProcess = null;
-					transcodeReady = false;
-
-					InitTranscodeServerProcess();
-
-					while (!transcodeReady)
-					{
-						try { InitTranscodeServerConnection(); } catch { }
-
-						while (!transcodeClient.tcp.Connected && !transcodeProcess.HasExited)
-						{
-							Thread.Sleep(16);
-						}
-
-						try { SendTranscodeServerHandshake(); } catch { }
-
-						Thread.Sleep(500);
-					}
-
-					Mod.Warn("transcode has been re-initialized");
+					Thread.Sleep(1);
 				}
 
-				Thread.Sleep(500);
+				SendTranscodeServerHandshake();
+			}
+			catch (Exception e)
+			{
+				Mod.Fatal("Failed to start transcode server, retrying\n", e);
+				Thread.Sleep(100);
+				InitTranscode();
 			}
 		}
 	}
