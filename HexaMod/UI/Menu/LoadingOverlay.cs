@@ -3,7 +3,7 @@ using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.UI.Element.Utility;
 using UnityEngine;
 
-namespace HexaMod.UI.Menus
+namespace HexaMod.UI.Menu
 {
 	public class LoadingOverlay : HexaUIElement
 	{

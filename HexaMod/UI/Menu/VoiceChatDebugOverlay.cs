@@ -4,7 +4,7 @@ using HexaMod.UI.Element.VoiceChatUI.Debug;
 using HexaMod.Voice;
 using UnityEngine;
 
-namespace HexaMod.UI.Menus
+namespace HexaMod.UI.Menu
 {
 	public class VoiceChatDebugOverlay : HexaUIElement
 	{

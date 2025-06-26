@@ -1,4 +1,4 @@
-﻿using HexaMod.UI.Menus;
+﻿using HexaMod.UI.Menu;
 using HexaMod.UI.Util;
 using UnityEngine;
 

@@ -4,7 +4,7 @@ using HexaMod.UI.Element.Utility;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace HexaMod.UI.Menus
+namespace HexaMod.UI.Menu
 {
 	public class StartupScreen : HexaUIElement
 	{

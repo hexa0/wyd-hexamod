@@ -15,14 +15,13 @@ using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
 using HexaMod.Settings;
 using System;
+using HexaMod.UI.Element.Control;
 using HexaMod.UI.Element.Control.TextButton;
 using HexaMod.UI.Element.Control.SwitchInput;
 using HexaMod.UI.Element.Control.ToggleButton;
 using HexaMod.UI.Element.Control.TextInputField;
 using HexaMod.UI.Element.VoiceChatUI;
-using HexaMod.UI.Element.Control;
 using VoiceChatShared.Enums;
-using UnityEngine.Networking;
 
 namespace HexaMod.UI
 {
@@ -210,11 +209,20 @@ namespace HexaMod.UI
 				UpdateUIForLobbyState();
 			});
 
-			mapInfo = Instantiate(title.root.Find("Version"), title.root).GetComponent<Text>();
+			RectTransform version = title.root.Find("Version").gameObject.GetComponent<RectTransform>();
+			Text versionText = version.GetComponent<Text>();
+
+			version.ScaleWithParent();
+			versionText.alignment = TextAnchor.LowerLeft;
+			versionText.fontSize = (int)(versionText.fontSize * 0.5f);
+			version.sizeDelta = new Vector2(versionText.fontSize * -2f, versionText.fontSize * -2f);
+
+			mapInfo = Instantiate(version, title.root).GetComponent<Text>();
 			mapInfo.name = "mapInfo";
-			mapInfo.transform.localPosition = new Vector2(mapInfo.transform.localPosition.x, mapInfo.transform.localPosition.y * 0.8f);
-			mapInfo.transform.SetParent(title.root.Find("Version"));
 			mapInfo.text = "";
+			mapInfo.alignment = TextAnchor.LowerRight;
+
+			version.SetParent(title.FindMenu("SplashMenu"), true);
 
 			{ // HexaMod Options Menu
 				void MakeButton(Button originalButton, MenuUtil menu)
@@ -383,7 +391,7 @@ namespace HexaMod.UI
 			{ // Title Screen
 				Mod.Print("edit title screen");
 
-				title.root.Find("Version").GetComponent<Text>().text = $"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)"; ;
+				title.FindMenu("SplashMenu").Find("Version").GetComponent<Text>().text = $"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)"; ;
 
 				// booooring
 				title.FindMenu("SplashMenu").Find("Return To New WYD").gameObject.SetActive(false);
@@ -587,7 +595,7 @@ namespace HexaMod.UI
 				}
 			}
 			{ // Host Options
-				foreach (string menuName in Menu.hostMenus)
+				foreach (string menuName in Util.Menu.hostMenus)
 				{
 					Transform menu = title.FindMenu(menuName);
 

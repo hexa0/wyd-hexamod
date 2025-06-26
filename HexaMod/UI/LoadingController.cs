@@ -33,10 +33,6 @@ namespace HexaMod.UI
 				currentlyShown = loadingShown;
 
 				HexaMenus.loadingOverlay.fader.fadeState = loadingShown;
-				if (title != null)
-				{
-					title.root.Find("Version").gameObject.SetActive(!loadingShown);
-				}
 			}
 		}
 
