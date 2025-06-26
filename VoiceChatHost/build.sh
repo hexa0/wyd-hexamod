@@ -1,1 +1,1 @@
-dotnet publish VoiceChatHost.csproj -r linux-x64 --self-contained true
+dotnet publish VoiceChatHost.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
