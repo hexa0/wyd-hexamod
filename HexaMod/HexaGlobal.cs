@@ -71,10 +71,16 @@ namespace HexaMod
 				Cursor.lockState = CursorLockMode.None;
 
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
+				if (Mod.GAME_VERSION == null)
+				{
+					Mod.GAME_VERSION = networkManager.version;
+				}
+
 				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies"))
 				{
-					networkManager.version = $"Game:\t{networkManager.version.Substring(1)}\nHexaMod:\t{Mod.VERSION}";
+					networkManager.version = $"hm:{BuildInfo.GitHash}";
 				}
+
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 				eventSystem = Object.FindObjectOfType<EventSystem>();
 

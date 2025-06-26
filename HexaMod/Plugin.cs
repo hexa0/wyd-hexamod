@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using System.Reflection;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -11,7 +12,8 @@ namespace HexaMod
 	{
 		public const string GUID = "com.hexa0.hexamod";
 		public const string NAME = "com.hexa0.hexamod";
-		public const string VERSION = VersionInfo.Version;
+		public const string VERSION = BuildInfo.Version;
+		public static string GAME_VERSION;
 
 		private static string[] GetLogs(params object[] messages)
 		{
@@ -80,6 +82,10 @@ namespace HexaMod
 		{
 			// Plugin startup logic
 			instance = this;
+
+			object[] customAttribute = Assembly
+				.GetExecutingAssembly()
+				.GetCustomAttributes(true);
 
 			log = BepInEx.Logging.Logger.CreateLogSource(GUID);
 			Print($"Loading plugin {GUID}!");

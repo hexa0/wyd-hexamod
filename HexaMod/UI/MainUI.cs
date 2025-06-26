@@ -22,6 +22,7 @@ using HexaMod.UI.Element.Control.TextInputField;
 using HexaMod.UI.Element.VoiceChatUI;
 using HexaMod.UI.Element.Control;
 using VoiceChatShared.Enums;
+using UnityEngine.Networking;
 
 namespace HexaMod.UI
 {
@@ -382,7 +383,7 @@ namespace HexaMod.UI
 			{ // Title Screen
 				Mod.Print("edit title screen");
 
-				title.root.Find("Version").GetComponent<Text>().text = HexaGlobal.networkManager.version;
+				title.root.Find("Version").GetComponent<Text>().text = $"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)"; ;
 
 				// booooring
 				title.FindMenu("SplashMenu").Find("Return To New WYD").gameObject.SetActive(false);
