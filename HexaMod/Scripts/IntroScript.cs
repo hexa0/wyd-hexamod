@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using System.Reflection;
 using HexaMod.UI;
 using HexaMod.UI.Element.HexaMod.Loading;
@@ -8,7 +7,7 @@ using HexaMod.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace HexaMod
+namespace HexaMod.Scripts
 {
 	public class IntroScript : MonoBehaviour
 	{
@@ -20,14 +19,6 @@ namespace HexaMod
 
 			// init hexa menus
 			HexaMenus.Init();
-
-			// setup scene loaded hook
-			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
-			{
-				HexaMenus.startupScreen.fader.fadeState = false;
-				SetLoadingText("Loaded Game");
-				HexaGlobal.OnGameSceneStart();
-			};
 
 			// begin the startup routine
 			if (!VoiceChat.testMode)
@@ -116,6 +107,7 @@ namespace HexaMod
 			yield return 0;
 			HexaGlobal.Init();
 			yield return 0;
+			HexaMenus.startupScreen.loadingText.enableLogging = false;
 			SetLoadingText($"Loading Asset Bundles\n(?/?)");
 			while (!Assets.loadedAssets)
 			{

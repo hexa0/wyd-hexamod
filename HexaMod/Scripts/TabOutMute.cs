@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace HexaMod
+namespace HexaMod.Scripts
 {
 	public class TabOutMute : MonoBehaviour
 	{
@@ -42,7 +42,7 @@ namespace HexaMod
 
 		public bool IsFocused()
 		{
-			return tabOutMuteEnabled ? currentlyFocused : true;
+			return !tabOutMuteEnabled || currentlyFocused;
 		}
 
 		void OnApplicationFocus(bool hasFocus)

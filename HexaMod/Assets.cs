@@ -273,10 +273,7 @@ namespace HexaMod
 		{
 			if (dadSpawn && babySpawn)
 			{
-				Mod.Print($"handle player {player.name}");
-
 				Transform spawnTransform = GetSpawnTransform(player);
-				Mod.Print($"teleport player {player.name}");
 
 				player.transform.position = spawnTransform.position;
 				player.transform.rotation = spawnTransform.rotation;
@@ -304,12 +301,9 @@ namespace HexaMod
 			}
 
 			GlobalPhotonFactory.Reset();
-			Mod.Print($"attempting to load map {level.name}");
 
 			if (level != defaultLevel)
 			{
-				Mod.Print("clearing default level.");
-
 				CleanupDefaultLevel();
 			}
 			else
@@ -317,34 +311,25 @@ namespace HexaMod
 				ActivateDefaultLevel();
 			}
 
-			Mod.Print("fetch player spawns.");
-
 			dadSpawn = level.levelPrefab.GetComponentInChildren<DadSpawn>();
 			babySpawn = level.levelPrefab.GetComponentInChildren<BabySpawn>();
 
 			if (dadSpawn)
 			{
-				Mod.Print("got dad spawn.");
 				dadSpawn.Init();
 				HexaGlobal.networkManager.dadSpawnPos = dadSpawn.GetSpawn(0);
 			}
 
 			if (babySpawn)
 			{
-				Mod.Print("got baby spawn.");
 				babySpawn.Init();
 				HexaGlobal.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
 
-				if (babySpawn.hgSpawns != null)
+				if (!babySpawn.hgSpawns)
 				{
-					Mod.Print("got hg baby spawn.");
 					babySpawn.hgSpawns.Init();
 				}
 			}
-
-			Mod.Print("done with (already connected) players!");
-
-			Mod.Print("fetch item spawns.");
 
 			lowSpawn = level.levelPrefab.GetComponentInChildren<LowSpawn>();
 			midSpawn = level.levelPrefab.GetComponentInChildren<MidSpawn>();
@@ -382,10 +367,6 @@ namespace HexaMod
 				HexaGlobal.gameStateController.radio = HexaGlobal.gameStateController.gameObject.AddComponent<AudioSource>();
 			}
 
-			Mod.Print("done with item spawns.");
-
-			Mod.Print("loading music.");
-
 			customLevelMusic = level.levelPrefab.GetComponentInChildren<LevelMusic>();
 
 			if (customLevelMusic != null)
@@ -416,8 +397,6 @@ namespace HexaMod
 					HexaGlobal.networkManager.aud.Play();
 				}
 			}
-
-			Mod.Print("inserting map assets.");
 
 			var loaded = Object.Instantiate(level.levelPrefab);
 			loaded.name = level.levelPrefab.name;

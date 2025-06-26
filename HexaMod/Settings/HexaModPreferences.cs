@@ -1,4 +1,6 @@
-﻿namespace HexaMod.Settings
+﻿using HexaMod.Scripts;
+
+namespace HexaMod.Settings
 {
 	public static class HexaModPreferences
 	{

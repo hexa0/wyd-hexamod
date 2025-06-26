@@ -20,7 +20,7 @@ namespace HexaMod.Patches.Fixes
 
 			if (internalType == null)
 			{
-				Mod.Error($"Error: Internal class '{internalClassName}' not found.");
+				Mod.Fatal($"Error: Internal class '{internalClassName}' not found.");
 				return null;
 			}
 

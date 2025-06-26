@@ -12,6 +12,7 @@ using HexaMod.Patches.Hooks;
 using System;
 using System.Linq;
 using Object = UnityEngine.Object;
+using HexaMod.UI.Element.HexaMod.Loading;
 
 namespace HexaMod
 {
@@ -36,18 +37,23 @@ namespace HexaMod
 
 		public static void Load()
 		{
-			// call this to start loading the class and setup all of the static properties
+			var activeScene = SceneManager.GetActiveScene();
+
+			if (activeScene.name == "CompanyLogo")
+			{
+				Object.Destroy(GameObject.Find("Canvas"));
+			}
+
+			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
+			{
+				OnGameSceneStart();
+			};
 		}
 
 		public static void Init()
 		{
-			Mod.Print("Setup Settings");
-
 			GameModes.DefineStandardGameModes();
-
-			Mod.Print("Setup Levels");
 			Assets.Init();
-			Mod.Print("Setup HexaPersistentLobby");
 			HexaPersistentLobby.instance.Init();
 		}
 
@@ -64,9 +70,11 @@ namespace HexaMod
 		public static void OnGameSceneStart()
 		{
 			var activeScene = SceneManager.GetActiveScene();
-			Mod.Print($"HexaMod OnGameSceneStart {activeScene.name}");
 
 			if (activeScene.name == "Game") {
+				HexaMenus.startupScreen.fader.fadeState = false;
+				HexaMenus.startupScreen.loadingText.SetText("Loaded Game");
+
 				Cursor.visible = true;
 				Cursor.lockState = CursorLockMode.None;
 
@@ -101,6 +109,10 @@ namespace HexaMod
 				{
 					HexaPersistentLobby.instance.Reset();
 				}
+			}
+			else if (activeScene.name == "CompanyLogo")
+			{
+				Object.Destroy(GameObject.Find("Canvas"));
 			}
 
 			HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", false);

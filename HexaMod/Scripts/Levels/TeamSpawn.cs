@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HexaMod;
 using HexaMod.Util;
 using UnityEngine;
 
@@ -34,8 +33,6 @@ namespace HexaMapAssemblies
 
 			initialized = true;
 
-			Mod.Print("init TeamSpawn.");
-
 			if (spawns == null && spots != null)
 			{
 				spawnSpots = spots.ToList();
@@ -53,8 +50,6 @@ namespace HexaMapAssemblies
 					spawnSpots.Add(spawnSpot.transform);
 				}
 			}
-
-			Mod.Print($"found {spawnSpots.Count} spawns");
 		}
 	}
 }

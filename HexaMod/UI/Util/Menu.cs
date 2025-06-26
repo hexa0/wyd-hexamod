@@ -12,7 +12,7 @@ namespace HexaMod.UI.Util
 		public bool goingBack = false;
 		public readonly Dictionary<int, int> backstates = new Dictionary<int, int>();
 
-		public int currentMenu
+		public int CurrentMenu
 		{
 			get
 			{
@@ -58,13 +58,13 @@ namespace HexaMod.UI.Util
 		{
 			goingBack = true;
 
-			if (backstates.ContainsKey(currentMenu))
+			if (backstates.ContainsKey(CurrentMenu))
 			{
-				menuController.ChangeToMenu(backstates[currentMenu]);
+				menuController.ChangeToMenu(backstates[CurrentMenu]);
 			}
 			else
 			{
-				Mod.Warn($"no back state for {currentMenu}");
+				Mod.Warn($"no back state for {CurrentMenu}");
 				menuController.ChangeToMenu(0);
 			}
 
@@ -116,7 +116,7 @@ namespace HexaMod.UI.Util
 
 			public static bool AnyMenuOpen()
 			{
-				return inGame.menuController.menus[inGame.currentMenu].activeSelf || title.menuController.menus[title.currentMenu].activeSelf;
+				return inGame.menuController.menus[inGame.CurrentMenu].activeSelf || title.menuController.menus[title.CurrentMenu].activeSelf;
 			}
 
 			public static MenuUtil GetMenuUtilForController(MenuController controller)
@@ -137,8 +137,6 @@ namespace HexaMod.UI.Util
 
 		public static void Init()
 		{
-			Mod.Print("init menu references");
-
 			menuCanvas = Object.FindObjectOfType<anvasHelper>().GetComponent<Canvas>();
 			menuCanvas.pixelPerfect = true; // sharper text
 

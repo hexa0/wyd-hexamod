@@ -11,7 +11,6 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static void LeaveRoom()
 		{
-			Mod.Print($"LeaveRoom");
 			inRoom = false;
 
 			if (VoiceChat.room != null)
@@ -24,7 +23,6 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static void Disconnect()
 		{
-			Mod.Print($"Disconnect");
 			inRoom = false;
 
 			if (VoiceChat.room != null)
@@ -37,7 +35,6 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static void JoinRoom(string roomName)
 		{
-			Mod.Print($"JoinRoom {roomName}");
 			inRoom = true;
 		}
 
@@ -45,7 +42,6 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static void JoinRoom(string roomName, string[] expectedUsers)
 		{
-			Mod.Print($"JoinRoom (expectedUsers) {roomName}");
 			inRoom = true;
 		}
 
@@ -53,7 +49,6 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static void CreateRoom(string roomName)
 		{
-			Mod.Print($"CreateRoom {roomName}");
 			inRoom = false;
 		}
 	}

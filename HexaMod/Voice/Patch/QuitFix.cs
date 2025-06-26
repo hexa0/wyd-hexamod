@@ -14,20 +14,10 @@ namespace HexaMod.Voice
 		{
 			if (VoiceChat.transcodeProcess != null)
 			{
-				Mod.Print("Closing internalTranscodeServerProcess.");
-				try
-				{
-					VoiceChat.transcodeProcess.Kill();
-					VoiceChat.transcodeProcess = null;
-				}
-				catch
-				{
-					// ignore
-				}
 				Mod.Print("Saving PlayerPrefs to disk.");
 				PlayerPrefs.Save();
 				Mod.Print("Quitting.");
-				// the BepInEx console results in unity freezing upon shutdown, so we just kill the application forcefully instead!
+				// the BepInEx console results in unity freezing upon shutdown, so we just kill the application forcefully instead.
 				Process.GetCurrentProcess().Kill();
 			}
 

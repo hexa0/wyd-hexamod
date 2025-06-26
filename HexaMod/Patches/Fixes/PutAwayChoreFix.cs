@@ -49,7 +49,6 @@ namespace HexaMod.Patches.Fixes
 			// HexaMod.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/SmokeDetector.wav")
 			if (__instance.curDishCount >= __instance.totalDishes && !__instance.isDone)
 			{
-				Mod.Print($"Chore \"{__instance.smallActionMessage}\" has finished");
 				if (HexaGlobal.networkManager.isDad)
 				{
 					ChallengeManager ChallengeManager = null;
@@ -61,7 +60,6 @@ namespace HexaMod.Patches.Fixes
 
 					if (ChallengeManager == null)
 					{
-						Mod.Print($"Trigger Random PowerUp!");
 						DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
 						Traverse fields = Traverse.Create(powerups);
 						ActionText bigAction = fields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
@@ -70,7 +68,6 @@ namespace HexaMod.Patches.Fixes
 					}
 					else
 					{
-						Mod.Print($"Trigger ChallengeManager.FinishChallenge with ID {__instance.challengeId}");
 						ChallengeManager.FinishChallenge(__instance.challengeId);
 					}
 				}

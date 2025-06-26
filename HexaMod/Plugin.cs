@@ -1,18 +1,12 @@
-﻿using System.Reflection;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace HexaMod
 {
-	[BepInPlugin(GUID, NAME, VERSION)]
+	[BepInPlugin(BuildInfo.AssemblyName, BuildInfo.AssemblyTitle, BuildInfo.Version)]
 	internal class Mod : BaseUnityPlugin
 	{
-		public const string GUID = "com.hexa0.hexamod";
-		public const string NAME = "com.hexa0.hexamod";
-		public const string VERSION = BuildInfo.Version;
 		public static string GAME_VERSION;
 
 		private static string[] GetLogs(params object[] messages)
@@ -20,23 +14,9 @@ namespace HexaMod
 			return string.Concat(messages).Split('\n');
 		}
 
-		internal readonly Harmony harmony = new Harmony(GUID);
-
+		internal readonly Harmony harmony = new Harmony(BuildInfo.AssemblyName);
 		internal static Mod instance;
 		internal static ManualLogSource log;
-
-		internal static int iFuckedUpAndNeedToDebugCounter = 0;
-
-		internal static void ResetDebugCounter()
-		{
-			iFuckedUpAndNeedToDebugCounter = 0;
-		}
-
-		internal static void DebugCounter(params object[] label)
-		{
-			log.LogInfo(string.Concat(label) + $": {iFuckedUpAndNeedToDebugCounter}");
-			iFuckedUpAndNeedToDebugCounter++;
-		}
 
 		internal static void Print(params object[] messages)
 		{
@@ -82,37 +62,11 @@ namespace HexaMod
 		{
 			// Plugin startup logic
 			instance = this;
-
-			object[] customAttribute = Assembly
-				.GetExecutingAssembly()
-				.GetCustomAttributes(true);
-
-			log = BepInEx.Logging.Logger.CreateLogSource(GUID);
-			Print($"Loading plugin {GUID}!");
+			log = BepInEx.Logging.Logger.CreateLogSource(BuildInfo.AssemblyName);
+			
+			Print($"Starting plugin {BuildInfo.AssemblyTitle} ({BuildInfo.AssemblyName}).");
 			HexaGlobal.Load();
-			Print($"Plugin {GUID} is loaded!");
-
-			var activeScene = SceneManager.GetActiveScene();
-
-			if (activeScene.name == "CompanyLogo")
-			{
-				Destroy(GameObject.Find("Canvas"));
-			}
-
-			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
-			{
-				OnGameSceneStart();
-			};
-		}
-
-		public static void OnGameSceneStart()
-		{
-			var activeScene = SceneManager.GetActiveScene();
-
-			if (activeScene.name == "CompanyLogo")
-			{
-				Destroy(GameObject.Find("Canvas"));
-			}
+			Print($"Plugin {BuildInfo.AssemblyTitle} ({BuildInfo.AssemblyName}) has started.");
 		}
 	}
 }

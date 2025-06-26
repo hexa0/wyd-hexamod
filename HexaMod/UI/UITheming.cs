@@ -13,7 +13,6 @@ namespace HexaMod.UI
 			var spriteInputField128 = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/InputField128.png");
 			var spriteButton = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Button.png");
 
-			Mod.Print("do theming");
 			{ // Lobby Join Button
 				var gameJoiner = HexaGlobal.networkManager.gameJoiner;
 				var joinButton = gameJoiner.GetComponentInChildren<Button>();

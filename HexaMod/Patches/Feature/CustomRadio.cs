@@ -34,7 +34,6 @@ namespace HexaMod.Patches.Feature
 		{
 			if (__instance.state)
 			{
-				Mod.Print($"Play Radio Track {index} with name {clips[index].name}");
 				__instance.aud.clip = clips[index];
 				__instance.aud.Play();
 

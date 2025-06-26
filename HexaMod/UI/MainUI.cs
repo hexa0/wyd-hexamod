@@ -50,28 +50,6 @@ namespace HexaMod.UI
 				HexaGlobal.MakeTestGame(false);
 			}
 
-			public static void SetShirtColor(Color color, string hex)
-			{
-				dadModelSwapper.SetShirtColor(color);
-				babyModelSwapper.SetShirtColor(color);
-			}
-
-			public static void SaveShirtColor(Color color, string hex)
-			{
-				PlayerPrefs.SetString("HMV2_ShirtColor", hex);
-			}
-
-			public static void SetSkinColor(Color color, string hex)
-			{
-				dadModelSwapper.SetSkinColor(color);
-				babyModelSwapper.SetSkinColor(color);
-			}
-
-			public static void SaveSkinColor(Color color, string hex)
-			{
-				PlayerPrefs.SetString("HMV2_SkinColor", hex);
-			}
-
 			public static void SetDadModel(string modelName)
 			{
 				dadModelSwapper.SetCharacterModel(modelName);
@@ -104,7 +82,6 @@ namespace HexaMod.UI
 
 			public static void ChangeLevel(string mapName)
 			{
-				Mod.Print($"change to {mapName}");
 				PlayerPrefs.SetString("HMV2_CustomMap", mapName);
 
 				HexaGlobal.textChat.SendServerMessage($"Map changed to {mapName}.");
@@ -154,8 +131,6 @@ namespace HexaMod.UI
 
 			// Map Menu
 
-			Mod.Print("make ChangeMap menu");
-
 			GameObject menu = title.NewMenu("ChangeMap");
 			int menuId = title.GetMenuId(menu.name);
 			WTextButton backButton = WTextButton.MakeBackButton(title, menu.transform);
@@ -196,7 +171,7 @@ namespace HexaMod.UI
 
 			if (HexaPersistentLobby.instance.lobbySettingsChanged == null)
 			{
-				throw new System.Exception("HexaMod.hexaLobby.lobbySettingsChanged is null");
+				throw new Exception("HexaMod.hexaLobby.lobbySettingsChanged is null");
 			}
 
 			HexaPersistentLobby.instance.lobbySettingsChanged.AddListener(delegate ()
@@ -389,8 +364,6 @@ namespace HexaMod.UI
 				);
 			}
 			{ // Title Screen
-				Mod.Print("edit title screen");
-
 				title.FindMenu("SplashMenu").Find("Version").GetComponent<Text>().text = $"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)"; ;
 
 				// booooring
@@ -437,8 +410,6 @@ namespace HexaMod.UI
 
 			}
 			{ // Character Customization Menu
-				Mod.Print("edit character customization menu");
-
 				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").Find("MenuCamera").Find("Camera").Find("Canvas");
 				dadModelSwapper = characterPreviewCanvas.Find("Dad").AddComponent<CharacterModelSwapper>();
 				babyModelSwapper = characterPreviewCanvas.Find("Baby001").AddComponent<CharacterModelSwapper>();
@@ -530,9 +501,14 @@ namespace HexaMod.UI
 						.SetName("shirtColor")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-468.4f, 0f)
-						.AddChangedListener(ButtonCallbacks.SetShirtColor)
-						.AddSubmitListener(ButtonCallbacks.SaveShirtColor)
-						.AddSubmitListener(ButtonCallbacks.SetShirtColor)
+						.AddChangedListener((color, hex) => {
+							dadModelSwapper.SetShirtColor(color);
+							babyModelSwapper.SetShirtColor(color);
+						})
+						.AddSubmitListener((color, hex) =>
+						{
+							PlayerPrefs.SetString("HMV2_ShirtColor", hex);
+						})
 						.SetText("Shirt Color (Hex)")
 						.SetFieldText(GetCurrentShirtColorHex()),
 
@@ -540,9 +516,14 @@ namespace HexaMod.UI
 						.SetName("skinColor")
 						.SetParent(characterCustomizationMenu)
 						.SetPosition(-468.4f, 0f)
-						.AddChangedListener(ButtonCallbacks.SetSkinColor)
-						.AddSubmitListener(ButtonCallbacks.SaveSkinColor)
-						.AddSubmitListener(ButtonCallbacks.SetSkinColor)
+						.AddChangedListener((color, hex) => {
+							dadModelSwapper.SetSkinColor(color);
+							babyModelSwapper.SetSkinColor(color);
+						})
+						.AddSubmitListener((color, hex) =>
+						{
+							PlayerPrefs.SetString("HMV2_SkinColor", hex);
+						})
 						.SetText("Skin Color (Hex)")
 						.SetFieldText(GetCurrentSkinColorHex()),
 
@@ -606,8 +587,6 @@ namespace HexaMod.UI
 				}
 			}
 			{ // Match Settings
-				Mod.Print("make MatchSettings menus");
-
 				void MakeMatchSettings(MenuUtil menuUtil, bool inGame)
 				{
 					GameObject menu = menuUtil.NewMenu("MatchSettings");
@@ -745,7 +724,7 @@ namespace HexaMod.UI
 							.SetPosition(455f, 0f)
 							.SetText("Voice Chat Relay")
 							.SetFieldText(ls.relay)
-							.AddSubmitListener((string text) => {
+							.AddSubmitListener(text => {
 								HexaPersistentLobby.instance.lobbySettings.relay = text;
 								HexaPersistentLobby.instance.CommitChanges();
 								HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");
@@ -804,7 +783,6 @@ namespace HexaMod.UI
 			{
 				HexaPersistentLobby.instance.lobbySettingsFailed = false;
 
-				Mod.Warn("lobbySettingsFailed was true, switch to the lobby settings menus");
 				title.menuController.ChangeToMenu(title.GetMenuId("MatchSettings"));
 				yield return new WaitForSeconds(0.1f);
 				title.FindMenu("MatchSettings").GetComponentInChildren<ActionText>().SendMessage("ActionDone", "Failed to load LobbySettings,\nPlease re-apply your settings here.");
@@ -863,7 +841,7 @@ namespace HexaMod.UI
 
 			if (HexaMenus.loadingOverlay.controller.GetTaskState("PhotonConnect"))
 			{
-				if (PhotonNetwork.connectedAndReady)
+				if (PhotonNetwork.connectedAndReady || PhotonNetwork.connectionStateDetailed == ClientState.PeerCreated)
 				{
 					HexaMenus.loadingOverlay.controller.SetTaskState("PhotonConnect", false);
 				}

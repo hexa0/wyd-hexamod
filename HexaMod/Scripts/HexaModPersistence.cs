@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HexaMod.Scripts;
+using UnityEngine;
 
 namespace HexaMod
 {

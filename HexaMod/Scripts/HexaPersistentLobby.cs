@@ -68,6 +68,7 @@ namespace HexaMod
 		public void Load()
 		{
 			Mod.Print("Loading LobbySettings");
+
 			try
 			{
 				string data = PlayerPrefs.GetString("HMV2_LobbySettings", "none");
@@ -83,6 +84,7 @@ namespace HexaMod
 			catch (Exception e)
 			{
 				Mod.Error($"LobbySettings failed to load:\n{e}");
+
 				lobbySettingsFailed = true;
 			}
 		}

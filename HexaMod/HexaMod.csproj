@@ -56,6 +56,8 @@ internal static class BuildInfo
 {
 	public const string Version = "$(Version)"%3B
 	public const string GitHash = "$(GitHash)"%3B
+	public const string AssemblyName = "$(AssemblyName)"%3B
+	public const string AssemblyTitle = "$(AssemblyTitle)"%3B
 }
 			</VersionInfoText>
 		</PropertyGroup>

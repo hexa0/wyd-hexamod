@@ -13,8 +13,6 @@ namespace HexaMod.UI.Util
 
 		public static void Init()
 		{
-			Mod.Print("init ui template references");
-
 			GameObject playLocalButton = Menu.WYDMenus.title.FindMenu("SplashMenu").Find("PlayLocal").gameObject;
 			GameObject LobbyNameOriginal = Menu.WYDMenus.title.FindMenu("OnlineMenu").Find("LobbyName").gameObject;
 			GameObject SetSpectateOriginal = Menu.WYDMenus.title.FindMenu(GameModes.named["familyGathering"].hostMenuName).Find("SetSpectate").gameObject;
@@ -62,8 +60,6 @@ namespace HexaMod.UI.Util
 
 				hostControlToggleTemplate.gameObject.SetActive(false);
 			}
-
-			// playLocalButton.GetComponent<Button>().interactable = false;
 		}
 	}
 }

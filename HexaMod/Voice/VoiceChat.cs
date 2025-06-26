@@ -76,8 +76,6 @@ namespace HexaMod.Voice
 
 		public static void InitTranscodeServerProcess()
 		{
-			Mod.Print("Start transcodeProcess");
-
 			transcodeServerPort = FreePort();
 
 			transcodeProcess = new Process()
@@ -125,13 +123,12 @@ namespace HexaMod.Voice
 		{
 			if (!transcodeReady)
 			{
-				Mod.Print($"Completed Handshake");
 				transcodeReady = true;
 				ConnectedToTranscodeServer();
 			}
 			else
 			{
-				Mod.Warn("Receive Handshake: Already Completed Handshake");
+				Mod.Fatal("Receive Handshake: Already Completed Handshake");
 			}
 		}
 
@@ -155,12 +152,9 @@ namespace HexaMod.Voice
 		{
 			if (transcodeClient != null)
 			{
-				Mod.Print("shutting down existing transcodeClient");
 				transcodeClient.Close();
 				transcodeClient = null;
 			}
-
-			Mod.Print("Start transcodeClient");
 
 			transcodeClient = new PeerDuelProtocolConnection<HVCMessage>(new IPEndPoint(
 				IPAddress.Parse("127.0.0.1"),
@@ -175,7 +169,7 @@ namespace HexaMod.Voice
 			{
 				if (transcodeReady)
 				{
-					Mod.Fatal($"transcodeClient unexpectedly has disconnected");
+					Mod.Fatal($"transcodeClient has unexpectedly disconnected");
 					transcodeReady = false;
 					InitTranscode();
 				}
@@ -296,8 +290,6 @@ namespace HexaMod.Voice
 			if (room != roomName)
 			{
 				room = roomName;
-
-				Mod.Print($"JoinVoiceRoom {roomName}");
 
 				transcodeClient.udp.SendMessage(
 					HVCMessage.VoiceRoomJoin,

@@ -164,11 +164,8 @@ namespace HexaMod
 			PlayerConnectedObject player = PlayerConnectedObject.serializer.Deserialize(playerConnectedData);
 			HexaLobbyState.loadedPlayers.Add(info.sender.ID);
 
-			Mod.Print($"got new ready player with name \"{GetPlayerName(info.sender)}\" and isDad = {player.isDad} {HexaLobbyState.loadedPlayers.Count}/{PhotonNetwork.room.PlayerCount}");
-
 			if (HexaLobbyState.onPlayersLoadedAction != null && !HexaLobbyState.handledPlayersLoaded && HexaLobbyState.loadedPlayers.Count == PhotonNetwork.room.PlayerCount)
 			{
-				Mod.Print("Got all players.");
 				HexaLobbyState.onPlayersLoadedAction();
 			}
 
@@ -193,8 +190,6 @@ namespace HexaMod
 		{
 			HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", true);
 
-			Mod.Print("Waiting for players.");
-
 			HexaLobbyState.onPlayersLoadedAction = delegate ()
 			{
 				if (HexaLobbyState.handledPlayersLoaded)
@@ -205,7 +200,6 @@ namespace HexaMod
 				HexaLobbyState.onPlayersLoadedAction = null;
 				HexaLobbyState.loadedPlayers.Clear();
 
-				Mod.Print("All players ready.");
 				HexaLobbyState.handledPlayersLoaded = true;
 				HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", false);
 				onPlayersLoaded();
@@ -213,7 +207,6 @@ namespace HexaMod
 
 			if (HexaLobbyState.loadedPlayers.Count >= PhotonNetwork.room.PlayerCount)
 			{
-				Mod.Print("We already have all players.");
 				HexaLobbyState.onPlayersLoadedAction();
 			}
 			else
@@ -453,7 +446,6 @@ namespace HexaMod
 
 		void OnCreatedRoom()
 		{
-			Mod.Print($"RoomCreated");
 			VoiceChat.SetMicrophoneChannels(2);
 			VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay);
 			VoiceChat.JoinVoiceRoom(HexaGlobal.instanceGuid);
@@ -472,12 +464,10 @@ namespace HexaMod
 		void OnMasterClientSwitched(PhotonPlayer player)
 		{
 			Mod.Print($"master client switched to peer {player.ID}");
+
 			if (player == PhotonNetwork.player)
 			{
 				HexaPersistentLobby.instance.SetInOtherLobby(false);
-
-				//VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay);
-				//VoiceChat.JoinVoiceRoom(HexaGlobal.instanceGuid);
 			}
 		}
 
@@ -509,6 +499,7 @@ namespace HexaMod
 		IEnumerator OnPhotonPlayerDisconnected(PhotonPlayer player)
 		{
 			Mod.Print($"player \"{GetPlayerName(player)}\" left the lobby");
+			
 			if (PhotonNetwork.isMasterClient)
 			{
 				// player left/all players left chat messages

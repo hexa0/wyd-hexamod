@@ -13,7 +13,7 @@ namespace HexaMod.Patches.Hooks
 			MenuUtil menu = Menu.WYDMenus.GetMenuUtilForController(__instance);
 			if (!menu.goingBack)
 			{
-				menu.backstates[val] = menu.currentMenu;
+				menu.backstates[val] = menu.CurrentMenu;
 			}
 		}
 	}
