@@ -12,14 +12,11 @@ namespace HexaMod.Voice
 		[HarmonyPrefix]
 		static bool Quit()
 		{
-			if (VoiceChat.transcodeProcess != null)
-			{
-				Mod.Print("Saving PlayerPrefs to disk.");
-				PlayerPrefs.Save();
-				Mod.Print("Quitting.");
-				// the BepInEx console results in unity freezing upon shutdown, so we just kill the application forcefully instead.
-				Process.GetCurrentProcess().Kill();
-			}
+			Mod.Print("Saving PlayerPrefs to disk.");
+			PlayerPrefs.Save();
+			Mod.Print("Quitting.");
+			// the BepInEx console results in unity freezing upon shutdown, so we just kill the application forcefully instead.
+			Process.GetCurrentProcess().Kill();
 
 			return false;
 		}

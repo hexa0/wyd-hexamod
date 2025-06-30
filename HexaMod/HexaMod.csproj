@@ -39,7 +39,7 @@
 			<TempGitHashFile>$(IntermediateOutputPath)githash.tmp</TempGitHashFile>
 		</PropertyGroup>
 
-		<Exec Command="git describe --long --always --dirty > &quot;$(TempGitHashFile)&quot;" />
+		<Exec Command="git describe --long --always --dirty &gt; &quot;$(TempGitHashFile)&quot;" />
 		
 		<ReadLinesFromFile File="$(TempGitHashFile)">
 			<Output TaskParameter="Lines" ItemName="GitHashFromFile" />

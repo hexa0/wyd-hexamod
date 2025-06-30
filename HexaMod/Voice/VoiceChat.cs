@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using BepInEx.Logging;
 using NAudio.Wave;
 using UnityEngine;
+using UnityEngine.UI;
 using VoiceChatShared;
 using VoiceChatShared.Enums;
 using VoiceChatShared.Net;
@@ -48,7 +46,6 @@ namespace HexaMod.Voice
 		public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
 		public static PeerDuelProtocolConnection<HVCMessage> transcodeClient;
 		private static int transcodeServerPort = 0;
-		public static Process transcodeProcess;
 		internal static ManualLogSource voiceChatProcessLog = BepInEx.Logging.Logger.CreateLogSource("VoiceChatHost");
 		public static float shortMaxValueMul = 1f / short.MaxValue;
 
@@ -78,44 +75,34 @@ namespace HexaMod.Voice
 		{
 			transcodeServerPort = FreePort();
 
-			transcodeProcess = new Process()
-			{
-				StartInfo = new ProcessStartInfo()
+			string voiceChatHostDirectory = PathJoin.Join(Mod.LOCATION, "voice");
+			string voiceChatHostExecutable = PathJoin.Join(voiceChatHostDirectory, "VoiceChatHost.exe");
+
+			NativeProcess.StartProcess(
+				voiceChatHostExecutable,
+				NativeProcess.BuildArguments(
+					Environment.GetCommandLineArgs().Contains("VoiceChatHostVerboseLogging") ? "tv" : "t",
+					"127.0.0.1",
+					transcodeServerPort
+				),
+				voiceChatHostDirectory,
+				standard =>
 				{
-					FileName = PathJoin.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "voice", "VoiceChatHost.exe"),
-					Arguments = $"{(Environment.GetCommandLineArgs().Contains("VoiceChatHostVerboseLogging") ? "tv" : "t")} 127.0.0.1 {transcodeServerPort}", // 39200
-					UseShellExecute = false,
+					foreach (string line in standard.Substring(0, standard.Length - 1).Split(new[] { '\r', '\n' }))
+					{
+						if (line.Length == 0) continue;
+						voiceChatProcessLog.LogInfo(line);
+					}
+				},
+				error =>
+				{
+					foreach (string line in error.Substring(0, error.Length - 1).Split(new[] { '\r', '\n' }))
+					{
+						if (line.Length == 0) continue;
+						voiceChatProcessLog.LogFatal(line);
+					}
 				}
-			};
-
-			ProcessStartInfo startInfo = transcodeProcess.StartInfo;
-			startInfo.RedirectStandardOutput = !startInfo.UseShellExecute;
-			startInfo.RedirectStandardError = !startInfo.UseShellExecute;
-			transcodeProcess.Start();
-
-			if (startInfo.RedirectStandardOutput)
-			{
-				transcodeProcess.OutputDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
-				{
-					string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
-					foreach (string line in output.Split(new[] { '\r', '\n' }))
-					{
-						voiceChatProcessLog.LogInfo(outLine.Data.Substring(0, outLine.Data.Length - 1));
-					}
-				});
-
-				transcodeProcess.ErrorDataReceived += new DataReceivedEventHandler((object sendingProcess, DataReceivedEventArgs outLine) =>
-				{
-					string output = outLine.Data.Substring(0, outLine.Data.Length - 1);
-					foreach (string line in output.Split(new[] { '\r', '\n' }))
-					{
-						voiceChatProcessLog.LogFatal(outLine.Data.Substring(0, outLine.Data.Length - 1));
-					}
-				});
-
-				transcodeProcess.BeginOutputReadLine();
-				transcodeProcess.BeginErrorReadLine();
-			}
+			);
 		}
 
 		public static bool transcodeReady = false;
@@ -386,12 +373,17 @@ namespace HexaMod.Voice
 				InitTranscodeServerProcess();
 				InitTranscodeServerConnection();
 
-				while (!transcodeClient.tcp.Connected && !transcodeProcess.HasExited)
+				while (!transcodeClient.tcp.Connected)
 				{
 					Thread.Sleep(1);
 				}
 
 				SendTranscodeServerHandshake();
+			}
+			catch (System.ComponentModel.Win32Exception e)
+			{
+				Mod.Fatal($"Failed to start transcode server due to a Win32Exception with error code {e.NativeErrorCode}:\n{e}\npress any key to continue...");
+				System.Console.ReadLine();
 			}
 			catch (Exception e)
 			{

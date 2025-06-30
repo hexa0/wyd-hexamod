@@ -1,4 +1,6 @@
-﻿using BepInEx;
+﻿using System.IO;
+using System.Reflection;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 
@@ -8,6 +10,7 @@ namespace HexaMod
 	internal class Mod : BaseUnityPlugin
 	{
 		public static string GAME_VERSION;
+		public static string LOCATION = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 		private static string[] GetLogs(params object[] messages)
 		{
@@ -26,7 +29,7 @@ namespace HexaMod
 			}
 		}
 
-		internal static void PrintDebug(params object[] messages)
+		internal static void Debug(params object[] messages)
 		{
 			foreach (string message in GetLogs(messages))
 			{
