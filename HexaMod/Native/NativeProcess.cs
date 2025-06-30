@@ -179,6 +179,12 @@ public static class NativeProcess
 		IntPtr stderrReadPipeHandle = IntPtr.Zero, stderrWritePipeHandle = IntPtr.Zero;
 		PROCESS_INFORMATION processInformation = new PROCESS_INFORMATION();
 
+		string commandLine = string.IsNullOrEmpty(arguments)
+			? SanitizeArgument(executablePath)
+			: $"{SanitizeArgument(executablePath)} {arguments}";
+
+		Exception thrownException = null;
+
 		try
 		{
 			SECURITY_ATTRIBUTES securityAttributes = new SECURITY_ATTRIBUTES();
@@ -199,10 +205,6 @@ public static class NativeProcess
 			startupInfo.hStdInput = IntPtr.Zero;
 			startupInfo.hStdOutput = stdoutWritePipeHandle;
 			startupInfo.hStdError = stderrWritePipeHandle;
-
-			string commandLine = string.IsNullOrEmpty(arguments)
-				? SanitizeArgument(executablePath)
-				: $"{SanitizeArgument(executablePath)} {arguments}";
 
 			Mod.Debug($"Starting process: {commandLine}");
 
@@ -259,11 +261,11 @@ public static class NativeProcess
 		}
 		catch (System.ComponentModel.Win32Exception ex)
 		{
-			Mod.Fatal($"ERROR creating process (code {ex.NativeErrorCode})\n{ex}");
+			thrownException = ex;
 		}
 		catch (Exception ex)
 		{
-			Mod.Fatal($"An unexpected error occurred:\n{ex}");
+			thrownException = ex;
 		}
 		finally
 		{
@@ -271,6 +273,12 @@ public static class NativeProcess
 			if (stdoutWritePipeHandle != IntPtr.Zero) CloseHandle(stdoutWritePipeHandle);
 			if (stderrReadPipeHandle != IntPtr.Zero) CloseHandle(stderrReadPipeHandle);
 			if (stderrWritePipeHandle != IntPtr.Zero) CloseHandle(stderrWritePipeHandle);
+
+			if (thrownException != null)
+			{
+				Mod.Fatal($"Failed to start process: {commandLine}");
+				throw thrownException; // Re-throw the exception to the caller.
+			}
 		}
 	}
 

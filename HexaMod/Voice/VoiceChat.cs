@@ -8,7 +8,6 @@ using System.Threading;
 using BepInEx.Logging;
 using NAudio.Wave;
 using UnityEngine;
-using UnityEngine.UI;
 using VoiceChatShared;
 using VoiceChatShared.Enums;
 using VoiceChatShared.Net;
@@ -18,22 +17,6 @@ namespace HexaMod.Voice
 {
 	internal static class VoiceChat
 	{
-		static int FreePort()
-		{
-			if (Environment.GetCommandLineArgs().Contains("ForceConsistantTranscodePort"))
-			{
-				return HexaVoiceChat.Ports.transcode;
-			}
-			else
-			{
-				TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-				l.Start();
-				int port = ((IPEndPoint)l.LocalEndpoint).Port;
-				l.Stop();
-				return port;
-			}
-		}
-
 		public class AudioBuffer
 		{
 			public short[] samples;
@@ -73,7 +56,8 @@ namespace HexaMod.Voice
 
 		public static void InitTranscodeServerProcess()
 		{
-			transcodeServerPort = FreePort();
+			// technically we need a port open to both TCP and UDP but in practice the chances of this collision are practically zero and even if that did happen it would fail and then promptly retry with another port that works
+			transcodeServerPort = TCP<HVCMessage>.GetOpenPort();
 
 			string voiceChatHostDirectory = PathJoin.Join(Mod.LOCATION, "voice");
 			string voiceChatHostExecutable = PathJoin.Join(voiceChatHostDirectory, "VoiceChatHost.exe");
@@ -382,8 +366,9 @@ namespace HexaMod.Voice
 			}
 			catch (System.ComponentModel.Win32Exception e)
 			{
-				Mod.Fatal($"Failed to start transcode server due to a Win32Exception with error code {e.NativeErrorCode}:\n{e}\npress any key to continue...");
-				System.Console.ReadLine();
+				Mod.Fatal($"Failed to start transcode server due to a Win32Exception (code {e.NativeErrorCode}), retrying\n{e}");
+				Thread.Sleep(1000);
+				InitTranscode();
 			}
 			catch (Exception e)
 			{

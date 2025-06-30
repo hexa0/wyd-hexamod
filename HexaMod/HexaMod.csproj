@@ -31,7 +31,9 @@
 		<Product>HexaMod</Product>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>full</DebugType>
+		<PathMap>$(MSBuildProjectDirectory)=./</PathMap>
 		<Configurations>Release</Configurations>
+		<NoWarn>IDE0290</NoWarn>
 	</PropertyGroup>
 
 	<Target Name="GenerateVersionInfo" BeforeTargets="CoreCompile">

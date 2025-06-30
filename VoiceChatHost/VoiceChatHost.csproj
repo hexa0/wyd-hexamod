@@ -9,7 +9,10 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
 		<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+		<PathMap>$(MSBuildProjectDirectory)=./</PathMap>
 		<Configurations>Release</Configurations>
+		<!-- technically supported but really ugly and stupid-->
+		<NoWarn>IDE0290</NoWarn>
 	</PropertyGroup>
 
 	<Target Name="PublishAllParallel" AfterTargets="CoreBuild" Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
