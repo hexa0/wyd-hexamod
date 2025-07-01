@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes

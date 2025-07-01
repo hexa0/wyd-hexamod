@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.Scripts;
 using HexaMod.Util;
 using UnityEngine;
 

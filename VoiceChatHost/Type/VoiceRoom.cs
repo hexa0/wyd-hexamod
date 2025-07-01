@@ -13,7 +13,7 @@ namespace VoiceChatHost.Type
 
 		public VoiceRoom(string roomName, PeerDuelProtocolConnection<HVCMessage> server)
 		{
-			Console.WriteLine($"room with hash {roomName} was created");
+			Console.Error.WriteLine($"room with hash {roomName} was created");
 
 			this.roomName = roomName;
 			this.server = server;
@@ -28,16 +28,16 @@ namespace VoiceChatHost.Type
 			{
 				if (reliable)
 				{
-					server.tcp.SendMessage(message, GetClient(client, reliable));
+					server.tcp.SendMessage(message, clientEndPoint);
 				}
 				else
 				{
-					server.udp.SendMessage(message, GetClient(client, reliable));
+					server.udp.SendMessage(message, clientEndPoint);
 				}
 			}
 			else
 			{
-				Console.WriteLine($"Failed to send message to client {client} in room {roomName}: server.GetPeerEndPoint failed to resolve an IPEndPoint.");
+				Console.Error.WriteLine($"Failed to send message to client {client} in room {roomName}: server.GetPeerEndPoint failed to resolve an IPEndPoint.");
 			}
 		}
 

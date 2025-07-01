@@ -45,13 +45,18 @@ namespace HexaMod.UI.Element.Control.TextInputField
 		public WTextInputField() : base()
 		{
 			gameObject = Object.Instantiate(UITemplates.textInputFieldTemplate);
-			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y * 1.25f);
+			rectTransform.sizeDelta = new Vector2(320f, 100f);
 
 			field = gameObject.transform.GetChild(0).GetComponent<InputField>();
-			field.transform.localPosition = new Vector2(field.transform.localPosition.x, 5f);
-			label = gameObject.transform.GetChild(1).GetComponent<Text>();
+			RectTransform fieldTransform = field.GetComponent<RectTransform>();
+			fieldTransform.pivot = Vector2.zero;
+			fieldTransform.SetPivotPosition(0f, 0f);
 
-			label.transform.localPosition = new Vector2(label.transform.localPosition.x, 70f);
+			label = gameObject.transform.GetChild(1).GetComponent<Text>();
+			RectTransform labelTransform = label.GetComponent<RectTransform>();
+			labelTransform.pivot = Vector2.zero;
+			labelTransform.sizeDelta = new Vector2(800f, 30f);
+			labelTransform.SetPivotPosition(0f, 60f);
 
 			ClearEvents();
 		}

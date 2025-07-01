@@ -11,7 +11,8 @@ namespace VoiceChatHost
 	{
 		private readonly PeerDuelProtocolConnection<HVCMessage> client;
 		RelayConnectionState m_state = RelayConnectionState.Disconnected;
-		public RelayConnectionState state {
+		public RelayConnectionState State
+		{
 			get => m_state;
 			set {
 				if (m_state != value)
@@ -30,7 +31,7 @@ namespace VoiceChatHost
 		{
 			room = roomName;
 
-			if (state == RelayConnectionState.Connected)
+			if (State == RelayConnectionState.Connected)
 			{
 				client.tcp.SendMessage(
 					HVCMessage.VoiceRoomJoin,
@@ -68,13 +69,13 @@ namespace VoiceChatHost
 
 		public void Close()
 		{
-			state = RelayConnectionState.Closed;
+			State = RelayConnectionState.Closed;
 			client.Close();
 		}
 
 		public void TryToConnect()
 		{
-			state = RelayConnectionState.Connecting;
+			State = RelayConnectionState.Connecting;
 			client.Connect();
 		}
 
@@ -87,10 +88,39 @@ namespace VoiceChatHost
 
 			client.OnDisconnect(peer =>
 			{
-				if (state != RelayConnectionState.Closed)
+				if (State != RelayConnectionState.Closed)
 				{
-					state = RelayConnectionState.Failed;
+					State = RelayConnectionState.Failed;
 				}
+			});
+
+			client.OnMessage(HVCMessage.VoiceRoomPeersUpdated, (message, peer) =>
+			{
+
+			});
+
+			client.OnMessage(HVCMessage.Opus, (message, peer) =>
+			{
+				int samples = BitConverter.ToInt32(message.Body, 0);
+				int sampleRate = BitConverter.ToInt32(message.Body, 4);
+				int channels = BitConverter.ToInt32(message.Body, 8);
+				byte[] opusFrame = new byte[message.Body.Length - 12];
+				Buffer.BlockCopy(message.Body, 12, opusFrame, 0, message.Body.Length - 12);
+				onOpusAction.Invoke(
+					message.Client,
+					opusFrame,
+					samples,
+					sampleRate,
+					channels
+				);
+			});
+
+			client.OnMessage(HVCMessage.SpeakingStateUpdated, (message, peer) =>
+			{
+				onSpeakingStateAction.Invoke(
+					message.Client,
+					message.Body[0] == 1
+				);
 			});
 
 			TryToConnect();
@@ -105,9 +135,9 @@ namespace VoiceChatHost
 			int backoff = maxBackoffStart;
 			int attempts = 1;
 
-			while (state != RelayConnectionState.Closed)
+			while (State != RelayConnectionState.Closed)
 			{
-				switch (state)
+				switch (State)
 				{
 					case RelayConnectionState.Failed:
 						Console.WriteLine($"RelayClient: Attempting to reconnect (attempt {attempts})");
@@ -119,7 +149,7 @@ namespace VoiceChatHost
 					case RelayConnectionState.Connecting:
 						if (client.tcp.Connected)
 						{
-							state = RelayConnectionState.AllocatingId;
+							State = RelayConnectionState.AllocatingId;
 
 							try
 							{
@@ -127,8 +157,10 @@ namespace VoiceChatHost
 									if (message.Body.Length == 8)
 									{
 										clientId = BitConverter.ToUInt64(message.Body, 0);
-										state = RelayConnectionState.Connected;
+										Console.WriteLine($"RelayClient: Allocated to peer ID {clientId} by server.");
 
+
+										State = RelayConnectionState.Connected;
 										if (room != null)
 										{
 											JoinRoom(room);
@@ -136,21 +168,21 @@ namespace VoiceChatHost
 									}
 									else
 									{
-										state = RelayConnectionState.Failed;
+										State = RelayConnectionState.Failed;
 										throw new ArgumentException("RelayClient: Invalid VoiceRoomPeerIdAllocated message received.");
 									}
 								});
 
 								byte[] portData = new byte[4];
 
-								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.udp.ClientEndPoint.Port), 0, portData, 0, 2);
-								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.tcp.ClientEndPoint.Port), 0, portData, 2, 2);
+								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.tcp.ClientEndPoint.Port), 0, portData, 0, 2);
+								Buffer.BlockCopy(BitConverter.GetBytes((ushort)client.udp.ClientEndPoint.Port), 0, portData, 2, 2);
 
 								client.tcp.SendMessage(HVCMessage.VoiceRoomAllocatePeerId, portData);
 							}
 							catch (Exception ex)
 							{
-								state = RelayConnectionState.Failed;
+								State = RelayConnectionState.Failed;
 								Console.WriteLine($"RelayClient: Failed to allocate peer ID {ex.Message}.");
 							}
 						}

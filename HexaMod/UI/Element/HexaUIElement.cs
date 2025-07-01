@@ -1,9 +1,10 @@
 ﻿using HexaMod.UI.Element;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace HexaMod.UI.Element
 {
-	public class HexaUIElementBehaviour : MonoBehaviour
+	public class HexaUIElementBehaviour : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 	{
 		bool initialized = false;
 		HexaUIElement element;
@@ -30,6 +31,14 @@ namespace HexaMod.UI.Element
 			}
 		}
 
+		void FixedUpdate()
+		{
+			if (m_shown)
+			{
+				element.FixedUpdate();
+			}
+		}
+
 		void OnEnable()
 		{
 			m_shown = true;
@@ -49,18 +58,42 @@ namespace HexaMod.UI.Element
 				Shown = m_shown;
 			}
 		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			element.MouseDown(eventData);
+		}
+
+		public void OnPointerUp(PointerEventData eventData)
+		{
+			element.MouseUp(eventData);
+		}
+
+		public void OnPointerEnter(PointerEventData eventData)
+		{
+			element.MouseEnter(eventData);
+		}
+
+		public void OnPointerExit(PointerEventData eventData)
+		{
+			element.MouseLeave(eventData);
+		}
 	}
 
 	public class HexaUIElement
 	{
 		public GameObject gameObject;
-		public RectTransform rectTransform {
-			get => gameObject.GetComponent<RectTransform>();
-		}
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "why")]
+		public RectTransform rectTransform => gameObject.GetComponent<RectTransform>();
 
 		public HexaUIElement()
 		{
 
+		}
+
+		public HexaUIElement(GameObject gameObject)
+		{
+			this.gameObject = gameObject;
 		}
 
 		public virtual void Init()
@@ -80,6 +113,31 @@ namespace HexaMod.UI.Element
 
 		}
 
+		public virtual void FixedUpdate()
+		{
+
+		}
+
+		public virtual void MouseEnter(PointerEventData eventData)
+		{
+
+		}
+
+		public virtual void MouseLeave(PointerEventData eventData)
+		{
+
+		}
+
+		public virtual void MouseDown(PointerEventData eventData)
+		{
+
+		}
+
+		public virtual void MouseUp(PointerEventData eventData)
+		{
+
+		}
+
 		bool m_shown = false;
 		public bool IsShown
 		{
@@ -90,6 +148,7 @@ namespace HexaMod.UI.Element
 				if (m_shown)
 				{
 					Shown();
+					FixedUpdate();
 					Update();
 				}
 				else
@@ -152,6 +211,56 @@ static class HexaUIElementGenericMethodExtensions
 		return element;
 	}
 
+	public static Element SetAnchorPosition<Element>(this Element element, Vector2 position) where Element : HexaUIElement
+	{
+		element.rectTransform.anchoredPosition = position;
+		return element;
+	}
+
+	public static Element SetAnchorPosition<Element>(this Element element, float x, float y) where Element : HexaUIElement
+	{
+		element.SetAnchorPosition(new Vector2(x, y));
+		return element;
+	}
+
+	public static Element SetAnchorMin<Element>(this Element element, Vector2 anchor) where Element : HexaUIElement
+	{
+		element.rectTransform.anchorMin = anchor;
+		return element;
+	}
+
+	public static Element SetAnchorMin<Element>(this Element element, float x, float y) where Element : HexaUIElement
+	{
+		element.SetAnchorMin(new Vector2(x, y));
+		return element;
+	}
+
+	public static Element SetAnchorMax<Element>(this Element element, Vector2 anchor) where Element : HexaUIElement
+	{
+		element.rectTransform.anchorMax = anchor;
+		return element;
+	}
+
+	public static Element SetAnchorMax<Element>(this Element element, float x, float y) where Element : HexaUIElement
+	{
+		element.SetAnchorMax(new Vector2(x, y));
+		return element;
+	}
+
+
+	public static Element SetAnchors<Element>(this Element element, Vector2 anchor) where Element : HexaUIElement
+	{
+		element.rectTransform.anchorMin = anchor;
+		element.rectTransform.anchorMax = anchor;
+		return element;
+	}
+
+	public static Element SetAnchors<Element>(this Element element, float x, float y) where Element : HexaUIElement
+	{
+		element.SetAnchors(new Vector2(x, y));
+		return element;
+	}
+
 	public static Element SetPivot<Element>(this Element element, Vector2 position) where Element : HexaUIElement
 	{
 		element.rectTransform.pivot = position;
@@ -186,5 +295,10 @@ static class HexaUIElementGenericMethodExtensions
 	{
 		element.gameObject.name = name;
 		return element;
+	}
+
+	public static string GetName<Element>(this Element element) where Element : HexaUIElement
+	{
+		return element.gameObject.name;
 	}
 }

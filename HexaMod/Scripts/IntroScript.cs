@@ -86,20 +86,6 @@ namespace HexaMod.Scripts
 
 			VoiceChat.Init();
 
-			SetLoadingText("Loading HexaModInitResourcesBundle\n(Init)");
-			yield return 0;
-			HexaGlobal.InitStartupBundle();
-			SetLoadingText("Loading HexaModInitResourcesBundle\n(Font)");
-			var fontLoadRequest = HexaGlobal.startupBundle.LoadAssetAsync<Font>("Assets/ModResources/Init/Font/osd.ttf");
-			var loadingAnimationRequest = HexaGlobal.startupBundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
-			yield return fontLoadRequest;
-			LoadingText.loadingFont = fontLoadRequest.asset as Font;
-			SetLoadingText("Loading HexaModInitResourcesBundle\n(Loading Animation)");
-			yield return loadingAnimationRequest;
-			LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
-			SetLoadingText("Loading HexaModCoreResourcesBundle");
-			yield return 0;
-			HexaGlobal.InitCoreBundle();
 			SetLoadingText("Patching Game");
 			yield return 0;
 			Mod.instance.harmony.PatchAll(Assembly.GetExecutingAssembly());

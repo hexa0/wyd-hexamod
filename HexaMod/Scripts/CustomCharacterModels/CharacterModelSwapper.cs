@@ -1,11 +1,10 @@
 ﻿using HarmonyLib;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
-using HexaMod.Scripts;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod.Util
+namespace HexaMod.Scripts.CustomCharacterModels
 {
 	public class CharacterModelSwapper : MonoBehaviour
 	{
@@ -64,6 +63,8 @@ namespace HexaMod.Util
 				}
 				defaultMesh = body.sharedMesh;
 				defaultMaterials = body.materials;
+				skinMaterialIndex = 0;
+				shirtMaterialIndex = -1;
 			}
 
 			currentShirtColor = initShirtColor;
@@ -252,7 +253,7 @@ namespace HexaMod.Util
 				body.gameObject.layer = 0;
 				body.sharedMesh = defaultMesh;
 				body.materials = defaultMaterials;
-				skinMaterialIndex = isDad ? 2 : -1;
+				skinMaterialIndex = isDad ? 2 : 0;
 				shirtMaterialIndex = isDad ? 4 : -1;
 			}
 
@@ -318,7 +319,7 @@ namespace HexaMod.Util
 		{
 			currentShirtColor = shirtColor;
 
-			if (currentShirtRecolorable && shirtMaterialIndex >= 0 && shirtMaterialIndex < body.materials.Length)
+			if (currentShirtRecolorable && shirtMaterialIndex >= 0 && shirtMaterialIndex <= body.materials.Length)
 			{
 				if (isDad)
 				{
@@ -336,17 +337,10 @@ namespace HexaMod.Util
 		{
 			currentSkinColor = skinColor;
 
-			if (skinMaterialIndex >= 0 && skinMaterialIndex < body.materials.Length)
+			if (skinMaterialIndex >= 0 && skinMaterialIndex <= body.materials.Length)
 			{
-				if (isDad)
-				{
-					var material = body.materials[skinMaterialIndex];
-					material.color = skinColor;
-				}
-				else
-				{
-
-				}
+				var material = body.materials[skinMaterialIndex];
+				material.color = skinColor;
 			}
 		}
 	}

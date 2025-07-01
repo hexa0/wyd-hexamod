@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.SerializableObjects;
 using HexaMod.UI;
-using HexaMod.UI.Util;
 using HexaMod.Util;
 using HexaMod.Voice;
 using UnityEngine;
 using static HexaMod.UI.Util.Menu;
 
-namespace HexaMod
+namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 {
 
 	public class HexaLobby : MonoBehaviour
@@ -304,7 +303,7 @@ namespace HexaMod
 				}
 			}
 
-			Menu.WYDMenus.title.menuController.DeactivateAll();
+			WYDMenus.title.menuController.DeactivateAll();
 			Destroy(HexaGlobal.rematchHelper);
 
 			HexaGlobal.networkManager.fader.SendMessage("Fade");
@@ -411,7 +410,7 @@ namespace HexaMod
 		IEnumerator HexaModReturnedLobbyInit()
 		{
 			var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
-			Transform hostMenu = Menu.WYDMenus.title.FindMenu(mode.hostMenuName);
+			Transform hostMenu = WYDMenus.title.FindMenu(mode.hostMenuName);
 
 			yield return new WaitForEndOfFrame();
 

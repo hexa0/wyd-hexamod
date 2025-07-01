@@ -3,10 +3,11 @@ using System.IO;
 using System.Reflection;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
+using HexaMod.Scripts;
 using HexaMod.Util;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
-using static HexaMod.HexaLobby;
+using static HexaMod.Scripts.PunRpcExtensions.Lobby.HexaLobby;
 
 namespace HexaMod
 {
@@ -325,7 +326,7 @@ namespace HexaMod
 				babySpawn.Init();
 				HexaGlobal.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
 
-				if (!babySpawn.hgSpawns)
+				if (babySpawn.hgSpawns)
 				{
 					babySpawn.hgSpawns.Init();
 				}

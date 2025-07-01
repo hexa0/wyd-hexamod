@@ -13,6 +13,8 @@ using System;
 using System.Linq;
 using Object = UnityEngine.Object;
 using HexaMod.UI.Element.HexaMod.Loading;
+using HexaMod.Scripts;
+using HexaMod.Scripts.PunRpcExtensions.Lobby;
 
 namespace HexaMod
 {
@@ -20,7 +22,6 @@ namespace HexaMod
 	{
 		public static string assetDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		public static AssetBundle coreBundle;
-		public static AssetBundle startupBundle;
 
 		public static int sendRate = 30;
 		public static int defaultMaxPlayers = 64;
@@ -55,16 +56,6 @@ namespace HexaMod
 			GameModes.DefineStandardGameModes();
 			Assets.Init();
 			HexaPersistentLobby.instance.Init();
-		}
-
-		public static void InitCoreBundle()
-		{
-			coreBundle = AssetBundle.LoadFromFile(PathJoin.Join(assetDir, "HexaModCoreResourcesBundle"));
-		}
-
-		public static void InitStartupBundle()
-		{
-			startupBundle = AssetBundle.LoadFromFile(PathJoin.Join(assetDir, "HexaModInitResourcesBundle"));
 		}
 
 		public static void OnGameSceneStart()

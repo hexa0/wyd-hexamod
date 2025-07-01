@@ -9,11 +9,17 @@ namespace HexaMod.UI.Element.Control.ToggleButton
 		public Toggle control;
 		public Text label;
 
-		ButtonSoundBehavior buttonSoundBehavior;
+		readonly ButtonSoundBehavior buttonSoundBehavior;
 
 		public WToggleControl SetState(bool state)
 		{
 			control.isOn = state;
+			return this;
+		}
+
+		public WToggleControl SetInteractable(bool interactable)
+		{
+			control.interactable = interactable;
 			return this;
 		}
 
@@ -54,15 +60,23 @@ namespace HexaMod.UI.Element.Control.ToggleButton
 		public WToggleControl() : base()
 		{
 			gameObject = Object.Instantiate(UITemplates.hostControlToggleTemplate.gameObject);
+			gameObject.name = "wToggleControl";
+
+			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y - 10f);
 
 			control = gameObject.GetComponent<Toggle>();
 			label = gameObject.GetComponentInChildren<Text>(true);
-			gameObject.Find("Background").transform.localPosition = new Vector2(-130f, 0f);
-			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y - 10f);
 
 			label.transform.localPosition = new Vector2(570f, -7f);
 			label.raycastTarget = false;
-			label.GetComponent<RectTransform>().sizeDelta = new Vector3(1000f, 1f);
+
+			RectTransform checkBoxTransform = gameObject.Find("Background").GetComponent<RectTransform>();
+			RectTransform labelTransform = label.GetComponent<RectTransform>();
+			checkBoxTransform.pivot = new Vector2(0f, 0f);
+			checkBoxTransform.SetPivotPosition(0f, 0f);
+			labelTransform.sizeDelta = new Vector2(1000f, rectTransform.sizeDelta.y);
+			labelTransform.pivot = new Vector2(0f, 0.5f);
+			labelTransform.SetPivotPosition(checkBoxTransform.sizeDelta.x + 5f, rectTransform.sizeDelta.y / 2f);
 
 			ClearEvents();
 

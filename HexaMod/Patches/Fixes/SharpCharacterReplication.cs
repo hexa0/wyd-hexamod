@@ -1,6 +1,7 @@
 ﻿using System;
 using Boo.Lang.Runtime;
 using HarmonyLib;
+using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 

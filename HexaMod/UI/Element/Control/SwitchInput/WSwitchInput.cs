@@ -66,6 +66,7 @@ namespace HexaMod.UI.Element.Control.SwitchInput
 			Transform videoOptionsMenu = WYDMenus.title.FindMenu("VideoOptionsMenu");
 
 			gameObject = Object.Instantiate(boundsTemplate, videoOptionsMenu);
+			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x / 2f, rectTransform.sizeDelta.y);
 
 			GameObject higher = Object.Instantiate(videoOptionsMenu.Find("HigherRes").gameObject, gameObject.transform, true);
 			GameObject lower = Object.Instantiate(videoOptionsMenu.Find("LowerRes").gameObject, gameObject.transform, true);
@@ -134,12 +135,25 @@ namespace HexaMod.UI.Element.Control.SwitchInput
 			return this;
 		}
 
-		public WSwitchInput<Type> AddOption(WSwitchOption<Type> option)
+		WSwitchInput<Type> InternalAddOption(WSwitchOption<Type> option)
 		{
 			option.index = options.Count;
 			options.Add(option);
+			return this;
+		}
 
+		public WSwitchInput<Type> AddOption(WSwitchOption<Type> option)
+		{
+			InternalAddOption(option);
 			SetOption(currentOption);
+
+			return this;
+		}
+
+		public WSwitchInput<Type> ClearOptions()
+		{
+			options.Clear();
+
 			return this;
 		}
 
@@ -147,8 +161,10 @@ namespace HexaMod.UI.Element.Control.SwitchInput
 		{
 			foreach (WSwitchOption<Type> option in options)
 			{
-				AddOption(option);
+				InternalAddOption(option);
 			}
+
+			SetOption(currentOption);
 			return this;
 		}
 

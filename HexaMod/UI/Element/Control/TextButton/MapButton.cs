@@ -3,17 +3,21 @@ using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.Video;
 using HarmonyLib;
-using HexaMod.UI.Element.Control.TextButton;
+using HexaMod.UI.Element.Utility;
+using UnityEngine.EventSystems;
 
-namespace HexaMod.UI.Element.Extended
+namespace HexaMod.UI.Element.Control.TextButton
 {
 	public class MapButton : WTextButton
 	{
-		ModLevel level;
+		readonly ModLevel level;
 
-		RectTransform levelBackground;
+		readonly LinearCanvasGroupFader levelVideoBackgroundFader;
+		readonly RectTransform levelVideoBackground;
+		readonly RectTransform levelBackground;
 		readonly Mask mask;
 		readonly Graphic levelImage;
+		readonly Graphic levelVideoImage;
 		readonly VideoPlayer levelVideo;
 
 		bool? wasActive = null;
@@ -32,23 +36,56 @@ namespace HexaMod.UI.Element.Extended
 			}
 		}
 
+
+		public override void MouseEnter(PointerEventData eventData)
+		{
+			base.MouseEnter(eventData);
+			levelVideoBackgroundFader.fadeState = true;
+
+			if (level.levelVideo)
+			{
+				Traverse buttonFields = Traverse.Create(button);
+				buttonFields.Field<Graphic>("m_TargetGraphic").Value = levelImage;
+
+				levelVideo.playbackSpeed = 1f;
+			}
+			else
+			{
+				button.image = levelImage as Image;
+			}
+		}
+
+		public override void MouseLeave(PointerEventData eventData)
+		{
+			base.MouseLeave(eventData);
+			levelVideoBackgroundFader.fadeState = false;
+			button.image = levelImage as Image;
+
+			if (level.levelVideo)
+			{
+				levelVideo.playbackSpeed = 0f;
+			}
+		}
+
 		public override void Shown()
 		{
 			base.Shown();
 
-			if (levelVideo)
+			if (level.levelVideo)
 			{
 				levelVideo.Play();
+				levelVideo.playbackSpeed = 0f;
 			}
 		}
 
 		public override void Hidden()
 		{
-			base.Hidden();
+			base.Shown();
 
-			if (levelVideo)
+			if (level.levelVideo)
 			{
 				levelVideo.Stop();
+				levelVideo.playbackSpeed = 0f;
 			}
 		}
 
@@ -56,40 +93,46 @@ namespace HexaMod.UI.Element.Extended
 		{
 			this.level = level;
 
+			levelVideoBackgroundFader = new LinearCanvasGroupFader()
+				.SetParent(rectTransform)
+				.ScaleWithParent()
+				.SetChildrenCullingEnabled(false)
+				.SetInitialFadeState(false)
+				.SetFadeSpeed(6f);
+
 			levelBackground = new GameObject("levelBackground", typeof(RectTransform)).GetComponent<RectTransform>();
 			levelBackground.SetParent(button.transform);
-			levelBackground.anchoredPosition = Vector2.zero;
-			levelBackground.sizeDelta = button.GetComponent<RectTransform>().sizeDelta;
+			levelBackground.GetComponent<RectTransform>().ScaleWithParent();
+
+			levelVideoBackground = new GameObject("levelVideoBackground", typeof(RectTransform)).GetComponent<RectTransform>();
+			levelVideoBackground.SetParent(levelVideoBackgroundFader.rectTransform);
+			levelVideoBackground.GetComponent<RectTransform>().ScaleWithParent();
+
+			label.transform.SetAsLastSibling();
 
 			mask = gameObject.AddComponent<Mask>();
-			SetSpriteColor(Color.white);
+
+			levelImage = levelBackground.gameObject.AddComponent<Image>();
+			button.image = levelImage as Image;
+			SetSprite(level.levelSprite)
+				.SetSpriteColor(Color.white);
 
 			if (level.levelVideo)
 			{
-				levelVideo = levelBackground.gameObject.AddComponent<VideoPlayer>();
+				levelVideo = levelVideoBackground.gameObject.AddComponent<VideoPlayer>();
 				levelVideo.isLooping = true;
 				levelVideo.clip = level.levelVideo;
 
-				levelImage = levelBackground.gameObject.AddComponent<RawImage>();
-
-				Traverse buttonFields = Traverse.Create(button);
-				buttonFields.Field<Graphic>("m_TargetGraphic").Value = levelImage;
-
-				levelVideo.targetTexture = new RenderTexture((int)levelBackground.sizeDelta.x, (int)levelBackground.sizeDelta.y, 16);
+				levelVideoImage = levelVideoBackground.gameObject.AddComponent<RawImage>();
+				levelVideoImage.raycastTarget = false;
+				levelVideo.targetTexture = new RenderTexture(300, 150, 16);
 				levelVideo.aspectRatio = VideoAspectRatio.Stretch;
-				(levelImage as RawImage).texture = levelVideo.targetTexture;
+				(levelVideoImage as RawImage).texture = levelVideo.targetTexture;
 
 				for (ushort i = 0; i < levelVideo.audioTrackCount; i++)
 				{
 					levelVideo.SetDirectAudioVolume(i, 0);
 				}
-			}
-			else
-			{
-				levelImage = levelBackground.gameObject.AddComponent<Image>();
-				button.image = levelImage as Image;
-				SetSprite(level.levelSprite)
-					.SetSpriteColor(Color.white);
 			}
 
 			levelBackground.SetSiblingIndex(0);

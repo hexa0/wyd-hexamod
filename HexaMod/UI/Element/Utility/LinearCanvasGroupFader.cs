@@ -6,13 +6,15 @@ namespace HexaMod.UI.Element.Utility
 	{
 		public RectTransform children;
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "why")]
 		public new RectTransform rectTransform
 		{
 			get => children;
 		}
 
-		CanvasGroup group;
+		readonly CanvasGroup group;
 
+		bool cullChildren = true;
 		public bool fadeState = true;
 		float alpha = 1f;
 		public float fadeSpeed = 1f;
@@ -51,13 +53,16 @@ namespace HexaMod.UI.Element.Utility
 			{
 				group.alpha = alpha;
 
-				if (alpha == 0f)
+				if (cullChildren)
 				{
-					children.gameObject.SetActive(false);
-				}
-				else if (oldAlpha == 0f)
-				{
-					children.gameObject.SetActive(true);
+					if (alpha == 0f)
+					{
+						children.gameObject.SetActive(false);
+					}
+					else if (oldAlpha == 0f)
+					{
+						children.gameObject.SetActive(true);
+					}
 				}
 			}
 		}
@@ -73,6 +78,22 @@ namespace HexaMod.UI.Element.Utility
 			fadeState = visible;
 			alpha = visible ? 1f : 0f;
 			group.alpha = alpha;
+			return this;
+		}
+
+		public LinearCanvasGroupFader SetChildrenCullingEnabled(bool shouldCullChildren)
+		{
+			if (shouldCullChildren)
+			{
+				children.gameObject.SetActive(alpha != 0f);
+			}
+			else
+			{
+				children.gameObject.SetActive(true);
+			}
+
+			cullChildren = shouldCullChildren;
+
 			return this;
 		}
 

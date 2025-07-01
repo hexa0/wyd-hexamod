@@ -25,8 +25,10 @@ namespace VoiceChatHost
 				assignedId++;
 			}
 
-			server.AddTCPPeer(new IPEndPoint(peer.Address, tcpPort), assignedId);
+			server.AddTCPPeer(peer, assignedId);
 			server.AddUDPPeer(new IPEndPoint(peer.Address, udpPort), assignedId);
+
+			Console.WriteLine($"client {peer.Address.GetHashCode()}:(TCP {tcpPort} UDP {udpPort}) was allocated to peer id {assignedId}");
 
 			server.tcp.SendMessage(
 				new NetMessage<HVCMessage>(
@@ -67,6 +69,7 @@ namespace VoiceChatHost
 			else
 			{
 				roomToJoin = new VoiceRoom(roomName, server);
+				roomToJoin.server = server;
 				rooms.Add(roomName, roomToJoin);
 			}
 

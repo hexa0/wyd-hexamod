@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.IO;
 using HexaMod.ScriptableObjects;
+using HexaMod.UI.Element;
+using HexaMod.UI.Element.HexaMod.Loading;
 using UnityEngine;
 
-namespace HexaMod
+namespace HexaMod.Scripts
 {
 	public class AsyncAssetLoader : MonoBehaviour
 	{
@@ -16,7 +18,7 @@ namespace HexaMod
 
 		public void LoadAsset(string filename, string file)
 		{
-			Mod.Print($"load asset bundle {filename}");
+			Mod.Debug($"load asset bundle {filename}");
 
 			Assets.bundlesToLoad++;
 			StartCoroutine(LoadAssetsAsync(filename, file));
@@ -33,10 +35,11 @@ namespace HexaMod
 			var bundle = bundleLoadRequest.assetBundle;
 
 			Assets.assetBundles.Add(filename, bundle);
-			Mod.Print($"Loaded Asset Bundle {filename}");
+			Mod.Debug($"Loaded Asset Bundle {filename}");
 
 			switch (type)
 			{
+#pragma warning disable IDE0220 // Add explicit cast
 				case "level":
 					var allLevels = bundle.LoadAllAssetsAsync<ModLevel>();
 					yield return allLevels;
@@ -45,13 +48,13 @@ namespace HexaMod
 					{
 						if (withoutExtension == "default_level" && from == "core")
 						{
-							Mod.Print($"Found default level {level.levelNameReadable}");
+							Mod.Debug($"Found default level {level.levelNameReadable}");
 							Assets.defaultLevel = level;
 							Assets.defaultLevelName = level.levelPrefab.name;
 						}
 
 						Assets.levels.Add(level);
-						Mod.Print($"Found level {level.levelNameReadable}");
+						Mod.Debug($"Found level {level.levelNameReadable}");
 					}
 
 					break;
@@ -70,7 +73,7 @@ namespace HexaMod
 						{
 							Assets.babyCharacterModels.Add(model);
 						}
-						Mod.Print($"Found v1 model {model.modelNameReadable}");
+						Mod.Debug($"Found v1 model {model.modelNameReadable}");
 					}
 
 					break;
@@ -89,7 +92,7 @@ namespace HexaMod
 						{
 							Assets.babyCharacterModels.Add(model);
 						}
-						Mod.Print($"Found v2 model {model.modelNameReadable}");
+						Mod.Debug($"Found v2 model {model.modelNameReadable}");
 					}
 
 					break;
@@ -100,7 +103,7 @@ namespace HexaMod
 					foreach (ModRadioTrack track in allRadioTracks.allAssets)
 					{
 						Assets.radioTracks.Add(track);
-						Mod.Print($"Found radio track {track.name}");
+						Mod.Debug($"Found radio track {track.name}");
 					}
 
 					break;
@@ -112,15 +115,50 @@ namespace HexaMod
 					{
 						if (withoutExtension == "default_shirt" && from == "core")
 						{
-							Mod.Print($"Found default shirt {shirt.name}");
+							Mod.Debug($"Found default shirt {shirt.name}");
 							Assets.defaultShirt = shirt;
 						}
 						else
 						{
-							Mod.Print($"Found shirt {shirt.name}");
+							Mod.Debug($"Found shirt {shirt.name}");
 							Assets.shirts.Add(shirt);
 						}
 					}
+
+					break;
+#pragma warning restore IDE0220 // Add explicit cast
+				case "init":
+					if (from != "core")
+					{
+						throw new System.Exception(type + " asset bundles can only be loaded from core, this has been blocked.");
+					}
+
+					var fontLoadRequest = bundle.LoadAssetAsync<Font>("Assets/ModResources/Init/Font/osd.ttf");
+					var loadingAnimationRequest = bundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
+
+					fontLoadRequest.completed += (request) =>
+					{
+						LoadingText.loadingFont = fontLoadRequest.asset as Font;
+						Mod.Debug("got loadingFont");
+					};
+
+					loadingAnimationRequest.completed += (request) =>
+					{
+						LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
+						Mod.Debug("got loadingAnimation");
+					};
+
+					break;
+				case "resources":
+					if (from != "core")
+					{
+						throw new System.Exception(type + " asset bundles can only be loaded from core, this has been blocked.");
+					}
+
+					HexaGlobal.coreBundle = bundle;
+					WUIGlobals.instance = new WUIGlobals();
+
+					yield return bundle.LoadAllAssetsAsync();
 
 					break;
 			}
@@ -129,7 +167,7 @@ namespace HexaMod
 
 			if (Assets.loadedBundles >= Assets.bundlesToLoad)
 			{
-				Mod.Print("All Levels Loaded!");
+				Mod.Debug("All Bundles Loaded!");
 				Assets.loadedAssets = true;
 			}
 		}

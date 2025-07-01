@@ -4,7 +4,7 @@ using HexaMod.SerializableObjects;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace HexaMod
+namespace HexaMod.Scripts
 {
 	public class HexaPersistentLobby : MonoBehaviour
 	{

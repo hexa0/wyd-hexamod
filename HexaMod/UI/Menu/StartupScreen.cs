@@ -13,8 +13,8 @@ namespace HexaMod.UI.Menu
 		public RectTransform loadingAnimationParent;
 		public CornerLoadingAnimation cornerLoadingAnimation;
 
-		RectTransform background;
-		Image backgroundImage;
+		readonly RectTransform background;
+		readonly Image backgroundImage;
 
 		public StartupScreen() : base()
 		{

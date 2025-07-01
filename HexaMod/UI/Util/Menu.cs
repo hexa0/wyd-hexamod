@@ -76,10 +76,8 @@ namespace HexaMod.UI.Util
 			GameObject menu = new GameObject(name, typeof(RectTransform));
 
 			menu.SetActive(false);
-			menu.transform.SetParent(root);
-			menu.transform.position = Vector3.zero;
-			menu.transform.rotation = Quaternion.identity;
-			menu.transform.localScale = Vector3.one;
+			menu.transform.SetParent(root, false);
+			menu.GetComponent<RectTransform>().ScaleWithParent();
 
 			int menuCount = menuController.menus.Count();
 

@@ -15,11 +15,11 @@ namespace HexaMod.UI.Element.Control
 
 	public class ButtonSoundBehavior : MonoBehaviour, IPointerEnterHandler, IPointerUpHandler, IPointerDownHandler
 	{
-		static AudioClip interact01 = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Interact01.wav");
-		static AudioClip interact02 = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Interact02.wav");
-		static AudioClip yes = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Yes.wav");
-		static AudioClip no = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/No.wav");
-		static AudioClip hover = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Hover.wav");
+		static readonly AudioClip interact01 = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Interact01.wav");
+		static readonly AudioClip interact02 = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Interact02.wav");
+		static readonly AudioClip yes = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Yes.wav");
+		static readonly AudioClip no = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/No.wav");
+		static readonly AudioClip hover = HexaGlobal.coreBundle.LoadAsset<AudioClip>("Assets/ModResources/Core/Audio/UI/Hover.wav");
 
 		public UISound ButtonDownSound = UISound.Forward;
 		public UISound ButtonUpSound = UISound.Forward;

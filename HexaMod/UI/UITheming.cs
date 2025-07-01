@@ -10,6 +10,12 @@ namespace HexaMod.UI
 	{
 		public static void Init()
 		{
+			if (!HexaGlobal.coreBundle)
+			{
+				Mod.Warn("HexaMod: Core bundle not loaded, cannot apply UI theming.");
+				return;
+			}
+
 			var spriteInputField128 = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/InputField128.png");
 			var spriteButton = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Button.png");
 

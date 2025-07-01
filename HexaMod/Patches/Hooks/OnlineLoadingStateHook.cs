@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.Scripts;
 using HexaMod.UI;
 
 namespace HexaMod.Patches.Hooks

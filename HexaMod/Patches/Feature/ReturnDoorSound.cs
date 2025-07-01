@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using HexaMapAssemblies;
+using HexaMod.Scripts;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature

@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using HexaMod.Patches.Fixes;
+using HexaMod.Scripts.CustomCharacterModels;
+using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using HexaMod.SerializableObjects;
 using HexaMod.UI;
-using HexaMod.Util;
 using HexaMod.Voice;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace HexaMod
+namespace HexaMod.Scripts.PunRpcExtensions.Character
 {
 	public class CharacterExtendedRPCBehavior : MonoBehaviour
 	{
@@ -17,11 +18,14 @@ namespace HexaMod
 		void Start()
 		{
 			netView = GetComponent<PhotonView>();
+
+			bool isDad = gameObject.name.Substring(0, 3) == "Dad";
+
 			initialState = new InitialPlayerState()
 			{
 				shirtColor = new SerializableColor(new Color().FromHex(MainUI.GetCurrentShirtColorHex())),
-				skinColor = new SerializableColor(new Color().FromHex(MainUI.GetCurrentSkinColorHex())),
-				characterModel = gameObject.name.Substring(0, 3) == "Dad" ? PlayerPrefs.GetString("HMV2_DadCharacterModel", "default") : PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default"),
+				skinColor = new SerializableColor(new Color().FromHex(isDad ? MainUI.GetCurrentSkinColorHex() : MainUI.GetCurrentBabySkinColorHex())),
+				characterModel = isDad ? PlayerPrefs.GetString("HMV2_DadCharacterModel", "default") : PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default"),
 				shirtMaterial = PlayerPrefs.GetString("HMV2_DadShirtMaterial", "default")
 			};
 

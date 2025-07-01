@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using HexaMod.Scripts;
-using HexaMod.Util;
+using HexaMod.Scripts.CustomCharacterModels;
+using HexaMod.Scripts.PunRpcExtensions.Character;
 using HexaMod.Voice;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;

@@ -2,7 +2,6 @@
 using UnityEngine.Events;
 using UnityEngine.UI;
 using HexaMod.UI.Util;
-using HexaMod.Util;
 using System.Linq;
 using HexaMod.ScriptableObjects;
 using HexaMod.Voice;
@@ -22,6 +21,10 @@ using HexaMod.UI.Element.Control.ToggleButton;
 using HexaMod.UI.Element.Control.TextInputField;
 using HexaMod.UI.Element.VoiceChatUI;
 using VoiceChatShared.Enums;
+using HexaMod.UI.Element.Label;
+using HexaMod.Scripts;
+using HexaMod.UI.Element.Utility;
+using HexaMod.Scripts.CustomCharacterModels;
 
 namespace HexaMod.UI
 {
@@ -119,7 +122,7 @@ namespace HexaMod.UI
 				title.FindMenu("Dadlympics").Find("Start").GetComponent<Button>().interactable = foundLevel.dadlympics;
 				title.FindMenu("DaddysNightmare").Find("Start").GetComponent<Button>().interactable = foundLevel.daddysNightmare;
 
-				mapInfo.text = $"{foundLevel.levelNameReadable}\n{foundLevel.levelDescriptionReadable}";
+				mapInfo.SetText($"{foundLevel.levelNameReadable}\n{foundLevel.levelDescriptionReadable}");
 			}
 		}
 
@@ -133,10 +136,18 @@ namespace HexaMod.UI
 
 			GameObject menu = title.NewMenu("ChangeMap");
 			int menuId = title.GetMenuId(menu.name);
+			UIElementStack bottomBarStack = new UIElementStack(WTextButton.padding.x)
+				.SetParent(menu.transform)
+				.SetName("bottomBarStack")
+				.SetAnchors(0.5f, 0f)
+				.SetPivot(0.5f, 0f)
+				.SetAnchorPosition(0f, WTextButton.padding.y)
+				.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
+
 			WTextButton backButton = WTextButton.MakeBackButton(title, menu.transform);
 			title.menuController.startBtn[menuId] = backButton.gameObject;
 
-			Vector2 center = new Vector2(1920f / 2f, 1080f / 2f);
+			bottomBarStack.AddChild(backButton);
 
 			float height = Mathf.Clamp(Assets.levels.Count() - 1, 0f, 4f);
 			float width = Mathf.Floor((Assets.levels.Count() - 1) / 5f);
@@ -150,15 +161,15 @@ namespace HexaMod.UI
 
 				new MapButton(level)
 					.SetParent(menu.transform)
-					.SetPosition(center + new Vector2(
+					.SetPosition(
 						WTextButton.gap.x * x,
 						WTextButton.gap.y * y
-					))
+					)
 					.AddListener(() => { ButtonCallbacks.ChangeLevel(level.levelPrefab.name); });
 			}
 		}
 
-		public static Text mapInfo;
+		public static WLabel mapInfo;
 
 		public void Init()
 		{
@@ -185,19 +196,21 @@ namespace HexaMod.UI
 			});
 
 			RectTransform version = title.root.Find("Version").gameObject.GetComponent<RectTransform>();
-			Text versionText = version.GetComponent<Text>();
+			version.gameObject.SetActive(false);
 
-			version.ScaleWithParent();
-			versionText.alignment = TextAnchor.LowerLeft;
-			versionText.fontSize = (int)(versionText.fontSize * 0.5f);
-			version.sizeDelta = new Vector2(versionText.fontSize * -2f, versionText.fontSize * -2f);
+			//Text versionText = version.GetComponent<Text>();
 
-			mapInfo = Instantiate(version, title.root).GetComponent<Text>();
-			mapInfo.name = "mapInfo";
-			mapInfo.text = "";
-			mapInfo.alignment = TextAnchor.LowerRight;
+			//version.ScaleWithParent();
+			//versionText.alignment = TextAnchor.LowerLeft;
+			//versionText.fontSize = (int)(versionText.fontSize * 0.5f);
+			//version.sizeDelta = new Vector2(versionText.fontSize * -2f, versionText.fontSize * -2f);
 
-			version.SetParent(title.FindMenu("SplashMenu"), true);
+			//mapInfo = Instantiate(version, title.root).GetComponent<Text>();
+			//mapInfo.name = "mapInfo";
+			//mapInfo.text = "";
+			//mapInfo.alignment = TextAnchor.LowerRight;
+
+			//version.SetParent(title.FindMenu("SplashMenu"), true);
 
 			{ // HexaMod Options Menu
 				void MakeButton(Button originalButton, MenuUtil menu)
@@ -224,12 +237,18 @@ namespace HexaMod.UI
 
 				void MakeMenu(GameObject menu, MenuUtil menuUtil)
 				{
-					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = WTextButton.MakeBackButton(menuUtil, menu.transform).gameObject;
+					UIElementStack bottomBarStack = new UIElementStack(WTextButton.padding.x)
+						.SetParent(menu.transform)
+						.SetName("bottomBarStack")
+						.SetAnchors(0.5f, 0f)
+						.SetPivot(0.5f, 0f)
+						.SetAnchorPosition(0f, WTextButton.padding.y)
+						.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
 
-					Vector2 bottomLeft = new Vector2(0f, 200f);
-					float gap = 15f;
+					WTextButton backButton = WTextButton.MakeBackButton(menuUtil, menu.transform);
+					menuUtil.menuController.startBtn[menuUtil.GetMenuId(menu.name)] = backButton.gameObject;
 
-					LobbySettings ls = HexaPersistentLobby.instance.lobbySettings;
+					bottomBarStack.AddChild(backButton);
 
 					var devices = VoiceChat.GetDevices();
 					WSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
@@ -245,7 +264,7 @@ namespace HexaMod.UI
 
 					WSwitchOption<int>[] audioBitrateOptions = new WSwitchOption<int>[Enum.GetValues(typeof(Bitrate)).Length];
 
-					for (int i = 0; i < audioBitrateOptions.Length;i++)
+					for (int i = 0; i < audioBitrateOptions.Length; i++)
 					{
 						int value = (byte)Enum.GetValues(typeof(Bitrate)).GetValue(i);
 
@@ -256,68 +275,60 @@ namespace HexaMod.UI
 						};
 					}
 
-					HexaUIElement[] options = {
-						// Audio
+					UIElementStack stack = new UIElementStack(WTextButton.padding.y)
+						.SetParent(menu.transform)
+						.SetAnchors(0.5f, 0f)
+						.SetPivot(0.5f, 0f)
+						.SetAnchorPosition(0f, WTextButton.padding.y + WTextButton.defaultSize.y + WTextButton.padding.y)
+						.SetAlignment(UIElementStack.StackAlignment.BottomToTop);
 
+					stack.AddChild(
 						new WToggleControl()
 							.SetName("micRnNoise")
-							.SetParent(menu.transform)
-							.SetPosition(200f, 0f)
 							.SetText("Microphone Denoising (RNNoise)")
-							.LinkToPreference(VoiceChat.denoisingEnabled),
+							.LinkToPreference(VoiceChat.denoisingEnabled)
+					);
 
+					stack.AddChild(
 						new WToggleControl()
 							.SetName("voiceChatDebugOverlayEnabled")
-							.SetParent(menu.transform)
-							.SetPosition(200f, 0f)
 							.SetText("Voice Chat Debug Overlay")
-							.LinkToPreference(VoiceChat.debugOverlayEnabled),
+							.LinkToPreference(VoiceChat.debugOverlayEnabled)
+					);
 
+					stack.AddChild(
 						new WSwitchInput<int>()
 							.SetName("microphoneBitrate")
-							.SetParent(menu.transform)
-							.SetPosition(45f, 0f)
 							.SetText("")
 							.AddOptions(audioBitrateOptions)
-							.LinkToPreference(VoiceChat.microphoneBitrate),
+							.LinkToPreference(VoiceChat.microphoneBitrate)
+					);
 
+					stack.AddChild(
 						new WSwitchInput<VoiceChat.MicrophoneDevice>()
 							.SetName("microphoneDevice")
-							.SetParent(menu.transform)
-							.SetPosition(45f, 0f)
 							.SetText("")
 							.AddOptions(deviceOptions)
-							.LinkToPreference(VoiceChat.microphoneDeviceId),
+							.LinkToPreference(VoiceChat.microphoneDeviceId)
+					);
 
+					stack.AddChild(
 						new MicrophoneIndicator()
-							.SetParent(menu.transform)
-							.SetPosition(45f, 0f),
+					);
 
+					stack.AddChild(
 						new WToggleControl()
 							.SetName("tabOutMute")
-							.SetParent(menu.transform)
-							.SetPosition(200f, 0f)
 							.SetText("Mute While Tabbed Out")
-							.LinkToPreference(HexaModPreferences.tabOutMute),
-						
-						// UI
+							.LinkToPreference(HexaModPreferences.tabOutMute)
+					);
 
+					stack.AddChild(
 						new WToggleControl()
 							.SetName("uiRefresh")
-							.SetParent(menu.transform)
-							.SetPosition(200f, 0f)
 							.SetText("Refreshed UI Colors (Requires Scene Reload)")
-							.LinkToPreference(HexaModPreferences.doUItheme),
-
-					};
-
-					for (int i = 0; i < options.Count(); i++)
-					{
-						var control = options[i];
-
-						control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
-						bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
-					}
+							.LinkToPreference(HexaModPreferences.doUItheme)
+					);
 				}
 
 				MakeButton(title.FindMenu("OptionsMenu").Find("SplitScreenOptions").GetComponent<Button>(), title);
@@ -364,49 +375,83 @@ namespace HexaMod.UI
 				);
 			}
 			{ // Title Screen
-				title.FindMenu("SplashMenu").Find("Version").GetComponent<Text>().text = $"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)"; ;
+				Transform splashMenu = title.FindMenu("SplashMenu");
 
 				// booooring
-				title.FindMenu("SplashMenu").Find("Return To New WYD").gameObject.SetActive(false);
+				splashMenu.Find("Return To New WYD").gameObject.SetActive(false);
 
-				// why was this disabled?
-				// oh nvm it works on private lobbies 💀
-				title.FindMenu("GameListMenu").Find("JoinRandom").gameObject.SetActive(false);
+				UIElementStack NewRow(string name)
+				{
+					return new UIElementStack(WTextButton.padding.x)
+						.SetName(name)
+						.SetPivot(0f, 0f)
+						.SetPosition(0f, 0f)
+						.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
+				}
 
-				// we replace all of the match settings with our own menu so hide the originals
-				title.FindMenu("Family Gathering-Host").Find("AlternateCharacters (2)").gameObject.SetActive(false);
-				title.FindMenu("Family Gathering-Host").Find("SetSpectate").gameObject.SetActive(false);
-				title.FindMenu("HungryGames").Find("SetSpectate (1)").gameObject.SetActive(false);
+				UIElementStack topRow = NewRow("top");
+				UIElementStack middleRow = NewRow("middle");
+				UIElementStack bottomRow = NewRow("bottom");
 
-				Vector2 TopLeft = new Vector2(-160f, -118f);
-
-				WTextButton testDad = new WTextButton()
+				 topRow.AddChild(new WTextButton()
 					.SetName("testDad")
 					.SetTextAuto("Test\nDad")
 					.SetParent(title.FindMenu("SplashMenu"))
-					.SetPosition(TopLeft + new Vector2(
-						WTextButton.gap.x * -1,
-						WTextButton.gap.y * 0
-					))
-					.AddListener(ButtonCallbacks.TestDadButton);
+					.AddListener(ButtonCallbacks.TestDadButton));
 
-				WTextButton testBaby = new WTextButton()
+				topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayLocal").gameObject));
+				topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayOnline").gameObject));
+
+				middleRow.AddChild(new WTextButton()
 					.SetName("testBaby")
 					.SetTextAuto("Test\nBaby")
 					.SetParent(title.FindMenu("SplashMenu"))
-					.SetPosition(TopLeft + new Vector2(
-						WTextButton.gap.x * -1,
-						WTextButton.gap.y * -1
-					))
-					.AddListener(ButtonCallbacks.TestBabyButton);
+					.AddListener(ButtonCallbacks.TestBabyButton));
 
-				new MatchSettingsButton()
+				middleRow.AddChild(new HexaUIElement(splashMenu.Find("Challenges").gameObject));
+				middleRow.AddChild(new HexaUIElement(splashMenu.Find("CharacterCusomization").gameObject));
+
+				bottomRow.AddChild(new MatchSettingsButton()
 					.SetParent(title.FindMenu("SplashMenu"))
-					.SetPosition(TopLeft + new Vector2(
-							WTextButton.gap.x * -1,
-							WTextButton.gap.y * -2
-					))
-					.AddListener(ButtonCallbacks.MatchSettingsButton);
+					.AddListener(ButtonCallbacks.MatchSettingsButton));
+
+				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Options").gameObject));
+				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Quit").gameObject));
+
+				UIElementStack titleStack = new UIElementStack(WTextButton.padding.y)
+					.SetParent(splashMenu)
+					.SetName("titleStack")
+					.SetAnchors(0.5f, 0f)
+					.SetPivot(0.5f, 0f)
+					.SetAnchorPosition(0f, WTextButton.padding.y)
+					.SetAlignment(UIElementStack.StackAlignment.TopToBottom);
+
+				titleStack.AddChild(topRow);
+				titleStack.AddChild(middleRow);
+				titleStack.AddChild(bottomRow);
+
+				int infoFontSize = 8;
+
+				new WLabel()
+					.SetName("versionText")
+					.SetParent(splashMenu)
+					.ScaleWithParent()
+					.Resize(infoFontSize * -2f, infoFontSize * -2f)
+					.SetText($"{Mod.GAME_VERSION.Substring(1)} (Game)\n{BuildInfo.Version} ({BuildInfo.GitHash}) (HexaMod)")
+					.SetTextAligment(TextAnchor.LowerLeft)
+					.SetTextFontSize(infoFontSize);
+
+				mapInfo = new WLabel()
+					.SetName("mapInfoText")
+					.SetParent(title.root)
+					.ScaleWithParent()
+					.Resize(infoFontSize * -2f, infoFontSize * -2f)
+					.SetText("")
+					.SetTextAligment(TextAnchor.LowerRight)
+					.SetTextFontSize(infoFontSize);
+
+			}
+			{ // Play Online Menu
 
 			}
 			{ // Character Customization Menu
@@ -418,11 +463,17 @@ namespace HexaMod.UI
 				dadModelSwapper.initShirtColor = new Color().FromHex(GetCurrentShirtColorHex());
 				dadModelSwapper.initSkinColor = new Color().FromHex(GetCurrentSkinColorHex());
 				babyModelSwapper.initModel = PlayerPrefs.GetString("HMV2_BabyCharacterModel", "default");
+				babyModelSwapper.initSkinColor = new Color().FromHex(GetCurrentBabySkinColorHex());
 
-				Transform characterCustomizationMenu = title.FindMenu("CharacterCustomizationMenu");
+				Transform characterCanvas = GameObject.Find("BackendObjects").transform.FindDeep("Canvas");
+
+				characterCanvas.Find("Dad").localPosition = new Vector3(250f, -500f, 0f);
+				characterCanvas.Find("Baby001").localPosition = new Vector3(-250f, -100f, 0f);
+
+				RectTransform characterCustomizationMenu = title.FindMenu("CharacterCustomizationMenu") as RectTransform;
+				characterCustomizationMenu.ScaleWithParent();
 
 				Vector2 bottomLeft = new Vector2(720f, -350f);
-				float gap = 15f;
 
 				WSwitchOption<string>[] dadModelOptions = new WSwitchOption<string>[Assets.dadCharacterModels.Count + 1];
 				WSwitchOption<Material>[] dadShirtOptions = new WSwitchOption<Material>[Assets.shirts.Count + 1];
@@ -496,86 +547,98 @@ namespace HexaMod.UI
 					}
 				}
 
-				HexaUIElement[] options = {
-					new WHexColorInputField()
-						.SetName("shirtColor")
-						.SetParent(characterCustomizationMenu)
-						.SetPosition(-468.4f, 0f)
-						.AddChangedListener((color, hex) => {
-							dadModelSwapper.SetShirtColor(color);
-							babyModelSwapper.SetShirtColor(color);
-						})
-						.AddSubmitListener((color, hex) =>
-						{
-							PlayerPrefs.SetString("HMV2_ShirtColor", hex);
-						})
-						.SetText("Shirt Color (Hex)")
-						.SetFieldText(GetCurrentShirtColorHex()),
+				UIElementStack dadStack = new UIElementStack(WTextButton.padding.y)
+					.SetParent(characterCustomizationMenu)
+					.SetName("dadStack")
+					.SetPivot(1f, 0.5f)
+					.SetAnchors(1f, 0.5f)
+					.SetAnchorPosition(-200f, 0f)
+					.SetAlignment(UIElementStack.StackAlignment.BottomToTop);
 
-					new WHexColorInputField()
-						.SetName("skinColor")
-						.SetParent(characterCustomizationMenu)
-						.SetPosition(-468.4f, 0f)
-						.AddChangedListener((color, hex) => {
-							dadModelSwapper.SetSkinColor(color);
-							babyModelSwapper.SetSkinColor(color);
-						})
-						.AddSubmitListener((color, hex) =>
-						{
-							PlayerPrefs.SetString("HMV2_SkinColor", hex);
-						})
-						.SetText("Skin Color (Hex)")
-						.SetFieldText(GetCurrentSkinColorHex()),
+				dadStack.AddChild(new WHexColorInputField()
+					.SetName("shirtColor")
+					.AddChangedListener((color, hex) => {
+						dadModelSwapper.SetShirtColor(color);
+						babyModelSwapper.SetShirtColor(color);
+					})
+					.AddSubmitListener((color, hex) =>
+					{
+						PlayerPrefs.SetString("HMV2_ShirtColor", hex);
+					})
+					.SetText("Shirt Color (Hex)")
+					.SetFieldText(GetCurrentShirtColorHex()));
 
-					new WSwitchInput<Material>()
-						.SetName("dadShirtMaterial")
-						.SetParent(characterCustomizationMenu)
-						.SetPosition(-880f, 0f)
-						.SetText("")
-						.AddOptions(dadShirtOptions)
-						.Select(dadShirtDefault)
-						.AddListener(option =>
-						{
-							ButtonCallbacks.SetDadShirt(option.name);
-							ButtonCallbacks.SaveDadShirt(option.name);
-						}),
+				dadStack.AddChild(new WHexColorInputField()
+					.SetName("dadSkinColor")
+					.AddChangedListener((color, hex) => {
+						dadModelSwapper.SetSkinColor(color);
+					})
+					.AddSubmitListener((color, hex) =>
+					{
+						PlayerPrefs.SetString("HMV2_SkinColor", hex);
+					})
+					.SetText("Skin Color (Hex)")
+					.SetFieldText(GetCurrentSkinColorHex()));
 
-					new WSwitchInput<string>()
-						.SetName("dadCharacterModel")
-						.SetParent(characterCustomizationMenu)
-						.SetPosition(-880f, 0f)
-						.SetText("")
-						.AddOptions(dadModelOptions)
-						.Select(dadCharacterDefault)
-						.AddListener(option =>
-						{
-							ButtonCallbacks.SetDadModel(option.value);
-							ButtonCallbacks.SaveDadModel(option.value);
-						}),
+				dadStack.AddChild(new WSwitchInput<Material>()
+					.SetName("dadShirtMaterial")
+					.SetText("")
+					.AddOptions(dadShirtOptions)
+					.Select(dadShirtDefault)
+					.AddListener(option =>
+					{
+						ButtonCallbacks.SetDadShirt(option.name);
+						ButtonCallbacks.SaveDadShirt(option.name);
+					}));
 
-					new WSwitchInput<string>()
-						.SetName("babyCharacterModel")
-						.SetParent(characterCustomizationMenu)
-						.SetPosition(-880f, 0f)
-						.SetText("")
-						.AddOptions(babyModelOptions)
-						.Select(babyCharacterDefault)
-						.AddListener(option =>
-						{
-							ButtonCallbacks.SetBabyModel(option.value);
-							ButtonCallbacks.SaveBabyModel(option.value);
-						}),
-				};
+				dadStack.AddChild(new WSwitchInput<string>()
+					.SetName("dadCharacterModel")
+					.SetText("")
+					.AddOptions(dadModelOptions)
+					.Select(dadCharacterDefault)
+					.AddListener(option =>
+					{
+						ButtonCallbacks.SetDadModel(option.value);
+						ButtonCallbacks.SaveDadModel(option.value);
+					}));
 
-				for (int i = 0; i < options.Count(); i++)
-				{
-					var control = options[i];
+				UIElementStack babyStack = new UIElementStack(WTextButton.padding.y)
+					.SetParent(characterCustomizationMenu)
+					.SetName("babyStack")
+					.SetPivot(0f, 0.5f)
+					.SetAnchors(0f, 0.5f)
+					.SetAnchorPosition(200f, 0f)
+					.SetAlignment(UIElementStack.StackAlignment.BottomToTop);
 
-					control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
-					bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
-				}
+				babyStack.AddChild(new WHexColorInputField()
+					.SetName("babySkinColor")
+					.AddChangedListener((color, hex) => {
+						babyModelSwapper.SetSkinColor(color);
+					})
+					.AddSubmitListener((color, hex) =>
+					{
+						PlayerPrefs.SetString("HMV2_BabySkinColor", hex);
+					})
+					.SetText("Skin Color (Hex)")
+					.SetFieldText(GetCurrentBabySkinColorHex()));
+
+				babyStack.AddChild(new WSwitchInput<string>()
+					.SetName("babyCharacterModel")
+					.SetText("")
+					.AddOptions(babyModelOptions)
+					.Select(babyCharacterDefault)
+					.AddListener(option =>
+					{
+						ButtonCallbacks.SetBabyModel(option.value);
+						ButtonCallbacks.SaveBabyModel(option.value);
+					}));
 			}
-			{ // Host Options
+			{ // Host Menus
+				// we replace all of the match settings with our own menu so hide the originals
+				title.FindMenu("Family Gathering-Host").Find("AlternateCharacters (2)").gameObject.SetActive(false);
+				title.FindMenu("Family Gathering-Host").Find("SetSpectate").gameObject.SetActive(false);
+				title.FindMenu("HungryGames").Find("SetSpectate (1)").gameObject.SetActive(false);
+
 				foreach (string menuName in Util.Menu.hostMenus)
 				{
 					Transform menu = title.FindMenu(menuName);
@@ -591,175 +654,164 @@ namespace HexaMod.UI
 				{
 					GameObject menu = menuUtil.NewMenu("MatchSettings");
 					int menuId = menuUtil.GetMenuId(menu.name);
+
+					WActionLabel errorMessage = new WActionLabel()
+						.SetName("matchSettingsErrorMessage")
+						.SetParent(menu.transform)
+						.ScaleWithParent()
+						.Resize(-200f, 0f);
+
+					errorMessage
+						.SetText("")
+						.SetTextAligment(TextAnchor.MiddleCenter)
+						.SetTextFontSize(WUIGlobals.Fonts.Sizes.MenuError);
+
+					UIElementStack bottomBarStack = new UIElementStack(WTextButton.padding.x)
+						.SetParent(menu.transform)
+						.SetName("bottomBarStack")
+						.SetAnchors(0.5f, 0f)
+						.SetPivot(0.5f, 0f)
+						.SetAnchorPosition(0f, WTextButton.padding.y)
+						.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
+
 					WTextButton backButton = WTextButton.MakeBackButton(menuUtil, menu.transform);
 					menuUtil.menuController.startBtn[menuId] = backButton.gameObject;
 
-					new ChangeMapButton(inGame)
+					bottomBarStack.AddChild(backButton);
+					bottomBarStack.AddChild(new ChangeMapButton(inGame)
 						.SetParent(menu.transform)
-						.SetPosition(backButton.gameObject.transform.localPosition + new Vector3(
-							WTextButton.gap.x,
+						.SetPivot(0f, 0f)
+						.SetPosition(backButton.rectTransform.localPosition + new Vector3(
+							backButton.rectTransform.sizeDelta.x + WTextButton.padding.x,
 							0f,
 							0f
 						))
-						.AddListener(ButtonCallbacks.ChangeMapButton);
+						.AddListener(ButtonCallbacks.ChangeMapButton));
 
 					Vector2 bottomLeft = new Vector2(0f, 200f);
-					float gap = 15f;
 
 					LobbySettings ls = HexaPersistentLobby.instance.lobbySettings;
 
-					HexaUIElement[] options = {
-						new WSwitchInput<ShufflePlayersMode>(
-							"shufflePlayers", "", (int)ls.shufflePlayers, LobbySettings.shuffleOptions,
-							menu.transform, new Vector2(45f, 0f),
-							new UnityAction<WSwitchOption<ShufflePlayersMode>>[] {
-								(WSwitchOption<ShufflePlayersMode> option) => {
-									HexaPersistentLobby.instance.lobbySettings.shufflePlayers = option.value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
-								}
-							}
-						),
+					UIElementStack stack = new UIElementStack(WTextButton.padding.y)
+						.SetParent(menu.transform)
+						.SetName("optionsStack")
+						.SetAnchors(0.5f, 0f)
+						.SetPivot(0.5f, 0f)
+						.SetAnchorPosition(0f, WTextButton.padding.y + WTextButton.defaultSize.y + WTextButton.padding.y)
+						.SetAlignment(UIElementStack.StackAlignment.BottomToTop);
 
-						new WSwitchInput<SpawnLocationMode>(
-							"spawnMode", "", (int)ls.spawnMode, LobbySettings.spawnOptions,
-							menu.transform, new Vector2(45f, 0f),
-							new UnityAction<WSwitchOption<SpawnLocationMode>>[] {
-								delegate (WSwitchOption<SpawnLocationMode> option) {
-									HexaPersistentLobby.instance.lobbySettings.spawnMode = option.value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"spawnMode changed to {option.value}");
-								}
-							}
-						),
-
-						// TODO: move this into a map specific settings menu
-						new WToggleControl(
-							"disablePets", "Disable House Pets", ls.disablePets, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.disablePets = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"disablePets changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"doorSounds", "Door Interact Sounds", ls.doorSounds, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.doorSounds = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"doorSounds changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"ventSounds", "Vent Interact Sounds", ls.ventSounds, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.ventSounds = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"ventSounds changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"modernGrabbing", "Modern Grabbing", ls.modernGrabbing, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.modernGrabbing = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"modernGrabbing changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"allMustDie", "All Babies Must Die", ls.allMustDie, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.allMustDie = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"allMustDie changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"spectatingAllowed", "Spectating Allowed", ls.allowSpectating, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.allowSpectating = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"spectatingAllowed changed to {value}");
-								}
-							}
-						),
-
-						new WToggleControl(
-							"cheats", "Cheats", ls.cheats, menu.transform,
-							new Vector2(200f, 0f),
-							new UnityAction<bool>[] {
-								delegate (bool value) {
-									HexaPersistentLobby.instance.lobbySettings.cheats = value;
-									HexaPersistentLobby.instance.CommitChanges();
-									HexaGlobal.textChat.SendServerMessage($"cheats changed to {value}");
-								}
-							}
-						),
-
-						new WSensitiveTextInputField()
-							.SetName("relayServer")
-							.SetParent(menu.transform)
-							.SetPosition(455f, 0f)
-							.SetText("Voice Chat Relay")
-							.SetFieldText(ls.relay)
-							.AddSubmitListener(text => {
-								HexaPersistentLobby.instance.lobbySettings.relay = text;
-								HexaPersistentLobby.instance.CommitChanges();
-								HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");
-							})
-					};
-
-					if (inGame)
-					{
-						for (int i = 0; i < options.Count(); i++)
+					stack.AddChild(new WSwitchInput<ShufflePlayersMode>()
+						.SetName("shufflePlayers")
+						.SetText("")
+						.AddOptions(LobbySettings.shuffleOptions)
+						.SetOption((int)ls.shufflePlayers)
+						.AddListener(option =>
 						{
-							HexaUIElement control = options[i];
+							HexaPersistentLobby.instance.lobbySettings.shufflePlayers = option.value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"shufflePlayers changed to {option.value}");
+						}));
 
-							if (control is WToggleControl && control.gameObject.name == "cheats")
-							{
+					stack.AddChild(new WSwitchInput<SpawnLocationMode>()
+						.SetName("spawnMode")
+						.SetText("")
+						.AddOptions(LobbySettings.spawnOptions)
+						.SetOption((int)ls.spawnMode)
+						.AddListener(option =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.spawnMode = option.value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"spawnMode changed to {option.value}");
+						}));
 
-								(control as WToggleControl).control.interactable = false;
-							}
-						}
-					}
+					// TODO: move this into a map specific settings menu
+					stack.AddChild(new WToggleControl()
+						.SetName("disablePets")
+						.SetText("Disable House Pets")
+						.SetState(ls.disablePets)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.disablePets = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"disablePets changed to {value}");
+						}));
 
-					for (int i = 0; i < options.Count(); i++)
-					{
-						HexaUIElement control = options[i];
+					stack.AddChild(new WToggleControl()
+						.SetName("doorSounds")
+						.SetText("Door Interact Sounds")
+						.SetState(ls.doorSounds)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.doorSounds = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"doorSounds changed to {value}");
+						}));
 
-						control.rectTransform.localPosition = bottomLeft + new Vector2(control.rectTransform.localPosition.x, gap);
-						bottomLeft.y = control.rectTransform.localPosition.y + control.rectTransform.sizeDelta.y;
-					}
+					stack.AddChild(new WToggleControl()
+						.SetName("ventSounds")
+						.SetText("Vent Interact Sounds")
+						.SetState(ls.ventSounds)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.ventSounds = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"ventSounds changed to {value}");
+						}));
 
-					// rob the title screen text because it's easier this way lmao
-					GameObject titleText = Instantiate(title.FindMenu("SplashMenu").Find("Text").gameObject, menu.transform, true);
-					titleText.name = "MatchSettingsActionText";
-					Text titleTextComponent = titleText.GetComponent<Text>();
-					titleTextComponent.text = "";
-					titleTextComponent.fontSize = 25;
-					titleText.AddComponent<ActionText>();
+					stack.AddChild(new WToggleControl()
+						.SetName("modernGrabbing")
+						.SetText("Modern Grabbing")
+						.SetState(ls.modernGrabbing)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.modernGrabbing = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"modernGrabbing changed to {value}");
+						}));
+
+					stack.AddChild(new WToggleControl()
+						.SetName("allMustDie")
+						.SetText("All Babies Must Die")
+						.SetState(ls.allMustDie)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.allMustDie = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"allMustDie changed to {value}");
+						}));
+
+					stack.AddChild(new WToggleControl()
+						.SetName("spectatingAllowed")
+						.SetText("Spectating Allowed")
+						.SetState(ls.allowSpectating)
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.allowSpectating = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"spectatingAllowed changed to {value}");
+						}));
+
+					stack.AddChild(new WToggleControl()
+						.SetName("cheats")
+						.SetText("Cheats")
+						.SetState(ls.cheats)
+						.SetInteractable(!inGame && (PhotonNetwork.isMasterClient || !PhotonNetwork.inRoom))
+						.AddListener(value =>
+						{
+							HexaPersistentLobby.instance.lobbySettings.cheats = value;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage($"cheats changed to {value}");
+						}));
+
+					stack.AddChild(new WSensitiveTextInputField()
+						.SetName("relayServer")
+						.SetText("Voice Chat Relay")
+						.SetFieldText(ls.relay)
+						.AddSubmitListener(text => {
+							HexaPersistentLobby.instance.lobbySettings.relay = text;
+							HexaPersistentLobby.instance.CommitChanges();
+							HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");
+						}));
 				}
 
 				MakeMatchSettings(title, false);
@@ -798,6 +850,12 @@ namespace HexaMod.UI
 		{
 			// todo: make this the actual default color code
 			return PlayerPrefs.GetString("HMV2_SkinColor", "#CC9485");
+		}
+
+		public static string GetCurrentBabySkinColorHex()
+		{
+			// todo: make this the actual default color code
+			return PlayerPrefs.GetString("HMV2_BabySkinColor", "#CDA7A4");
 		}
 
 		public static string GetCurrentDadModel()

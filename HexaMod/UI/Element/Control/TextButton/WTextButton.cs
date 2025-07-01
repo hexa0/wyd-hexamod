@@ -2,7 +2,6 @@
 using UnityEngine.Events;
 using UnityEngine;
 using UnityEngine.UI;
-using static HexaMod.UI.Element.Control.ButtonSoundBehavior;
 
 namespace HexaMod.UI.Element.Control.TextButton
 {
@@ -22,9 +21,12 @@ namespace HexaMod.UI.Element.Control.TextButton
 			set => buttonSoundBehavior.HoverSound = value;
 		}
 
-		ButtonSoundBehavior buttonSoundBehavior;
+		private readonly ButtonSoundBehavior buttonSoundBehavior;
 
 		public static Vector2 gap = new Vector2(320f, 168f);
+		public static Vector2 padding = new Vector2(11f, 11f);
+		public static Vector2 defaultSize = new Vector2(300f, 150f);
+
 		public enum FontSizes : int
 		{
 			Small = 28,
@@ -33,7 +35,7 @@ namespace HexaMod.UI.Element.Control.TextButton
 
 		public Button button;
 		public Text label;
-		public Image image
+		public Image Image
 		{
 			get => button.image;
 			set { button.image = value; }
@@ -68,13 +70,13 @@ namespace HexaMod.UI.Element.Control.TextButton
 
 		public WTextButton SetSprite(Sprite sprite)
 		{
-			image.sprite = sprite;
+			Image.sprite = sprite;
 			return this;
 		}
 
 		public WTextButton SetSpriteColor(Color color)
 		{
-			image.color = color;
+			Image.color = color;
 			return this;
 		}
 
@@ -191,7 +193,8 @@ namespace HexaMod.UI.Element.Control.TextButton
 				.SetTextAuto("Back")
 				.SetButtonSound(UISound.Back)
 				.SetParent(root.transform)
-				.SetPosition(170f, 90f)
+				.SetPosition(-960f + padding.y, -540f + padding.x)
+				.SetPivot(0f, 0f)
 				.AddListener(() =>
 				{
 					if (backMenu != null)
