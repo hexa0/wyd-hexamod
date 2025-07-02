@@ -8,7 +8,7 @@ namespace VoiceChatHost.Type
 	public class VoiceRoom
 	{
 		public string roomName;
-		public List<ulong> clients = new List<ulong>();
+		public List<ulong> clients = [];
 		public PeerDuelProtocolConnection<HVCMessage> server;
 
 		public VoiceRoom(string roomName, PeerDuelProtocolConnection<HVCMessage> server)
@@ -89,9 +89,8 @@ namespace VoiceChatHost.Type
 		{
 			Console.WriteLine($"client {peerId} left room with hash {roomName}");
 
-			if (clients.Contains(peerId))
+			if (clients.Remove(peerId))
 			{
-				clients.Remove(peerId);
 				UpdatePeers();
 			}
 			else

@@ -4,6 +4,7 @@ using System.Reflection;
 using HexaMod.UI;
 using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.Voice;
+using HexaMod.Voice.Script;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,35 +22,12 @@ namespace HexaMod.Scripts
 			HexaMenus.Init();
 
 			// begin the startup routine
-			if (!VoiceChat.testMode)
-			{
-				InitHexaMod();
-			}
-			else
-			{
-				SetLoadingText("Voice Chat Test Mode Enabled");
-			}
+			InitHexaMod();
 		}
 
 		public void Start()
 		{
-			if (VoiceChat.testMode)
-			{
-				AudioSource mic = gameObject.AddComponent<AudioSource>();
-				mic.playOnAwake = true;
-				mic.volume = PlayerPrefs.GetFloat("MasterVolume", 0.75f);
-				mic.spatialBlend = 0f;
-				mic.spatialize = false;
-				mic.spread = 1f;
-				mic.bypassEffects = true;
-				mic.loop = true;
 
-				VoiceEmitter voiceEmitter = gameObject.AddComponent<VoiceEmitter>();
-				voiceEmitter.clientId = 0;
-
-				VoiceChat.ConnectToRelay("127.0.0.1");
-				VoiceChat.JoinVoiceRoom("VoiceChat.testMode room");
-			}
 		}
 
 		void SetLoadingText(string loadingText) => HexaMenus.startupScreen.loadingText.SetText(loadingText);

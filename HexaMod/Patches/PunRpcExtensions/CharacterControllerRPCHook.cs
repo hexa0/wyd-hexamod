@@ -2,7 +2,7 @@
 using HexaMod.Scripts;
 using HexaMod.Scripts.CustomCharacterModels;
 using HexaMod.Scripts.PunRpcExtensions.Character;
-using HexaMod.Voice;
+using HexaMod.Voice.Script;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 

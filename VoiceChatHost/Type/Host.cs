@@ -12,26 +12,26 @@
 
 		public static Host GetHost(string flags)
 		{
-			bool verboseLogs = flags.Contains("v");
+			bool verboseLogs = flags.Contains('v');
 
-			if (flags.Contains("c"))
+			if (flags.Contains('c'))
 			{
 				Console.Clear();
 			}
 
-			if (flags.Contains("t"))
+			if (flags.Contains('t'))
 			{
 				return new Host(HostType.Transcode, verboseLogs);
 			}
-			else if (flags.Contains("r"))
+			else if (flags.Contains('r'))
 			{
 				return new Host(HostType.Relay, verboseLogs);
 			}
-			else if (flags.Contains("T"))
+			else if (flags.Contains('T'))
 			{
 				return new Host(HostType.TestTranscodeClient, verboseLogs);
 			}
-			else if (flags.Contains("R"))
+			else if (flags.Contains('R'))
 			{
 				return new Host(HostType.TestRelayClient, verboseLogs);
 			}

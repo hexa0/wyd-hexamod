@@ -1,40 +1,41 @@
-﻿using System.Net;
-using VoiceChatHost.Opus;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using System.Text;
-using RNNoise.NET;
 using NAudio.Wave;
+using RNNoise.NET;
+using VoiceChatHost.Opus;
 using VoiceChatShared;
-using VoiceChatShared.Net;
 using VoiceChatShared.Enums;
+using VoiceChatShared.Net;
 using VoiceChatShared.Net.PeerConnection;
 
 namespace VoiceChatHost
 {
 	public class TranscodeServer
 	{
-		private static DateTime start = DateTime.Now;
-		private static readonly int decodeBufferSize = 4096;
-		private static readonly Dictionary<ulong, float[]> decodeBuffers = [];
-		private static readonly Dictionary<ulong, DecodingSetup> decoders = [];
-		private static readonly Denoiser rnNoiseDenoiser = new Denoiser();
-		private readonly PeerDuelProtocolConnection<HVCMessage> server;
-		private RelayClient relay;
-		private IPEndPoint gameEndPoint;
-		private bool isSpeaking = false;
-		private double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
-		private ulong clientId = 0;
-		private static float shortMaxValueMul = 1f / short.MaxValue;
-		// private static float shortMinValueMul = 1f / short.MinValue;
-		private static bool doDenoise = true;
+		static readonly DateTime start = DateTime.Now;
+		static readonly int decodeBufferSize = 4096;
+		static readonly Dictionary<ulong, float[]> decodeBuffers = [];
+		static readonly Dictionary<ulong, DecodingSetup> decoders = [];
+		static readonly Denoiser rnNoiseDenoiser = new();
+		readonly PeerDuelProtocolConnection<HVCMessage> server;
+		RelayClient relay;
+		IPEndPoint gameEndPoint;
+		bool isSpeaking = false;
+		double lastSpeakingTime = (DateTime.Now - start).TotalSeconds;
+		ulong clientId = 0;
+		static readonly float shortMaxValueMul = 1f / short.MaxValue;
+		// static float shortMinValueMul = 1f / short.MinValue;
+		static bool doDenoise = true;
 
-		static int micSampleRate = 48000;
-		static int micBufferMillis = 20;
+		static readonly int micSampleRate = 48000;
+		static readonly int micBufferMillis = 20;
 		static int micChannels = 1;
-		static int micBits = 16;
+		static readonly int micBits = 16;
 
 		internal static bool listening = false;
 		internal static bool expectedToDrop = false;
-		internal static WaveInEvent waveIn = new WaveInEvent
+		internal static WaveInEvent waveIn = new()
 		{
 			DeviceNumber = 0,
 			WaveFormat = new WaveFormat(
@@ -72,7 +73,7 @@ namespace VoiceChatHost
 			gameEndPoint = from;
 
 			string relayIp = Encoding.ASCII.GetString(message.Body);
-			IPEndPoint newRelayEndPoint = new IPEndPoint(IPAddress.Parse(relayIp), HexaVoiceChat.Ports.relay);
+			IPEndPoint newRelayEndPoint = new(IPAddress.Parse(relayIp), HexaVoiceChat.Ports.relay);
 
 			Console.WriteLine($"relay changed");
 
@@ -88,10 +89,18 @@ namespace VoiceChatHost
 				}
 			}
 
-			relay = new RelayClient(relayIp);
-			relay.clientId = clientId;
-			relay.onOpusAction = OnOpus;
-			relay.onSpeakingStateAction = OnSpeakingState;
+			relay = new(relayIp)
+			{
+				clientId = clientId,
+				onOpusAction = OnOpus,
+				onSpeakingStateAction = OnSpeakingState,
+				onAllocatedIdAction = id =>
+				{
+					// make the game client aware of the allocated ID
+					clientId = id;
+					server.udp.SendMessage(HVCMessage.VoiceRoomPeerIdAllocated, NetData.As(id), gameEndPoint);
+				}
+			};
 		}
 
 		private void OnVoiceRoomJoin(NetMessage<HVCMessage> message, IPEndPoint from)
@@ -109,35 +118,19 @@ namespace VoiceChatHost
 			relay.JoinRoom(Encoding.ASCII.GetString(message.Body));
 		}
 
-		private void OnVoiceRoomLeave(NetMessage<HVCMessage> message, IPEndPoint from)
-		{
-			gameEndPoint = from;
-
-			if (relay == null)
-			{
-				throw new Exception("OnVoiceRoomLeave() cannot be called when there is no RelayClient");
-			}
-
-			decoders.Clear();
-			decodeBuffers.Clear();
-			isSpeaking = false;
-		}
-
 		private void OnOpus(ulong clientId, byte[] opusFrame, int samples, int sampleRate, int channels)
 		{
-			if (!decodeBuffers.ContainsKey(clientId))
+			if (!decodeBuffers.TryGetValue(clientId, out float[] decodeBuffer))
 			{
-				decodeBuffers.Add(clientId, new float[decodeBufferSize]);
+				decodeBuffer = (new float[decodeBufferSize]);
+				decodeBuffers.Add(clientId, decodeBuffer);
 			}
 
-			if (!decoders.ContainsKey(clientId))
+			if (!decoders.TryGetValue(clientId, out DecodingSetup decoder))
 			{
-				decoders.Add(clientId, new DecodingSetup(sampleRate, channels));
+				decoder = new DecodingSetup(sampleRate, channels);
+				decoders.Add(clientId, decoder);
 			}
-
-			float[] decodeBuffer = decodeBuffers[clientId];
-
-			DecodingSetup decoder = decoders[clientId];
 
 			decoder.sampleRate = sampleRate;
 			decoder.channels = channels;
@@ -199,7 +192,7 @@ namespace VoiceChatHost
 
 				try
 				{
-					if (relay.room != null)
+					if (relay?.room != null)
 					{
 						int sampleCount = audioBuffer.Length / 2;
 
@@ -226,7 +219,7 @@ namespace VoiceChatHost
 							if (isSpeaking != shouldBeSpeaking)
 							{
 								isSpeaking = true;
-								relay.SetSpeakingState(true);
+								relay?.SetSpeakingState(true);
 								OnSpeakingState(clientId, true);
 							}
 
@@ -240,7 +233,7 @@ namespace VoiceChatHost
 								if (isSpeaking)
 								{
 									isSpeaking = false;
-									relay.SetSpeakingState(false);
+									relay?.SetSpeakingState(false);
 									OnSpeakingState(clientId, false);
 								}
 							}
@@ -251,7 +244,7 @@ namespace VoiceChatHost
 							int frameSize = EncodingSetup.Encode(floatAudio, pcm.Length / micChannels, EncodingSetup.encodeBuffer.Length);
 							Span<byte> encoded = EncodingSetup.encodeBuffer.AsSpan(0, frameSize);
 
-							relay.SendOpus(encoded.ToArray(), pcm.Length);
+							relay?.SendOpus(encoded.ToArray(), pcm.Length);
 						}
 					}
 				}
@@ -280,32 +273,32 @@ namespace VoiceChatHost
 			server.OnMessage(HVCMessage.ConnectToRelay, ConnectToRelay);
 			server.OnMessage(HVCMessage.DisconnectFromRelay, DisconnectFromRelay);
 			server.OnMessage(HVCMessage.VoiceRoomJoin, OnVoiceRoomJoin);
-			server.OnMessage(HVCMessage.Handshake, (NetMessage<HVCMessage> message, IPEndPoint peer) =>
+			server.OnMessage(HVCMessage.Handshake, (message, peer) =>
 			{
 				Console.WriteLine($"got handshake, respond to {peer.Address}:{peer.Port}");
 				server.tcp.SendEventMessage(HVCMessage.Handshake, peer);
 			});
-			server.OnMessage(HVCMessage.SetRNNoiseEnabled, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetRNNoiseEnabled, (message, from) =>
 			{
 				Console.WriteLine($"set rn noise: {message.Body[0]}");
 				doDenoise = message.Body[0] == 1;
 			});
 			server.OnMessage(HVCMessage.SetListening, OnSetListening);
-			server.OnMessage(HVCMessage.SetMicDeviceId, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetMicDeviceId, (message, from) =>
 			{
 				int deviceId = BitConverter.ToInt32(message.Body);
 				Console.WriteLine($"set mic device: {deviceId}");
 				waveIn.DeviceNumber = deviceId;
 			});
-			server.OnMessage(HVCMessage.SetMicBufferMillis, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetMicBufferMillis, (message, from) =>
 			{
 				waveIn.BufferMilliseconds = message.Body[0];
 			});
-			server.OnMessage(HVCMessage.SetMicBufferCount, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetMicBufferCount, (message, from) =>
 			{
 				waveIn.NumberOfBuffers = message.Body[0];
 			});
-			server.OnMessage(HVCMessage.SetMicChannels, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetMicChannels, (message, from) =>
 			{
 				byte channels = message.Body[0];
 
@@ -334,7 +327,7 @@ namespace VoiceChatHost
 					waveIn.StopRecording();
 				}
 			});
-			server.OnMessage(HVCMessage.SetBitrate, (NetMessage<HVCMessage> message, IPEndPoint from) =>
+			server.OnMessage(HVCMessage.SetBitrate, (message, from) =>
 			{
 				Bitrate preset = (Bitrate)message.Body[0];
 				if (Enum.IsDefined(typeof(Bitrate), message.Body[0]))

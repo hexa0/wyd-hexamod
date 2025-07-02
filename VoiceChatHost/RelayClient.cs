@@ -25,6 +25,7 @@ namespace VoiceChatHost
 		public ulong clientId = 0;
 		public Action<ulong, byte[], int, int, int> onOpusAction;
 		public Action<ulong, bool> onSpeakingStateAction;
+		public Action<ulong> onAllocatedIdAction;
 		public string room = null;
 
 		public void JoinRoom(string roomName)
@@ -42,6 +43,7 @@ namespace VoiceChatHost
 
 		public void SetSpeakingState(bool speaking)
 		{
+			if (client.tcp.Disposed) { return; }
 			client.tcp.SendMessage(
 				HVCMessage.SpeakingStateUpdated,
 				speaking ? [1] : [0]
@@ -50,6 +52,7 @@ namespace VoiceChatHost
 
 		public void SendOpus(byte[] encoded, int samples)
 		{
+			if (client.udp.Disposed) { return; }
 			byte[] sampleCount = BitConverter.GetBytes(samples);
 			byte[] sampleRate = BitConverter.GetBytes(EncodingSetup.sampleRate);
 			byte[] channels = BitConverter.GetBytes(EncodingSetup.channels);
@@ -159,8 +162,9 @@ namespace VoiceChatHost
 										clientId = BitConverter.ToUInt64(message.Body, 0);
 										Console.WriteLine($"RelayClient: Allocated to peer ID {clientId} by server.");
 
-
+										onAllocatedIdAction.Invoke(clientId);
 										State = RelayConnectionState.Connected;
+
 										if (room != null)
 										{
 											JoinRoom(room);

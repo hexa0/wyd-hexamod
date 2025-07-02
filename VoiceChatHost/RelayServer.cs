@@ -10,8 +10,8 @@ namespace VoiceChatHost
 {
 	public class RelayServer
 	{
-		private PeerDuelProtocolConnection<HVCMessage> server;
-		private Dictionary<string, VoiceRoom> rooms = new Dictionary<string, VoiceRoom>();
+		private readonly PeerDuelProtocolConnection<HVCMessage> server;
+		private readonly Dictionary<string, VoiceRoom> rooms = [];
 
 		void SetPeer(NetMessage<HVCMessage> message, IPEndPoint peer)
 		{
@@ -62,14 +62,16 @@ namespace VoiceChatHost
 
 			VoiceRoom roomToJoin;
 
-			if (rooms.ContainsKey(roomName))
+			if (rooms.TryGetValue(roomName, out VoiceRoom value))
 			{
-				roomToJoin = rooms[roomName];
+				roomToJoin = value;
 			}
 			else
 			{
-				roomToJoin = new VoiceRoom(roomName, server);
-				roomToJoin.server = server;
+				roomToJoin = new(roomName, server)
+				{
+					server = server
+				};
 				rooms.Add(roomName, roomToJoin);
 			}
 
@@ -118,7 +120,7 @@ namespace VoiceChatHost
 
 			if (room != null)
 			{
-				NetMessage<HVCMessage> newMessage = new NetMessage<HVCMessage>(
+				NetMessage<HVCMessage> newMessage = new(
 					message.Type,
 					message.Body,
 					peerId // retransmit the packet to the other clients with the correct peerId
@@ -133,7 +135,7 @@ namespace VoiceChatHost
 
 		public RelayServer(string ip)
 		{
-			IPEndPoint endPoint = new IPEndPoint(
+			IPEndPoint endPoint = new(
 				IPAddress.Parse(ip),
 				HexaVoiceChat.Ports.relay
 			);
@@ -155,8 +157,6 @@ namespace VoiceChatHost
 		{
 			while (true)
 			{
-				long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
 				lock (rooms)
 				{
 					foreach (var room in rooms)

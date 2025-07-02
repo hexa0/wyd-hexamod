@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using BepInEx.Logging;
+using ExitGames.Client.Photon;
 using NAudio.Wave;
 using UnityEngine;
-using VoiceChatShared;
 using VoiceChatShared.Enums;
 using VoiceChatShared.Net;
 using VoiceChatShared.Net.PeerConnection;
@@ -24,7 +23,6 @@ namespace HexaMod.Voice
 			public int sampleRate = 48000;
 		}
 
-		public static bool testMode = false;
 		public static Dictionary<ulong, List<AudioBuffer>> audioBuffers = new Dictionary<ulong, List<AudioBuffer>>();
 		public static Dictionary<ulong, bool> speakingStates = new Dictionary<ulong, bool>();
 		public static PeerDuelProtocolConnection<HVCMessage> transcodeClient;
@@ -136,6 +134,22 @@ namespace HexaMod.Voice
 
 			transcodeClient.OnMessage(HVCMessage.PCMData, OnPCMData);
 			transcodeClient.OnMessage(HVCMessage.SpeakingStateUpdated, OnSpeakingState);
+			transcodeClient.OnMessage(HVCMessage.VoiceRoomPeerIdAllocated, (message, peer) =>
+			{
+				ulong allocatedId = BitConverter.ToUInt64(message.Body, 0);
+				Mod.Print($"We've been assigned to peer ID {allocatedId} by the relay server");
+
+				Hashtable hash = PhotonNetwork.player.CustomProperties;
+
+				if (hash.ContainsKey("VoicePeerId"))
+				{
+					hash.Remove("VoicePeerId");
+				}
+
+				hash.Add("VoicePeerId", message.Body);
+
+				PhotonNetwork.player.SetCustomProperties(hash);
+			});
 			transcodeClient.OnDisconnect(peer =>
 			{
 				if (transcodeReady)

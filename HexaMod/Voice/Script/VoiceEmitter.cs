@@ -5,13 +5,39 @@ using HexaMod.UI;
 using HexaMod.UI.Element.VoiceChatUI.Debug;
 using UnityEngine;
 
-namespace HexaMod.Voice
+namespace HexaMod.Voice.Script
 {
 	public class VoiceEmitter : MonoBehaviour
 	{
 		public GameObject speakingObject;
 		public AudioSource audioSource;
-		public ulong clientId = 0;
+		public PhotonPlayer player;
+		ulong ClientId {
+			get
+			{
+				if (player == null)
+				{
+					Mod.Warn("VoiceEmitter: Player is null, returning 0 for ClientId.");
+					return 0;
+				}
+				else
+				{
+					if (!player.CustomProperties.ContainsKey("VoicePeerId"))
+					{
+						return 0;
+					}
+					else
+					{
+						player.CustomProperties.TryGetValue("VoicePeerId", out object peerId);
+
+						ulong allocatedId = BitConverter.ToUInt64(peerId as byte[], 0);
+
+						return allocatedId;
+					}
+				}
+			}
+		}
+
 		private List<VoiceChat.AudioBuffer> buffers;
 		private VoiceChat.AudioBuffer lastBuffer = new VoiceChat.AudioBuffer()
 		{
@@ -35,35 +61,6 @@ namespace HexaMod.Voice
 				if (buffer == null)
 				{
 					buffer = lastBuffer;
-
-					//bool speaking = false;
-
-					//if (VoiceChat.speakingStates.ContainsKey(clientId))
-					//{
-					//	if (VoiceChat.speakingStates[clientId])
-					//	{
-					//		speaking = true;
-					//	}
-					//}
-
-					//if (speaking)
-					//{
-					//	//for (int i = 0; i < buffer.samples.Length; i++)
-					//	//{
-					//	//	buffer.samples[i] = (short)(buffer.samples[i] * 0.85f); // haha discord funni
-					//	//}
-					//}
-					//else
-					//{
-					//	circularBuffer.Write(new short[circularBuffer.capacity]);
-					//	circularBuffer.realReadHead = 0;
-					//	circularBuffer.realWriteHead = 256;
-
-					//	for (int i = 0; i < buffer.samples.Length; i++)
-					//	{
-					//		buffer.samples[i] = 0;
-					//	}
-					//}
 				}
 				else
 				{
@@ -75,7 +72,7 @@ namespace HexaMod.Voice
 			}
 		}
 
-		private CircularShortBuffer circularBuffer = new CircularShortBuffer(48000);
+		private readonly CircularShortBuffer circularBuffer = new CircularShortBuffer(48000);
 		private static void CopyData(short[] source, int sourceIndex, short[] destination, int destinationIndex, int length)
 		{
 			Buffer.BlockCopy(source, sourceIndex * 2, destination, destinationIndex * 2, length * 2);
@@ -89,7 +86,7 @@ namespace HexaMod.Voice
 			{
 				isWrittenTo = false;
 
-				if (!VoiceChat.speakingStates.ContainsKey(clientId) || VoiceChat.speakingStates[clientId])
+				if (!VoiceChat.speakingStates.ContainsKey(ClientId) || VoiceChat.speakingStates[ClientId])
 				{
 					tooCloseToWriteHead = true;
 				}
@@ -118,7 +115,7 @@ namespace HexaMod.Voice
 
 			if (tooCloseToWriteHead)
 			{
-				circularBuffer.realReadHead = circularBuffer.realWriteHead - (lastBuffer.samples.Length * VoiceChat.underrunPreventionSize);
+				circularBuffer.realReadHead = circularBuffer.realWriteHead - lastBuffer.samples.Length * VoiceChat.underrunPreventionSize;
 			}
 
 			short[] read = circularBuffer.Read(chunkSize);
@@ -131,9 +128,9 @@ namespace HexaMod.Voice
 
 		private void Update()
 		{
-			if (speakingObject != null && VoiceChat.speakingStates.ContainsKey(clientId))
+			if (speakingObject != null && VoiceChat.speakingStates.ContainsKey(ClientId))
 			{
-				var speaking = VoiceChat.speakingStates[clientId];
+				var speaking = VoiceChat.speakingStates[ClientId];
 				speakingObject.SetActive(speaking);
 			}
 
@@ -176,9 +173,9 @@ namespace HexaMod.Voice
 
 		private void OnAudioFilterRead(float[] data, int outputChannels)
 		{
-			if (VoiceChat.audioBuffers.ContainsKey(clientId))
+			if (VoiceChat.audioBuffers.ContainsKey(ClientId))
 			{
-				buffers = VoiceChat.audioBuffers[clientId];
+				buffers = VoiceChat.audioBuffers[ClientId];
 
 				try
 				{

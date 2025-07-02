@@ -1,8 +1,7 @@
-﻿using HexaMod.Util;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace HexaMod.Voice
+namespace HexaMod.Voice.Script
 {
 	public class LobbyVoiceEmitterBehavior : MonoBehaviour
 	{
@@ -161,7 +160,7 @@ namespace HexaMod.Voice
 			int i = 0;
 			playerNames.daddyPlayerIds.ForEach(player => {
 				VoiceEmitter emitter = emitters[playerIndex].GetComponent<VoiceEmitter>();
-				emitter.clientId = (ulong)player.ID;
+				emitter.player = player;
 				emitter.speakingObject = dadIndicators[i];
 				playerIndex++;
 				i++;
@@ -170,7 +169,7 @@ namespace HexaMod.Voice
 			i = 0;
 			playerNames.babyPlayerIds.ForEach(player => {
 				VoiceEmitter emitter = emitters[playerIndex].GetComponent<VoiceEmitter>();
-				emitter.clientId = (ulong)player.ID;
+				emitter.player = player;
 				emitter.speakingObject = babyIndicators[i];
 				playerIndex++;
 				i++;

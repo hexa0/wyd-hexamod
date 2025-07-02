@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace HexaMod.Voice
+namespace HexaMod.Voice.Script
 {
 	public class PlayerVoiceEmitterRPC : MonoBehaviour
 	{
@@ -14,7 +12,7 @@ namespace HexaMod.Voice
 
 		AudioSource voiceSource;
 
-		public void SetVoiceId(ulong id)
+		public void SetVoicePlayer(PhotonPlayer player)
 		{
 			GameObject model = gameObject;
 			var dadModel = transform.Find("DadModel");
@@ -45,7 +43,7 @@ namespace HexaMod.Voice
 			voiceSource.loop = true;
 
 			VoiceEmitter voiceEmitter = model.AddComponent<VoiceEmitter>();
-			voiceEmitter.clientId = id;
+			voiceEmitter.player = player;
 
 			voiceEmitter.enabled = false;
 			voiceSource.enabled = false;

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.Voice.Script;
 
 namespace HexaMod.Voice
 {

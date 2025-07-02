@@ -4,7 +4,7 @@ using HexaMod.Scripts.CustomCharacterModels;
 using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using HexaMod.SerializableObjects;
 using HexaMod.UI;
-using HexaMod.Voice;
+using HexaMod.Voice.Script;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -45,7 +45,7 @@ namespace HexaMod.Scripts.PunRpcExtensions.Character
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);
 			GetComponent<CharacterModelSwapper>().SetShirt(initialState.shirtMaterial);
-			GetComponent<PlayerVoiceEmitterRPC>().SetVoiceId((ulong)netView.owner.ID);
+			GetComponent<PlayerVoiceEmitterRPC>().SetVoicePlayer(netView.owner);
 		}
 
 		IEnumerator SendInitalState()
