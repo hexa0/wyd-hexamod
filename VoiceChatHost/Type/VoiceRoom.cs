@@ -13,7 +13,7 @@ namespace VoiceChatHost.Type
 
 		public VoiceRoom(string roomName, PeerDuelProtocolConnection<HVCMessage> server)
 		{
-			Console.Error.WriteLine($"room with hash {roomName} was created");
+			Console.WriteLine($"room with hash {roomName} was created");
 
 			this.roomName = roomName;
 			this.server = server;
