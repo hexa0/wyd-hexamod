@@ -142,8 +142,10 @@ namespace HexaMod.UI.Util
 			WYDMenus.inGame = new MenuUtil();
 
 			WYDMenus.title.root = menuCanvas.Find("MainMenu").transform;
+			WYDMenus.title.root.GetComponent<RectTransform>().ScaleWithParent();
 			WYDMenus.title.menuController = WYDMenus.title.root.GetComponent<MenuController>();
 			WYDMenus.inGame.root = menuCanvas.Find("InGameMenu").transform;
+			WYDMenus.inGame.root.GetComponent<RectTransform>().ScaleWithParent();
 			WYDMenus.inGame.menuController = WYDMenus.inGame.root.GetComponent<MenuController>();
 
 			if (!PhotonNetwork.inRoom)
