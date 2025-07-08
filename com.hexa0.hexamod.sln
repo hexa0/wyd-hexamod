@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaMod", "HexaMod\HexaMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatHost", "VoiceChatHost\VoiceChatHost.csproj", "{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatShared", "VoiceChatShared\VoiceChatShared.csproj", "{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaNet", "HexaNet\HexaNet.csproj", "{94093039-9755-8135-4FBF-FEC060EB7727}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceChatShared", "VoiceChatShared\VoiceChatShared.csproj", "{F1521E5E-9CEB-B9DB-B31A-BA6E5C127805}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,8 +20,10 @@ Global
 		{6E01048F-AA24-4B69-8098-10CC744CAEFD}.Release|x64.Build.0 = Release|x64
 		{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}.Release|x64.ActiveCfg = Release|x64
 		{498FE7E6-AF60-4A54-BA48-476CD9B22BF1}.Release|x64.Build.0 = Release|x64
-		{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}.Release|x64.ActiveCfg = Release|x64
-		{7AFBBF8D-85E8-4AF5-8236-ABEB695427AE}.Release|x64.Build.0 = Release|x64
+		{94093039-9755-8135-4FBF-FEC060EB7727}.Release|x64.ActiveCfg = Release|x64
+		{94093039-9755-8135-4FBF-FEC060EB7727}.Release|x64.Build.0 = Release|x64
+		{F1521E5E-9CEB-B9DB-B31A-BA6E5C127805}.Release|x64.ActiveCfg = Release|x64
+		{F1521E5E-9CEB-B9DB-B31A-BA6E5C127805}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -86,6 +86,7 @@ internal static class BuildInfo
 	</Target>
 
 	<ItemGroup>
+		<ProjectReference Include="..\HexaNet\HexaNet.csproj" />
 		<ProjectReference Include="..\VoiceChatShared\VoiceChatShared.csproj" />
 	</ItemGroup>
 

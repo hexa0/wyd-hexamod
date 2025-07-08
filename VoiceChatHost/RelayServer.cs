@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using System.Text;
 using VoiceChatHost.Type;
-using VoiceChatShared;
+using HexaNet;
 using VoiceChatShared.Enums;
-using VoiceChatShared.Net;
-using VoiceChatShared.Net.PeerConnection;
+using HexaNet;
+using HexaNet.PeerConnection;
+using VoiceChatShared;
 
 namespace VoiceChatHost
 {

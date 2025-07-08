@@ -66,6 +66,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\HexaNet\HexaNet.csproj" />
 		<ProjectReference Include="..\VoiceChatShared\VoiceChatShared.csproj" />
 	</ItemGroup>
 </Project>
