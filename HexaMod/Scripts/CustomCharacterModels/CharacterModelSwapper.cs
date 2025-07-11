@@ -122,6 +122,16 @@ namespace HexaMod.Scripts.CustomCharacterModels
 						if (model.materials.Length > 0)
 						{
 							body.materials = model.materials;
+
+							if (!isDad)
+							{
+								BabyStats babyStats = GetComponentInChildren<BabyStats>();
+
+								if (babyStats)
+								{
+									babyStats.healthyColor = body.materials[0].color;
+								}
+							}
 						}
 						else
 						{
@@ -341,15 +351,15 @@ namespace HexaMod.Scripts.CustomCharacterModels
 			{
 				var material = body.materials[skinMaterialIndex];
 				material.color = skinColor;
-			}
 
-			if (!isDad)
-			{
-				BabyStats babyStats = GetComponentInChildren<BabyStats>();
-
-				if (babyStats)
+				if (!isDad)
 				{
-					babyStats.healthyColor = skinColor;
+					BabyStats babyStats = GetComponentInChildren<BabyStats>();
+
+					if (babyStats)
+					{
+						babyStats.healthyColor = skinColor;
+					}
 				}
 			}
 		}
