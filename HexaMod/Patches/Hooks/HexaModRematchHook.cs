@@ -35,13 +35,13 @@ namespace HexaMod.Patches.Hooks
 					PhotonNetwork.DestroyAll();
 				}
 
-				HexaMenus.fadeOverlay.fader.fadeState = true;
 				AsyncOperation sceneLoadOperation = SceneManager.LoadSceneAsync(1);
 				sceneLoadOperation.allowSceneActivation = false;
-				yield return new WaitForSeconds((1f / HexaMenus.fadeOverlay.fader.fadeSpeed) - 0.2f);
-				HexaMenus.startupScreen.loadingText.SetText("Loading");
+				HexaMenus.startupScreen.loadingText.SetText(string.Empty);
 				HexaMenus.startupScreen.fader.fadeState = true;
-				yield return new WaitForSeconds(0.2f);
+				yield return new WaitForSeconds(1f / 4f);
+				HexaMenus.startupScreen.loadingText.SetText("Loading");
+				yield return 0;
 				rematchInProgress = false;
 				HexaMenus.startupScreen.fader.fadeState = false;
 				sceneLoadOperation.allowSceneActivation = true;

@@ -1,9 +1,9 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.Patches.Feature;
 using HexaMod.Settings;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
-using UnityStandardAssets.Utility;
 
 namespace HexaMod.Patches.Fixes
 {
@@ -78,11 +78,6 @@ namespace HexaMod.Patches.Fixes
 		static bool crouchingTarget = false;
 		static bool proningTarget = false;
 
-		static private float camStartX = 0f;
-		static private float camStartY = 0f;
-		static private float camStartZ = 0f;
-
-
 		[HarmonyPatch(typeof(ActionInput), "Start")]
 		[HarmonyPostfix]
 		static void ActionInputStart()
@@ -112,17 +107,13 @@ namespace HexaMod.Patches.Fixes
 			}
 		}
 
-		static float characterHeight = 2.8f;
-		static int ceilingRaycastMask = ~671088640;
+		readonly static float characterHeight = 2.8f;
+		readonly static int ceilingRaycastMask = ~671088640;
 
 		[HarmonyPatch(typeof(Crouch), "Start")]
 		[HarmonyPrefix]
 		static void CrouchStart(ref Crouch __instance)
 		{
-			camStartX = __instance.cam.localPosition.x;
-			camStartY = __instance.cam.localPosition.y;
-			camStartZ = __instance.cam.localPosition.x; // this bug replicates a behavior in the game that makes the camera offset itself forwards
-			// it seems the code was unintentionally made to do that by setting a variable wrong but was never patched because it prevents you from seeing yourself
 			__instance.gameObject.AddComponent<WallClipFixBehavior>();
 		}
 
@@ -153,19 +144,14 @@ namespace HexaMod.Patches.Fixes
 			}
 
 			WallClipFixBehavior self = __instance.GetComponent<WallClipFixBehavior>();
+			CameraController cameraController = __instance.GetComponent<CameraController>();
+
+			if (!cameraController.cameraOffsets.ContainsKey("crouch"))
+			{
+				cameraController.cameraOffsets.Add("crouch", Vector3.zero);
+			}
 
 			CharacterController controller = __instance.charCont;
-			FirstPersonController wydController = __instance.charContScript;
-
-			Traverse wydControllerFields = Traverse.Create(wydController);
-
-			Traverse<LerpControlledBob> m_JumpBob = wydControllerFields.Field<LerpControlledBob>("m_JumpBob");
-			Traverse<CurveControlledBob> m_HeadBob = wydControllerFields.Field<CurveControlledBob>("m_HeadBob");
-
-			Traverse headBobFields = Traverse.Create(m_HeadBob.Value);
-
-			Traverse<float> m_CyclePositionX = headBobFields.Field<float>("m_CyclePositionX");
-			Traverse<float> m_CyclePositionY = headBobFields.Field<float>("m_CyclePositionY");
 
 			__instance.GetControls();
 
@@ -183,35 +169,16 @@ namespace HexaMod.Patches.Fixes
 
 			controller.center = Vector3.Lerp(controller.center, targetCenter, Mathf.Min(delta * 15f, 1f));
 			controller.height = Mathf.Lerp(controller.height, targetHeight, Mathf.Min(delta * 15f, 1f));
+			
 			if (HexaModPreferences.smoothCrouching.Value)
 			{
 				self.crouchHeight = Mathf.Lerp(self.crouchHeight, self.crouching ? __instance.crouchHeight : 0f, Mathf.Min(delta * 15f, 1f));
-				self.cameraOffset = Vector3.Lerp(self.cameraOffset, targetCameraOffset, Mathf.Min(delta * 15f, 1f));
+				cameraController.cameraOffsets["crouch"] = Vector3.Lerp(cameraController.cameraOffsets["crouch"], targetCameraOffset, Mathf.Min(delta * 15f, 1f));
 			}
 			else
 			{
 				self.crouchHeight = self.crouching ? __instance.crouchHeight : 0f;
-				self.cameraOffset = targetCameraOffset;
-			}
-
-			if (HexaModPreferences.viewBobbing.Value)
-			{
-				float bobX = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionX.Value) * m_HeadBob.Value.HorizontalBobRange;
-				float bobY = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionY.Value) * m_HeadBob.Value.VerticalBobRange;
-
-				__instance.cam.localPosition = new Vector3(
-					camStartX + self.cameraOffset.x,
-					camStartY + self.cameraOffset.y,
-					camStartZ + self.cameraOffset.z
-				) + new Vector3(0f, -m_JumpBob.Value.Offset(), 0f) + new Vector3(bobX, bobY, 0f);
-			}
-			else
-			{
-				__instance.cam.localPosition = new Vector3(
-					camStartX + self.cameraOffset.x,
-					camStartY + self.cameraOffset.y,
-					camStartZ + self.cameraOffset.z
-				);
+				cameraController.cameraOffsets["crouch"] = targetCameraOffset;
 			}
 
 			return false;
