@@ -50,6 +50,14 @@ namespace HexaMod.Patches.Hooks
 	[HarmonyPatch(typeof(MenuController))]
 	internal class HexaModRematchHook
 	{
+		[HarmonyPatch("Start")]
+		[HarmonyPostfix]
+		static void Start(ref MenuController __instance)
+		{
+			HexaMenus.fadeOverlay.fader.fadeState = false;
+			__instance.gameObject.AddComponent<HexaModRematcher>();
+		}
+
 		[HarmonyPatch("Rematch")]
 		[HarmonyPrefix]
 		static bool Rematch(ref MenuController __instance)
@@ -57,14 +65,6 @@ namespace HexaMod.Patches.Hooks
 			__instance.SendMessage("HexaModRematchAsync");
 
 			return false;
-		}
-
-		[HarmonyPatch("Start")]
-		[HarmonyPostfix]
-		static void Start(ref MenuController __instance)
-		{
-			HexaMenus.fadeOverlay.fader.fadeState = false;
-			__instance.gameObject.AddComponent<HexaModRematcher>();
 		}
 	}
 }
