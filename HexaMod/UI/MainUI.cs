@@ -409,7 +409,7 @@ namespace HexaMod.UI
 
 				 topRow.AddChild(new WTextButton()
 					.SetName("testDad")
-					.SetTextAuto("Test\nDad")
+					.SetTextAuto("Test As\nDad")
 					.SetParent(title.FindMenu("SplashMenu"))
 					.AddListener(ButtonCallbacks.TestDadButton));
 
@@ -418,7 +418,7 @@ namespace HexaMod.UI
 
 				middleRow.AddChild(new WTextButton()
 					.SetName("testBaby")
-					.SetTextAuto("Test\nBaby")
+					.SetTextAuto("Test As\nBaby")
 					.SetParent(title.FindMenu("SplashMenu"))
 					.AddListener(ButtonCallbacks.TestBabyButton));
 
