@@ -94,43 +94,6 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 			LoadLobbyLevel();
 		}
 
-		private bool waitingForTestRoom = false;
-
-		public void Update()
-		{
-			if (HexaGlobal.testGameWaitingForConn || waitingForTestRoom)
-			{
-				if (!waitingForTestRoom)
-				{
-					if (PhotonNetwork.connectedAndReady)
-					{
-						HexaGlobal.testGameWaitingForConn = false;
-						waitingForTestRoom = true;
-
-						RoomOptions roomOptions = new RoomOptions
-						{
-							IsOpen = false,
-							IsVisible = false,
-							MaxPlayers = 1
-						};
-						PhotonNetwork.CreateRoom(
-							"FG_" + HexaGlobal.networkManager.gameName + HexaGlobal.networkManager.gameNum,
-							roomOptions,
-							PhotonNetwork.lobby
-						);
-					}
-				}
-				else
-				{
-					if (PhotonNetwork.room != null)
-					{
-						waitingForTestRoom = false;
-						HexaGlobal.networkManager.StartMatch_FG();
-					}
-				}
-			}
-		}
-
 		public void TryNetworkLobbySettings(LobbySettings newSettings)
 		{
 			newSettings.voiceRoom = HexaGlobal.instanceGuid;
@@ -241,24 +204,6 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 			HexaPersistentLobby lobby = HexaPersistentLobby.instance;
 			LobbySettings lobbySettings = lobby.lobbySettings;
 
-			var privateRematchFields = Traverse.Create(rematchHelper);
-
-			if (PhotonNetwork.offlineMode)
-			{
-				var p1isDad = privateRematchFields.Field<bool>("p1isDad");
-
-				if (!p1isDad.Value)
-				{
-					networkManager.CreateOfflineGame();
-				}
-				else
-				{
-					networkManager.CreateOfflineGame2();
-				}
-
-				Destroy(rematchHelper.gameObject);
-				HexaGlobal.rematchHelper = null;
-			}
 
 			rematchHelper.allowSpec = lobbySettings.allowSpectating && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
 			rematchHelper.allMustDie = lobbySettings.allMustDie && !GameModes.gameModes[rematchHelper.curGameMode].twoPlayer;
@@ -305,8 +250,6 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 			}
 
 			WYDMenus.title.menuController.DeactivateAll();
-			Destroy(HexaGlobal.rematchHelper);
-
 			HexaGlobal.networkManager.fader.SendMessage("Fade");
 
 			if (PhotonNetwork.isMasterClient)
@@ -316,6 +259,7 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 				HexaGlobal.hexaLobby.WaitForPlayers(delegate ()
 				{
 					HexaGlobal.hexaLobby.StartMatch();
+					Destroy(HexaGlobal.rematchHelper);
 				}, 5f);
 			}
 		}
@@ -343,13 +287,34 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 				if (PhotonNetwork.room.IsOpen == false)
 				{
-					if (mode.respawnRPC != null)
+					Mod.Warn(PhotonNetwork.room.Name);
+					if (SplitscreenUtil.IsInSplitscreen())
 					{
-						HexaGlobal.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
+						var privateRematchFields = Traverse.Create(HexaGlobal.rematchHelper);
+						var p1isDad = privateRematchFields.Field<bool>("p1isDad");
+
+						if (!p1isDad.Value)
+						{
+							HexaGlobal.networkManager.CreateOfflineGame();
+						}
+						else
+						{
+							HexaGlobal.networkManager.CreateOfflineGame2();
+						}
+
+						Destroy(HexaGlobal.rematchHelper.gameObject);
+						HexaGlobal.rematchHelper = null;
 					}
 					else
 					{
-						HexaGlobal.networkManager.RespawnPlayers();
+						if (mode.respawnRPC != null)
+						{
+							HexaGlobal.networkManager.netView.RPC(mode.respawnRPC, PhotonTargets.All);
+						}
+						else
+						{
+							HexaGlobal.networkManager.RespawnPlayers();
+						}
 					}
 				}
 			}

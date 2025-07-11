@@ -128,18 +128,32 @@ namespace HexaMod
 			PhotonNetwork.sendRateOnSerialize = sendRate;
 		}
 		public static readonly string instanceGuid = NewGuid().ToString();
-		public static bool testGameWaitingForConn = false;
 		public static void MakeTestGame(bool spawnAsDad = true)
 		{
-			networkManager.ConnectToPhoton();
+			PhotonNetwork.offlineMode = true;
+			//networkManager.ConnectToPhoton();
 			networkManager.gameName = instanceGuid;
 			HexaPersistentLobby.instance.Reset();
 			// PhotonNetwork.player.ID will be uninitialized at -1, 1 will always be our id in a test game so we set that
 			HexaPersistentLobby.instance.dads[1] = spawnAsDad;
 			networkManager.isDad = spawnAsDad;
 			WYDMenus.title.menuController.DeactivateAll();
-			testGameWaitingForConn = true;
 			networkManager.curGameMode = GameModes.GetId("familyGathering");
+
+			RoomOptions roomOptions = new RoomOptions
+			{
+				IsOpen = false,
+				IsVisible = false,
+				MaxPlayers = 1
+			};
+
+			PhotonNetwork.CreateRoom(
+				instanceGuid,
+				roomOptions,
+				PhotonNetwork.lobby
+			);
+
+			networkManager.StartMatch_FG();
 		}
 	}
 }

@@ -351,7 +351,7 @@ namespace HexaMod.UI
 				MakeMenu(inGame.NewMenu("HexaModOptions"), inGame);
 			}
 			{ // Return To Lobby Override
-				if (PhotonNetwork.isMasterClient)
+				if (PhotonNetwork.isMasterClient && !SplitscreenUtil.IsInSplitscreen())
 				{
 					WTextButton hexaModOptions = new WTextButton(
 						"returnToLobby", "Return To\nLobby", inGame.FindMenu("OptionsMenu (1)").Find("ReturnToMenu").GetComponent<Button>(),

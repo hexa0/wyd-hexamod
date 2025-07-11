@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
+using HexaMod.UI;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -35,7 +36,7 @@ namespace HexaMod.Scripts.CustomCharacterModels
 		public void Start()
 		{
 			isSelf = HexaGlobal.networkManager.playerObj == transform.gameObject;
-			if (PhotonNetwork.offlineMode)
+			if (SplitscreenUtil.IsInSplitscreen())
 			{
 				isSelf = false;
 			}
