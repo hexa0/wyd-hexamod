@@ -407,7 +407,7 @@ namespace HexaMod.UI
 				UIElementStack middleRow = NewRow("middle");
 				UIElementStack bottomRow = NewRow("bottom");
 
-				 topRow.AddChild(new WTextButton()
+				topRow.AddChild(new WTextButton()
 					.SetName("testDad")
 					.SetTextAuto("Test As\nDad")
 					.SetParent(title.FindMenu("SplashMenu"))
