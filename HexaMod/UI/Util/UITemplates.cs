@@ -1,5 +1,4 @@
-﻿using HexaMod.UI.Element;
-using HexaMod.Util;
+﻿using HexaMod.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
