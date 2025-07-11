@@ -287,7 +287,6 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 				if (PhotonNetwork.room.IsOpen == false)
 				{
-					Mod.Warn(PhotonNetwork.room.Name);
 					if (SplitscreenUtil.IsInSplitscreen())
 					{
 						var privateRematchFields = Traverse.Create(HexaGlobal.rematchHelper);
