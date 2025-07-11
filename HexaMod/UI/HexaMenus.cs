@@ -6,9 +6,9 @@ namespace HexaMod.UI
 {
 	public static class HexaMenus
 	{
+		public static FadeOverlay fadeOverlay;
 		public static StartupScreen startupScreen;
 		public static LoadingOverlay loadingOverlay;
-		public static FadeOverlay fadeOverlay;
 		public static VoiceChatDebugOverlay voiceChatDebugOverlay;
 		public static MenuUtil util;
 		public static AudioSource uiAudioSource;
@@ -18,11 +18,11 @@ namespace HexaMod.UI
 			uiAudioSource = PersistentCanvas.instance.canvas.gameObject.AddComponent<AudioSource>();
 			uiAudioSource.volume = 0.1f;
 
-			startupScreen = new StartupScreen()
+			fadeOverlay = new FadeOverlay()
 				.SetParent(PersistentCanvas.instance.canvas.transform)
 				.ScaleWithParent();
 
-			fadeOverlay = new FadeOverlay()
+			startupScreen = new StartupScreen()
 				.SetParent(PersistentCanvas.instance.canvas.transform)
 				.ScaleWithParent();
 

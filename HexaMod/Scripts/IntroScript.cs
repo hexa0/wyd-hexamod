@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Reflection;
 using HexaMod.UI;
-using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.Voice;
-using HexaMod.Voice.Script;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

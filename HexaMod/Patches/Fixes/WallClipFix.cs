@@ -1,11 +1,14 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.Settings;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Utility;
 
 namespace HexaMod.Patches.Fixes
 {
+	// this patch basically completely rewrites the crouching system to fix wall clipping issues
+	// this also adds options for smoother crouching
 	[HarmonyPatch]
 	internal class WallClipFix
 	{
@@ -45,8 +48,8 @@ namespace HexaMod.Patches.Fixes
 
 			if (__instance.smooth) // this is likely only used while spectating so we leave it unmodified
 			{
-				character.localRotation = Quaternion.Slerp(character.localRotation, m_CharacterTargetRot.Value, __instance.smoothTime * Time.deltaTime);
-				camera.localRotation = Quaternion.Slerp(camera.localRotation, m_CameraTargetRot.Value, __instance.smoothTime * Time.deltaTime);
+				character.localRotation = Quaternion.Slerp(character.localRotation, m_CharacterTargetRot.Value, __instance.smoothTime * Time.smoothDeltaTime);
+				camera.localRotation = Quaternion.Slerp(camera.localRotation, m_CameraTargetRot.Value, __instance.smoothTime * Time.smoothDeltaTime);
 			}
 			else
 			{
@@ -82,7 +85,7 @@ namespace HexaMod.Patches.Fixes
 
 		[HarmonyPatch(typeof(ActionInput), "Start")]
 		[HarmonyPostfix]
-		static void ActionInputStart(ref ActionInput __instance)
+		static void ActionInputStart()
 		{
 			crouchingTarget = false;
 			proningTarget = false;
@@ -140,6 +143,15 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool CrouchUpdate(ref Crouch __instance)
 		{
+			float delta = Time.smoothDeltaTime;
+
+			// anything less then ~32 fps causes wall clips to be possible
+
+			if (delta >= 1 / 35f)
+			{
+				delta = 1f / 35f; // prevent wall clips from low framerates
+			}
+
 			WallClipFixBehavior self = __instance.GetComponent<WallClipFixBehavior>();
 
 			CharacterController controller = __instance.charCont;
@@ -155,36 +167,52 @@ namespace HexaMod.Patches.Fixes
 			Traverse<float> m_CyclePositionX = headBobFields.Field<float>("m_CyclePositionX");
 			Traverse<float> m_CyclePositionY = headBobFields.Field<float>("m_CyclePositionY");
 
-			float bobX = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionX.Value) * m_HeadBob.Value.HorizontalBobRange;
-			float bobY = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionY.Value) * m_HeadBob.Value.VerticalBobRange;
-
 			__instance.GetControls();
 
-			RaycastHit ceilingRaycast;
 			Vector3 floorPosition = __instance.transform.position + __instance.transform.rotation * new Vector3(controller.center.x, controller.center.y - (controller.height / 2f), controller.center.z);
-			bool ceilingDetected = Physics.SphereCast(floorPosition, controller.radius, Vector3.up, out ceilingRaycast, characterHeight, ceilingRaycastMask);
+			bool ceilingDetected = Physics.SphereCast(floorPosition, controller.radius, Vector3.up, out RaycastHit ceilingRaycast, characterHeight, ceilingRaycastMask);
 
-			bool blocked = ceilingDetected ? ceilingRaycast.distance + controller.radius <= characterHeight : false;
+			bool blocked = ceilingDetected && ceilingRaycast.distance + controller.radius <= characterHeight;
 
-			self.crouching = __instance.btnDown ? true : (blocked ? self.crouching : false);
-			self.proning = __instance.btn2Down ? true : (blocked ? self.proning : false);
+			self.crouching = __instance.btnDown || (blocked && self.crouching);
+			self.proning = __instance.btn2Down || (blocked && self.proning);
 
 			float targetHeight = self.proning ? characterHeight * self.proneMult : (self.crouching ? characterHeight * self.crouchMult : characterHeight);
 			Vector3 targetCenter = self.proning ? new Vector3(0f, -0.8f, 0.9f) : (self.crouching ? new Vector3(0f, -0.6f, -0.28f) : new Vector3(0f, 0.1f, -0.28f));
 			Vector3 targetCameraOffset = self.proning ? new Vector3(0f, __instance.proneHeight, __instance.proneDis) : (self.crouching ? new Vector3(0f, __instance.crouchHeight, 0f) : Vector3.zero);
 
-			controller.center = Vector3.Lerp(controller.center, targetCenter, Mathf.Min(Time.deltaTime * 15f, 1f));
-			controller.height = Mathf.Lerp(controller.height, targetHeight, Mathf.Min(Time.deltaTime * 15f, 1f));
-			self.crouchHeight = Mathf.Lerp(self.crouchHeight, self.crouching ? __instance.crouchHeight : 0f, Mathf.Min(Time.deltaTime * 15f, 1f));
-			self.cameraOffset = Vector3.Lerp(self.cameraOffset, targetCameraOffset, Mathf.Min(Time.deltaTime * 15f, 1f));
+			controller.center = Vector3.Lerp(controller.center, targetCenter, Mathf.Min(delta * 15f, 1f));
+			controller.height = Mathf.Lerp(controller.height, targetHeight, Mathf.Min(delta * 15f, 1f));
+			if (HexaModPreferences.smoothCrouching.Value)
+			{
+				self.crouchHeight = Mathf.Lerp(self.crouchHeight, self.crouching ? __instance.crouchHeight : 0f, Mathf.Min(delta * 15f, 1f));
+				self.cameraOffset = Vector3.Lerp(self.cameraOffset, targetCameraOffset, Mathf.Min(delta * 15f, 1f));
+			}
+			else
+			{
+				self.crouchHeight = self.crouching ? __instance.crouchHeight : 0f;
+				self.cameraOffset = targetCameraOffset;
+			}
 
-			Vector3 localCameraPosition = __instance.cam.localPosition;
-			localCameraPosition = new Vector3(
-				camStartX + self.cameraOffset.x,
-				camStartY + self.cameraOffset.y,
-				camStartZ + self.cameraOffset.z
-			) + new Vector3(0f, -m_JumpBob.Value.Offset(), 0f) + new Vector3(bobX, bobY, 0f);
-			__instance.cam.localPosition = localCameraPosition;
+			if (HexaModPreferences.viewBobbing.Value)
+			{
+				float bobX = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionX.Value) * m_HeadBob.Value.HorizontalBobRange;
+				float bobY = m_HeadBob.Value.Bobcurve.Evaluate(m_CyclePositionY.Value) * m_HeadBob.Value.VerticalBobRange;
+
+				__instance.cam.localPosition = new Vector3(
+					camStartX + self.cameraOffset.x,
+					camStartY + self.cameraOffset.y,
+					camStartZ + self.cameraOffset.z
+				) + new Vector3(0f, -m_JumpBob.Value.Offset(), 0f) + new Vector3(bobX, bobY, 0f);
+			}
+			else
+			{
+				__instance.cam.localPosition = new Vector3(
+					camStartX + self.cameraOffset.x,
+					camStartY + self.cameraOffset.y,
+					camStartZ + self.cameraOffset.z
+				);
+			}
 
 			return false;
 		}

@@ -329,6 +329,20 @@ namespace HexaMod.UI
 							.SetText("Refreshed UI Colors (Requires Scene Reload)")
 							.LinkToPreference(HexaModPreferences.doUItheme)
 					);
+
+					stack.AddChild(
+						new WToggleControl()
+							.SetName("smoothCrouch")
+							.SetText("Smooth Crouching & Proning")
+							.LinkToPreference(HexaModPreferences.smoothCrouching)
+					);
+
+					stack.AddChild(
+						new WToggleControl()
+							.SetName("viewBobbing")
+							.SetText("View Bobbing")
+							.LinkToPreference(HexaModPreferences.viewBobbing)
+					);
 				}
 
 				MakeButton(title.FindMenu("OptionsMenu").Find("SplitScreenOptions").GetComponent<Button>(), title);

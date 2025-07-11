@@ -15,6 +15,7 @@ using Object = UnityEngine.Object;
 using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.Scripts;
 using HexaMod.Scripts.PunRpcExtensions.Lobby;
+using HexaMod.Patches.Feature;
 
 namespace HexaMod
 {
@@ -62,9 +63,15 @@ namespace HexaMod
 		{
 			var activeScene = SceneManager.GetActiveScene();
 
-			if (activeScene.name == "Game") {
-				HexaMenus.startupScreen.fader.fadeState = false;
-				HexaMenus.startupScreen.loadingText.SetText("Loaded Game");
+			if (activeScene.name == "Game")
+			{
+				PlayerControllersParent.parent = new GameObject("Players").GetComponent<Transform>();
+
+				if (!PhotonNetwork.inRoom)
+				{
+					HexaMenus.startupScreen.loadingText.SetText("Loaded Game");
+					HexaMenus.startupScreen.fader.fadeState = false;
+				}
 
 				Cursor.visible = true;
 				Cursor.lockState = CursorLockMode.None;
@@ -105,8 +112,6 @@ namespace HexaMod
 			{
 				Object.Destroy(GameObject.Find("Canvas"));
 			}
-
-			HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", false);
 		}
 
 		public static void EnableInterpolationForAll()

@@ -66,6 +66,13 @@ namespace HexaMod.Patches.Fixes
 					lastPosition = nextPosition;
 					lastRotation = nextRotation;
 
+					// check if the stream has enough data to read
+					if (stream.Count == 0)
+					{
+						Mod.Warn("CharacterReplication: Not enough data in stream to read position and rotation.");
+						return;
+					}
+
 					nextPosition = (Vector3)stream.ReceiveNext();
 					nextRotation = (Quaternion)stream.ReceiveNext();
 

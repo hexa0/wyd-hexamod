@@ -1,9 +1,47 @@
 ﻿using HarmonyLib;
-using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
+	internal static class SharpPhysicsReplicationHandler
+	{
+		internal static void Read(PhotonStream stream, Rigidbody rigidBody, PickUp pickUpScript)
+		{
+			Vector3 position = (Vector3)stream.ReceiveNext();
+			Quaternion rotation = (Quaternion)stream.ReceiveNext();
+			Vector3 velocity = (Vector3)stream.ReceiveNext();
+			Vector3 angularVelocity = (Vector3)stream.ReceiveNext();
+
+			// prevents objects from getting stuck under shelfs or other flat surfaces
+			// ideally in the future also check if the object has been misplaced by 0.2 units for more then 1 second as well to catch a few edge cases
+			if (rigidBody.IsSleeping() || (rigidBody.position - position).magnitude > 3f)
+			{
+				rigidBody.position = position;
+				rigidBody.rotation = rotation;
+				rigidBody.velocity = velocity;
+				rigidBody.angularVelocity = angularVelocity;
+			}
+			else
+			{
+				if (!pickUpScript)
+				{
+					rigidBody.position = Vector3.Lerp(rigidBody.position, position, 0.1f);
+				}
+				rigidBody.rotation = Quaternion.Lerp(rigidBody.rotation, rotation, 0.1f);
+				rigidBody.velocity = velocity;
+				rigidBody.angularVelocity = angularVelocity;
+			}
+
+		}
+
+		internal static void Write(PhotonStream stream, Rigidbody rigidBody)
+		{
+			stream.SendNext(rigidBody.position);
+			stream.SendNext(rigidBody.rotation);
+			stream.SendNext(rigidBody.velocity);
+			stream.SendNext(rigidBody.angularVelocity);
+		}
+	}
 	[HarmonyPatch(typeof(NetworkMovementRB))]
 	internal class SharpPhysicsReplication
 	{
@@ -19,81 +57,31 @@ namespace HexaMod.Patches.Fixes
 		static bool Start(ref NetworkMovementRB __instance)
 		{
 			Traverse fields = Traverse.Create(__instance);
-			__instance.timer = 5f;
 			PhotonView netView = __instance.GetComponent<PhotonView>();
 			fields.Field<PhotonView>("netView").Value = netView;
 			fields.Field<Rigidbody>("rb").Value = __instance.GetComponent<Rigidbody>();
 			netView.ObservedComponents.Add(__instance);
 			netView.synchronization = ViewSynchronization.UnreliableOnChange;
 			fields.Field<PickUp>("pickUpScript").Value = __instance.GetComponent<PickUp>();
-			fields.Field<Vector3>("syncEndPosition").Value = __instance.transform.position;
-			fields.Field<Quaternion>("syncEndRotation").Value = __instance.transform.rotation;
 
 			return false;
 		}
 
 		[HarmonyPatch("OnPhotonSerializeView")]
 		[HarmonyPrefix]
-		static bool OnPhotonSerializeViewCancel(ref NetworkMovementRB __instance)
+		static bool OnPhotonSerializeView(ref NetworkMovementRB __instance, PhotonStream stream, PhotonMessageInfo info)
 		{
-			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
-			return HexaLobby.HexaLobbyState.handledPlayersLoaded && !float.IsNaN(rigidBody.position.y);
-		}
-
-		[HarmonyPatch("OnPhotonSerializeView")]
-		[HarmonyPostfix]
-		static void OnPhotonSerializeView(ref NetworkMovementRB __instance)
-		{
-			var privateFields = Traverse.Create(__instance);
-
-			var netView = privateFields.Field<PhotonView>("netView");
-			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
-			var syncPosition = privateFields.Field<Vector3>("syncPosition");
-			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
-			var syncVel = privateFields.Field<Vector3>("syncVel");
-			var syncAngVel = privateFields.Field<Vector3>("syncAngVel");
-			var lastSynchronizationTime = privateFields.Field<float>("lastSynchronizationTime");
-
-			if (!netView.Value.isMine && __instance.updated)
+			if (info.sender == PhotonNetwork.player && stream.isWriting)
 			{
-				rigidBody.position = Vector3.Lerp(rigidBody.position, syncPosition.Value, 0.1f);
-				rigidBody.rotation = Quaternion.Lerp(rigidBody.rotation, syncRotation.Value, 0.1f);
-				rigidBody.velocity = syncVel.Value;
-				rigidBody.angularVelocity = syncAngVel.Value;
+				SharpPhysicsReplicationHandler.Write(stream, __instance.GetComponent<Rigidbody>());
+			}
+			else if (info.sender != PhotonNetwork.player && stream.isReading)
+			{
+				Traverse fields = Traverse.Create(__instance);
+				SharpPhysicsReplicationHandler.Read(stream, __instance.GetComponent<Rigidbody>(), fields.Field<PickUp>("pickUpScript").Value);
 			}
 
-			if (syncPosition.Value != null && syncPosition.Value != Vector3.zero && !netView.Value.isMine && (rigidBody.IsSleeping() || (rigidBody.position - syncPosition.Value).magnitude > 3f))
-			{
-				rigidBody.position = syncPosition.Value;
-				rigidBody.rotation = syncRotation.Value;
-				rigidBody.velocity = syncVel.Value;
-				rigidBody.angularVelocity = syncAngVel.Value;
-			}
-
-			lastSynchronizationTime.Value = Time.time;
-		}
-
-		[HarmonyPatch("FixedUpdate")]
-		[HarmonyPostfix]
-		static void FixedUpdate(ref NetworkMovementRB __instance)
-		{
-			var privateFields = Traverse.Create(__instance);
-
-			var netView = privateFields.Field<PhotonView>("netView");
-			Rigidbody rigidBody = __instance.gameObject.GetComponent<Rigidbody>();
-			var syncPosition = privateFields.Field<Vector3>("syncPosition");
-			var syncRotation = privateFields.Field<Quaternion>("syncRotation");
-			var syncVel = privateFields.Field<Vector3>("syncVel");
-			var syncAngVel = privateFields.Field<Vector3>("syncAngVel");
-			var lastSynchronizationTime = privateFields.Field<float>("lastSynchronizationTime");
-
-			if (syncPosition.Value != null && syncPosition.Value != Vector3.zero && !netView.Value.isMine && (rigidBody.IsSleeping() || (rigidBody.position - syncPosition.Value).magnitude > 3f || ((Time.time - lastSynchronizationTime.Value) > 1f)))
-			{
-				rigidBody.position = syncPosition.Value;
-				rigidBody.rotation = syncRotation.Value;
-				rigidBody.velocity = syncVel.Value;
-				rigidBody.angularVelocity = syncAngVel.Value;
-			}
+			return false;
 		}
 	}
 }

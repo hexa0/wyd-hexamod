@@ -39,9 +39,11 @@ namespace HexaMod.Patches.Hooks
 				AsyncOperation sceneLoadOperation = SceneManager.LoadSceneAsync(1);
 				sceneLoadOperation.allowSceneActivation = false;
 				yield return new WaitForSeconds((1f / HexaMenus.fadeOverlay.fader.fadeSpeed) - 0.2f);
-				HexaMenus.loadingOverlay.controller.SetTaskState("LevelLoad", true);
+				HexaMenus.startupScreen.loadingText.SetText("Loading");
+				HexaMenus.startupScreen.fader.fadeState = true;
 				yield return new WaitForSeconds(0.2f);
 				rematchInProgress = false;
+				HexaMenus.startupScreen.fader.fadeState = false;
 				sceneLoadOperation.allowSceneActivation = true;
 			}
 		}

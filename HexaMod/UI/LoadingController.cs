@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
 using UnityEngine;
-using static HexaMod.UI.Util.Menu.WYDMenus;
 
 namespace HexaMod.UI
 {
 	public class LoadingController : MonoBehaviour
 	{
-		private Dictionary<string, bool> tasks = new Dictionary<string, bool>();
+		private readonly Dictionary<string, bool> tasks = new Dictionary<string, bool>();
 
 		public void ResetTasks()
 		{
@@ -22,7 +19,7 @@ namespace HexaMod.UI
 
 		public bool GetTaskState(string taskName)
 		{
-			return tasks.ContainsKey(taskName) ? tasks[taskName] : false;
+			return tasks.ContainsKey(taskName) && tasks[taskName];
 		}
 
 		private bool currentlyShown = false;
@@ -36,15 +33,13 @@ namespace HexaMod.UI
 			}
 		}
 
-		private static Dictionary<string, string> taskNames = new Dictionary<string, string>()
+		private static readonly Dictionary<string, string> taskNames = new Dictionary<string, string>()
 		{
 			{ "PhotonConnect", "Connecting to Photon" },
 			{ "LobbyJoin", "Fetching lobby list" },
 			{ "RoomLookForOrCreateTag", "Searching for lobby" },
 			{ "RoomCreate", "Creating lobby" },
 			{ "RoomJoin", "Joining lobby" },
-			{ "LevelLoad", "Loading Game" },
-			{ "MatchLoad", "Waiting for others to load" }
 		}
 ;
 

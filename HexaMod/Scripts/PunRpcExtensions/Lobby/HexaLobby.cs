@@ -76,7 +76,7 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 			if (PhotonNetwork.inRoom)
 			{
 				SendReadyToMasterClient();
-				HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", true);
+				HexaMenus.startupScreen.loadingText.SetText("Waiting for others to load");
 			}
 
 			HexaPersistentLobby.instance.lobbySettingsChanged.AddListener(delegate ()
@@ -187,7 +187,7 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 		public void WaitForPlayers(Action onPlayersLoaded, float timeoutSeconds = 5f)
 		{
-			HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", true);
+			HexaMenus.startupScreen.loadingText.SetText("Waiting for others to load");
 
 			HexaLobbyState.onPlayersLoadedAction = delegate ()
 			{
@@ -200,7 +200,8 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 				HexaLobbyState.loadedPlayers.Clear();
 
 				HexaLobbyState.handledPlayersLoaded = true;
-				HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", false);
+				HexaMenus.startupScreen.loadingText.SetText("Loaded");
+				HexaMenus.startupScreen.fader.fadeState = false;
 				onPlayersLoaded();
 			};
 
@@ -377,7 +378,8 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 			var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
 
-			HexaMenus.loadingOverlay.controller.SetTaskState("MatchLoad", false);
+			HexaMenus.startupScreen.loadingText.SetText("Loaded");
+			HexaMenus.startupScreen.fader.fadeState = false;
 
 			if (inGame)
 			{
