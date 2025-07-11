@@ -342,6 +342,16 @@ namespace HexaMod.Scripts.CustomCharacterModels
 				var material = body.materials[skinMaterialIndex];
 				material.color = skinColor;
 			}
+
+			if (!isDad)
+			{
+				BabyStats babyStats = GetComponentInChildren<BabyStats>();
+
+				if (babyStats)
+				{
+					babyStats.healthyColor = skinColor;
+				}
+			}
 		}
 	}
 }
