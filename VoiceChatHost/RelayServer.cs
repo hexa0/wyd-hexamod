@@ -3,7 +3,6 @@ using System.Text;
 using VoiceChatHost.Type;
 using HexaNet;
 using VoiceChatShared.Enums;
-using HexaNet;
 using HexaNet.PeerConnection;
 using VoiceChatShared;
 
