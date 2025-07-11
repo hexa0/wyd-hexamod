@@ -43,7 +43,6 @@ namespace HexaMod.Patches.Hooks
 				HexaMenus.startupScreen.loadingText.SetText("Loading");
 				yield return 0;
 				rematchInProgress = false;
-				HexaMenus.startupScreen.fader.fadeState = false;
 				sceneLoadOperation.allowSceneActivation = true;
 			}
 		}
