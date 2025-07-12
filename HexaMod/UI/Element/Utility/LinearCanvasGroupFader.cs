@@ -4,13 +4,10 @@ namespace HexaMod.UI.Element.Utility
 {
 	public class LinearCanvasGroupFader : HexaUIElement
 	{
-		public RectTransform children;
+		public readonly RectTransform children;
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "why")]
-		public new RectTransform rectTransform
-		{
-			get => children;
-		}
+		public new RectTransform rectTransform => children;
 
 		readonly CanvasGroup group;
 
