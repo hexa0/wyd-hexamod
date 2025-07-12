@@ -1,18 +1,16 @@
 ﻿using System.Collections.Generic;
+using HexaMod.Scripts.Levels.Volume;
 using UnityEngine;
 
 namespace HexaMapAssemblies
 {
-	public class DynamicLightCullingManager : MonoBehaviour
+	public class DynamicLightCullingManager : CameraTrackedVolumeManagerBehavior<LightCullingVolume>
 	{
-		internal LightCullingVolume[] volumes;
-		internal List<TrackedPoint3> trackers = new List<TrackedPoint3>();
-		internal TrackedCamera camera;
+		internal List<TrackedPoint3<LightCullingVolume>> trackers = new List<TrackedPoint3<LightCullingVolume>>();
 
-		void Awake()
+		public override void Awake()
 		{
-			volumes = GetComponentsInChildren<LightCullingVolume>();
-			camera = new TrackedCamera(this);
+			base.Awake();
 		}
 
 		void Start()
@@ -24,17 +22,17 @@ namespace HexaMapAssemblies
 				if (light.type != LightType.Directional && light.gameObject.activeSelf)
 				{
 					trackers.Add(
-						new TrackedLight(light, this)
+						new TrackedLight<LightCullingVolume>(light, this)
 					);
 				}
 			}
 		}
 
-		void FixedUpdate()
+		public override void FixedUpdate()
 		{
-			camera.CheckForNewPosition();
+			base.FixedUpdate();
 
-			foreach (TrackedPoint3 tracker in trackers)
+			foreach (TrackedPoint3<LightCullingVolume> tracker in trackers)
 			{
 				tracker.CheckForNewPosition();
 				tracker.CullingCheck(camera);
