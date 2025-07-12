@@ -35,8 +35,8 @@ namespace HexaMapAssemblies
 		{
 			if (smoothed)
 			{
-				currentSkyLightingIntensity = Mathf.Lerp(currentSkyLightingIntensity, targetSkyLightingIntensity, Time.deltaTime * lerpFactor);
-				currentSkyReflectionsIntensity = Mathf.Lerp(currentSkyReflectionsIntensity, targetSkyReflectionsIntensity, Time.deltaTime * lerpFactor);
+				currentSkyLightingIntensity = Mathf.Lerp(currentSkyLightingIntensity, targetSkyLightingIntensity, Time.smoothDeltaTime * lerpFactor);
+				currentSkyReflectionsIntensity = Mathf.Lerp(currentSkyReflectionsIntensity, targetSkyReflectionsIntensity, Time.smoothDeltaTime * lerpFactor);
 			}
 			else
 			{
