@@ -4,6 +4,21 @@ namespace HexaMod.Scripts.Levels.Volume
 {
 	public static class VolumeUtils
 	{
+		static float LocalXToWorld(BoxCollider trigger, float x)
+		{
+			return trigger.transform.TransformPoint(new Vector3(x, 0f, 0f)).x;
+		}
+
+		static float LocalYToWorld(BoxCollider trigger, float y)
+		{
+			return trigger.transform.TransformPoint(new Vector3(0f, y, 0f)).y;
+		}
+
+		static float LocalZToWorld(BoxCollider trigger, float z)
+		{
+			return trigger.transform.TransformPoint(new Vector3(0f, 0f, z)).z;
+		}
+
 		public static void ProcessVolumes(GameObject volume, out BoundingBox3 subRegionBoundingBox, out BoundingBox3[] subRegions)
 		{
 			float minX = float.PositiveInfinity;
@@ -22,12 +37,12 @@ namespace HexaMod.Scripts.Levels.Volume
 			foreach (BoxCollider trigger in triggers)
 			{
 				BoundingBox3 region = new BoundingBox3(
-					trigger.center.x - (trigger.size.x * 0.5f),
-					trigger.center.y - (trigger.size.y * 0.5f),
-					trigger.center.z - (trigger.size.z * 0.5f),
-					trigger.center.x + (trigger.size.x * 0.5f),
-					trigger.center.y + (trigger.size.y * 0.5f),
-					trigger.center.z + (trigger.size.z * 0.5f)
+					LocalXToWorld(trigger, trigger.center.x - (trigger.size.x * 0.5f)),
+					LocalYToWorld(trigger, trigger.center.y - (trigger.size.y * 0.5f)),
+					LocalZToWorld(trigger, trigger.center.z - (trigger.size.z * 0.5f)),
+					LocalXToWorld(trigger, trigger.center.x + (trigger.size.x * 0.5f)),
+					LocalYToWorld(trigger, trigger.center.y + (trigger.size.y * 0.5f)),
+					LocalZToWorld(trigger, trigger.center.z + (trigger.size.z * 0.5f))
 				);
 
 				if (region.xn < minX)

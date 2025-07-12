@@ -29,6 +29,7 @@ namespace HexaMod.Patches.Hooks
 		{
 			HexaPersistentLobby.instance.SetInOtherLobby(false);
 			HexaPersistentLobby.instance.Reset();
+			HexaGlobal.networkManager.curGameMode = 1;
 		}
 
 		[HarmonyPatch(typeof(PhotonNetwork), "Disconnect")]

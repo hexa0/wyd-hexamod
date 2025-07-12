@@ -5,15 +5,15 @@ namespace HexaMapAssemblies
 {
 	public class LightingParamsManager : CameraTrackedVolumeManagerBehavior<LightingParamsVolume>
 	{
+		[Header("General Parameters")]
+
 		public bool smoothed = true;
 		public float lerpFactor = 10f;
 
-		[Tooltip("The ambient light color multiplier")]
-		[Range(0f, 8f)]
-		public float defaultSkyLightingIntensity = 1f;
-		[Tooltip("The reflection light color multiplier")]
-		[Range(0f, 1f)]
-		public float defaultSkyReflectionsIntensity = 1f;
+		[Header("Lighting Parameters")]
+
+		[SerializeField]
+		public LightingParamSettings[] settings = new LightingParamSettings[] {};
 
 		float targetSkyLightingIntensity = 1f;
 		float targetSkyReflectionsIntensity = 1f;
@@ -24,6 +24,11 @@ namespace HexaMapAssemblies
 		public override void Awake()
 		{
 			base.Awake();
+
+			LightingParamSettings defaultLightingParams = LightingParamSettings.GetSettings(settings);
+
+			currentSkyLightingIntensity = defaultLightingParams.skyLightingIntensity;
+			currentSkyReflectionsIntensity = defaultLightingParams.skyReflectionsIntensity;
 		}
 
 		void Update()
@@ -62,13 +67,17 @@ namespace HexaMapAssemblies
 
 			if (!highestPriorityVolume)
 			{
-				targetSkyLightingIntensity = defaultSkyLightingIntensity;
-				targetSkyReflectionsIntensity = defaultSkyReflectionsIntensity;
+				LightingParamSettings defaultLightingParams = LightingParamSettings.GetSettings(settings);
+
+				targetSkyLightingIntensity = defaultLightingParams.skyLightingIntensity;
+				targetSkyReflectionsIntensity = defaultLightingParams.skyReflectionsIntensity;
 			}
 			else
 			{
-				targetSkyLightingIntensity = highestPriorityVolume.skyLightingIntensity;
-				targetSkyReflectionsIntensity = highestPriorityVolume.skyReflectionsIntensity;
+				LightingParamSettings lightingParams = LightingParamSettings.GetSettings(highestPriorityVolume.settings);
+
+				targetSkyLightingIntensity = lightingParams.skyLightingIntensity;
+				targetSkyReflectionsIntensity = lightingParams.skyReflectionsIntensity;
 			}
 		}
 	}
