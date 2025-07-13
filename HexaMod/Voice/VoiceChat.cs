@@ -185,7 +185,7 @@ namespace HexaMod.Voice
 		public static readonly ModPreference<bool> debugOverlayEnabled = new ModPreference<bool>("VoiceChatDebugOverlay", false);
 		public static readonly ModPreference<int> microphoneDeviceId = new ModPreference<int>("MicrophoneDevice", 0).LinkTo(SetMicrophoneDeviceId);
 		public static readonly ModPreference<byte> microphoneBufferMillis = new ModPreference<byte>("MicrophoneBufferMillis", 20).LinkTo(SetMicrophoneBufferMillis);
-		public static readonly ModPreference<int> microphoneBitrate = new ModPreference<int>("MicrophoneBitrateV2", 4).LinkTo(SetMicrophoneBitrate);
+		public static readonly ModPreference<int> microphoneBitrate = new ModPreference<int>("MicrophoneBitrateV2", 3).LinkTo(SetMicrophoneBitrate);
 		public static readonly ModPreference<bool> denoisingEnabled = new ModPreference<bool>("UseRnNoise", false).LinkTo(SetDenoiseEnabled);
 
 		public static float currentPeak = 0f;
