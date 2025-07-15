@@ -46,11 +46,13 @@ namespace HexaMod.Scripts
 
 					foreach (ModLevel level in allLevels.allAssets)
 					{
+						level.levelBundle = bundle;
+
 						if (withoutExtension == "default_level" && from == "core")
 						{
 							Mod.Debug($"Found default level {level.levelNameReadable}");
 							Assets.defaultLevel = level;
-							Assets.defaultLevelName = level.levelPrefab.name;
+							Assets.defaultLevelName = level.LevelIdentifier;
 						}
 
 						Assets.levels.Add(level);

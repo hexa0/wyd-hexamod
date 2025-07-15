@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Video;
 
 namespace HexaMod.ScriptableObjects
@@ -24,7 +25,18 @@ namespace HexaMod.ScriptableObjects
 		[field: Space(1)]
 		[field: Header("Level Data")]
 		[field: Space(1)]
-		public GameObject levelPrefab; // TODO: have LevelCompiler.cs automatically include this in the associated asset bundle and not link to it directly so we can load it async when needed
-		public string levelPrefabPath; // this is set by LevelCompiler.cs but unused currently
+		public string levelPrefabPath;
+
+		[NonSerialized]
+		[HideInInspector]
+		public GameObject levelPrefab;
+		[NonSerialized]
+		[HideInInspector]
+		public AssetBundle levelBundle;
+
+		public string LevelIdentifier
+		{
+			get { return levelPrefabPath; }
+		}
 	}
 }

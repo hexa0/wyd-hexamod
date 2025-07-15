@@ -24,7 +24,7 @@ namespace HexaMod
 		internal static List<ModCharacterModelBase> babyCharacterModels = new List<ModCharacterModelBase>();
 
 		internal static ModLevel defaultLevel;
-		internal static string defaultLevelName = "compiled_Default";
+		internal static string defaultLevelName = "Assets/CompiledLevelPrefabs/compiled_Default.prefab";
 
 		internal static ModShirt defaultShirt;
 
@@ -282,11 +282,16 @@ namespace HexaMod
 			}
 		}
 
-		public static void LoadLevel(ModLevel level)
+		static void LoadLevel(ModLevel level)
 		{
 			if (loadedLevel && loadedLevel.name == level.name)
 			{
 				return;
+			}
+
+			if (level.levelPrefab == null)
+			{
+				level.levelPrefab = level.levelBundle.LoadAsset<GameObject>(level.levelPrefabPath);
 			}
 
 			loadedLevel = level;
@@ -400,8 +405,10 @@ namespace HexaMod
 			}
 
 			var loaded = Object.Instantiate(level.levelPrefab);
-			loaded.name = level.levelPrefab.name;
+			loaded.name = level.LevelIdentifier;
 			loadedLevelInstance = loaded.transform;
+
+			HexaGlobal.hexaLobby.SendReadyToMasterClient();
 		}
 
 		public static void InitScene()
@@ -431,13 +438,14 @@ namespace HexaMod
 
 			foreach (ModLevel level in levels)
 			{
-				if (level.levelPrefab.name == HexaPersistentLobby.instance.lobbySettings.mapName)
+				if (level.LevelIdentifier == HexaPersistentLobby.instance.lobbySettings.mapName)
 				{
 					LoadLevel(level);
 					return;
 				}
 			}
 
+			HexaGlobal.hexaLobby.SendReadyToMasterClient();
 			ActivateDefaultLevel();
 		}
 	}

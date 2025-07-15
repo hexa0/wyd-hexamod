@@ -100,7 +100,7 @@ namespace HexaMod.UI
 
 			foreach (var level in Assets.levels)
 			{
-				if (level.levelPrefab.name == HexaPersistentLobby.instance.lobbySettings.mapName)
+				if (level.LevelIdentifier == HexaPersistentLobby.instance.lobbySettings.mapName)
 				{
 					foundLevel = level;
 					break;
@@ -165,7 +165,7 @@ namespace HexaMod.UI
 						WTextButton.gap.x * x,
 						WTextButton.gap.y * y
 					)
-					.AddListener(() => { ButtonCallbacks.ChangeLevel(level.levelPrefab.name); });
+					.AddListener(() => { ButtonCallbacks.ChangeLevel(level.LevelIdentifier); });
 			}
 		}
 

@@ -48,6 +48,8 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 		public void SendReadyToMasterClient()
 		{
+			if (!PhotonNetwork.inRoom) { return; }
+
 			PlayerConnectedObject player = new PlayerConnectedObject
 			{
 				isDad = HexaGlobal.networkManager.isDad
@@ -75,7 +77,6 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 
 			if (PhotonNetwork.inRoom)
 			{
-				SendReadyToMasterClient();
 				HexaMenus.startupScreen.loadingText.SetText("Waiting for others to load");
 			}
 
