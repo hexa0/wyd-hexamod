@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.UI;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -11,6 +12,8 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void Update(ref ItemTargeting __instance)
 		{
+			if (SplitscreenUtil.IsInSplitscreen()) { return; }
+
 			var privateFields = Traverse.Create(__instance);
 
 			var curTarget = privateFields.Field<GameObject>("curTarget");
@@ -29,6 +32,8 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void Update(ref DadItemTargeting __instance)
 		{
+			if (SplitscreenUtil.IsInSplitscreen()) { return; }
+
 			var privateFields = Traverse.Create(__instance);
 
 			var curTarget = privateFields.Field<GameObject>("curTarget");
