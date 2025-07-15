@@ -1,8 +1,10 @@
-﻿using HarmonyLib;
+﻿using Boo.Lang;
+using HarmonyLib;
 using HexaMapAssemblies;
 using HexaMod.ScriptableObjects;
 using HexaMod.UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Scripts.CustomCharacterModels
@@ -20,6 +22,8 @@ namespace HexaMod.Scripts.CustomCharacterModels
 
 		public string currentShirtMaterial = "default";
 		public bool currentShirtRecolorable = true;
+		public ModCharacterModelBase currentModel;
+		public Camera currentCamera;
 
 		public string initModel = "default";
 		public string initShirt = "default";
@@ -36,42 +40,125 @@ namespace HexaMod.Scripts.CustomCharacterModels
 		public void Start()
 		{
 			isSelf = HexaGlobal.networkManager.playerObj == transform.gameObject;
-			if (SplitscreenUtil.IsInSplitscreen())
-			{
-				isSelf = false;
-			}
-			var dadModel = transform.name == "Dad" ? transform : transform.Find("DadModel");
-			if (dadModel)
+			Transform dadModel = transform.Find("DadModel") ?? transform;
+			Transform babyModel = transform.Find("Baby001") ?? transform;
+
+			Transform dadMesh = dadModel.Find("generic_male_01.005");
+			Transform babyMesh = babyModel.Find("skin") ?? babyModel.Find("BabyBodyMesh");
+
+			if (dadMesh)
 			{
 				isDad = true;
-				body = dadModel.Find("generic_male_01.005").GetComponent<SkinnedMeshRenderer>();
+
+				body = dadMesh.GetComponent<SkinnedMeshRenderer>();
+
 				defaultMesh = body.sharedMesh;
 				defaultMaterials = body.materials;
 				skinMaterialIndex = 2;
 				shirtMaterialIndex = 4;
+
+				if (transform.Find("DadCam"))
+				{
+					currentCamera = transform.Find("DadCam").GetComponent<Camera>();
+				}
 			}
-			else
+			else if (babyMesh)
 			{
 				isDad = false;
-				var babyModel = transform.name == "Baby001" ? transform : transform.Find("Baby001");
-				if (babyModel.Find("skin"))
-				{
-					body = babyModel.Find("skin").GetComponent<SkinnedMeshRenderer>();
-				}
-				else
-				{
-					body = babyModel.Find("BabyBodyMesh").GetComponent<SkinnedMeshRenderer>();
-				}
+
+				body = babyMesh.GetComponent<SkinnedMeshRenderer>();
 				defaultMesh = body.sharedMesh;
 				defaultMaterials = body.materials;
 				skinMaterialIndex = 0;
 				shirtMaterialIndex = -1;
+
+				if (transform.Find("BabyCam"))
+				{
+					currentCamera = transform.Find("BabyCam").GetComponent<Camera>();
+				}
+			}
+			else
+			{
+				throw new System.Exception("Cannot initalize model swapper for player, meshes weren't recognized");
 			}
 
 			currentShirtColor = initShirtColor;
 			currentSkinColor = initSkinColor;
 			SetCharacterModel(initModel);
 			SetShirt(initShirt);
+		}
+
+		public void InitialStateDone()
+		{
+			bool selfCulled = currentModel != null && currentModel is ModCharacterModel && (currentModel as ModCharacterModel).selfCulling;
+
+			if (currentCamera)
+			{
+				Renderer[] renderers;
+				CharacterSelfCuller[] selfCullers = currentV2Model ? currentV2Model.GetComponentsInChildren<CharacterSelfCuller>() : new CharacterSelfCuller[0];
+
+				{
+					List<Renderer> rendererList = new List<Renderer>();
+
+					foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
+					{
+						if (renderer != body || (renderer == body && selfCulled))
+						{
+							rendererList.Add(renderer);
+						}
+					}
+
+					renderers = rendererList.ToArray();
+				}
+
+				ShadowCastingMode[] shadowCastingModes = new ShadowCastingMode[renderers.Length];
+				bool culled = false;
+
+				Camera.onPreRender += camera =>
+				{
+					if (camera == currentCamera)
+					{
+						if (!culled)
+						{
+							culled = true;
+
+							for (int i = 0; i < renderers.Length; i++)
+							{
+								shadowCastingModes[i] = renderers[i].shadowCastingMode;
+								renderers[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+							}
+						}
+					}
+					else
+					{
+						if (culled)
+						{
+							culled = false;
+
+							for (int i = 0; i < renderers.Length; i++)
+							{
+								renderers[i].shadowCastingMode = shadowCastingModes[i];
+							}
+						}
+					}
+				};
+
+				Camera.onPostRender += camera =>
+				{
+					if (camera == currentCamera)
+					{
+						if (culled)
+						{
+							culled = false;
+
+							for (int i = 0; i < renderers.Length; i++)
+							{
+								renderers[i].shadowCastingMode = shadowCastingModes[i];
+							}
+						}
+					}
+				};
+			}
 		}
 
 		public void SetCharacterModel(string modelName)
@@ -89,6 +176,7 @@ namespace HexaMod.Scripts.CustomCharacterModels
 				if (baseModel.name == modelName && baseModel.isDad == isDad)
 				{
 					foundMatch = true;
+					currentModel = baseModel;
 
 					if (baseModel is ModCharacterModel)
 					{
@@ -100,25 +188,6 @@ namespace HexaMod.Scripts.CustomCharacterModels
 						shirtMaterialIndex = model.shirtMaterialEditable ? model.shirtMaterialId : -1;
 
 						body.sharedMesh = model.characterMesh;
-						if (isSelf)
-						{
-							body.transform.parent.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 12;
-							}
-							if (!model.selfCulling)
-							{
-								body.gameObject.layer = 1;
-							}
-						}
-						else
-						{
-							foreach (var renderer in GetComponentsInChildren<Renderer>(true))
-							{
-								renderer.gameObject.layer = 0;
-							}
-						}
 
 						if (model.materials.Length > 0)
 						{
@@ -234,14 +303,6 @@ namespace HexaMod.Scripts.CustomCharacterModels
 								networkedSound.RegisterSound(controllerFields.Field<AudioClip>("m_JumpSound").Value);
 								networkedSound.RegisterSound(controllerFields.Field<AudioClip>("m_LandSound").Value);
 								networkedSound.RegisterSounds(controllerFields.Field<AudioClip[]>("m_FootstepSounds").Value);
-							}
-
-							if (isSelf)
-							{
-								foreach (CharacterSelfCuller culler in currentV2Model.GetComponentsInChildren<CharacterSelfCuller>())
-								{
-									culler.Cull();
-								}
 							}
 
 							CharacterHeadBone headBone = currentV2Model.GetComponentInChildren<CharacterHeadBone>();

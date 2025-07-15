@@ -19,7 +19,7 @@ namespace HexaMod.Scripts.PunRpcExtensions.Character
 		{
 			netView = GetComponent<PhotonView>();
 
-			bool isDad = gameObject.name.Substring(0, 3) == "Dad";
+			bool isDad = gameObject.name.ToLower().StartsWith("dad");
 
 			initialState = new InitialPlayerState()
 			{
@@ -45,12 +45,13 @@ namespace HexaMod.Scripts.PunRpcExtensions.Character
 			GetComponent<CharacterModelSwapper>().SetSkinColor(initialState.skinColor.toColor());
 			GetComponent<CharacterModelSwapper>().SetCharacterModel(initialState.characterModel);
 			GetComponent<CharacterModelSwapper>().SetShirt(initialState.shirtMaterial);
+			GetComponent<CharacterModelSwapper>().InitialStateDone();
 			GetComponent<PlayerVoiceEmitterRPC>().SetVoicePlayer(netView.owner);
 		}
 
 		IEnumerator SendInitalState()
 		{
-			if (gameObject == HexaGlobal.networkManager.playerObj)
+			if (netView.isMine)
 			{
 				yield return 0;
 

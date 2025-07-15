@@ -13,7 +13,7 @@ namespace HexaMod.Patches.Feature
 		{
 			GameObject player = GameObject.Find(input);
 
-			if (player.name.Substring(0, 3) == "Dad" && __instance.tag == "Eat")
+			if (player.name.ToLower().StartsWith("dad") && __instance.tag == "Eat")
 			{
 				return false;
 			}

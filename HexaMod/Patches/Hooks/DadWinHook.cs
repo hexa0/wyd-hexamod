@@ -18,7 +18,7 @@ namespace HexaMod.Patches.Hooks
 		{
 			foreach (FirstPersonController firstPersonController in Object.FindObjectsOfType<FirstPersonController>())
 			{
-				if (firstPersonController.name.Substring(0, 3) == "Dad")
+				if (firstPersonController.name.ToLower().StartsWith("dad"))
 				{
 					WinManager.lastPlayerWon = firstPersonController.GetComponent<PhotonView>().owner;
 					break;

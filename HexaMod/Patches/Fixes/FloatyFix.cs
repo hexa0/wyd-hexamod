@@ -88,7 +88,7 @@ namespace HexaMod.Patches.Fixes
 			GameObject item = GameObject.Find(input1);
 			GameObject player = GameObject.Find(input2);
 
-			if (item && item.tag == "Floaty" && input2.Substring(0, 3) == "Dad")
+			if (item && item.tag == "Floaty" && input2.ToLower().StartsWith("dad"))
 			{
 				Floaty floaty = __instance.GetComponent<Floaty>();
 				floaty.hasFloaty = true;

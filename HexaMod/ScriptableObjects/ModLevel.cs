@@ -17,12 +17,14 @@ namespace HexaMod.ScriptableObjects
 		public bool hungryGames = false;
 		public bool dadlympics = false;
 		public bool daddysNightmare = false;
+		public string[] customGamemodes;
 		[field: Space(1)]
 		public Sprite levelSprite;
 		public VideoClip levelVideo;
 		[field: Space(1)]
 		[field: Header("Level Data")]
 		[field: Space(1)]
-		public GameObject levelPrefab;
+		public GameObject levelPrefab; // TODO: have LevelCompiler.cs automatically include this in the associated asset bundle and not link to it directly so we can load it async when needed
+		public string levelPrefabPath; // this is set by LevelCompiler.cs but unused currently
 	}
 }

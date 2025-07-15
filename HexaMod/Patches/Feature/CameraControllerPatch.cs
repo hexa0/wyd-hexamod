@@ -95,7 +95,6 @@ namespace HexaMod.Patches.Feature
 			cameraController.isWalking = wydControllerFields.Field<bool>("m_IsWalking");
 			cameraController.bobBaseInterval = headBobFields.Field<float>("m_BobBaseInterval");
 
-			Mod.Warn(__instance.name, cameraController.camera.transform.localPosition.y);
 			if (__instance.name.ToLower().StartsWith("dad"))
 			{
 				cameraController.cameraOffsets.Add("dad", new Vector3(
