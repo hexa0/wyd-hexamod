@@ -5,7 +5,7 @@ namespace HexaMod.Scripts
 {
 	public class NetworkedSoundBehavior : MonoBehaviour
 	{
-		private List<AudioClip> clips = new List<AudioClip>();
+		private readonly List<AudioClip> clips = new List<AudioClip>();
 
 		public void RegisterSound(AudioClip sound)
 		{

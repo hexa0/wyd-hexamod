@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using HexaMapAssemblies;
+using HexaMod.Patches.Feature;
+using HexaMod.Patches.Fixes;
 using HexaMod.UI;
-using static HexaMod.UI.Util.Menu;
 using HexaMod.Util;
 using UnityEngine;
-using UnityStandardAssets.Effects;
-using HexaMod.Patches.Fixes;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityStandardAssets.Effects;
+using static HexaMod.UI.Util.Menu;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -207,7 +208,7 @@ namespace HexaMod.Patches.Hooks
 
 		void MakeThrowable()
 		{
-			gameObject.transform.SetParent(null);
+			gameObject.transform.SetParent(PlayerControllersParent.parent);
 			gameObject.name = "Dead Baby";
 			Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
 			rigidBody.interpolation = RigidbodyInterpolation.Interpolate;
@@ -216,7 +217,7 @@ namespace HexaMod.Patches.Hooks
 			DestroyImmediate(gameObject.GetComponent<NetworkMovement>());
 			DestroyImmediate(gameObject.GetComponent<CharacterReplication>());
 			gameObject.GetComponent<CharacterController>().enabled = false;
-			NetworkMovementRB networkMovement = gameObject.AddComponent<NetworkMovementRB>();
+			RigidBodyReplication networkMovement = gameObject.AddComponent<RigidBodyReplication>();
 			networkMovement.timer = 5f;
 			BoxCollider collider = gameObject.GetComponent<BoxCollider>();
 			collider.isTrigger = false;
