@@ -129,7 +129,7 @@ namespace HexaMod.Patches.Fixes
 			{
 				inRange = false;
 
-				foreach (Transform player in PlayerControllersParent.GetPlayerTransforms())
+				foreach (Transform player in PlayerControllers.GetPlayerTransforms())
 				{
 					if ((player.position - transform.position).magnitude < 15f)
 					{

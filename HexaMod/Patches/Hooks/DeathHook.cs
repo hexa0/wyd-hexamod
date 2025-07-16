@@ -208,7 +208,7 @@ namespace HexaMod.Patches.Hooks
 
 		void MakeThrowable()
 		{
-			gameObject.transform.SetParent(PlayerControllersParent.parent);
+			gameObject.transform.SetParent(PlayerControllers.parent);
 			gameObject.name = "Dead Baby";
 			Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
 			rigidBody.interpolation = RigidbodyInterpolation.Interpolate;

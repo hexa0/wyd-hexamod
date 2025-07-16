@@ -14,8 +14,8 @@ namespace HexaMod.Patches.Fixes
 
 			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
 			{
-				DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
-				Traverse powerupFields = Traverse.Create(powerups);
+				DadPowerUps powerUps = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
+				Traverse powerupFields = Traverse.Create(powerUps);
 				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 				bigAction.ActionDone("Chore Completed");
 				var audio = bigAction.GetComponent<AudioSource>();
@@ -32,8 +32,8 @@ namespace HexaMod.Patches.Fixes
 
 			if (fields.Field<bool>("choreStarted").Value && !__instance.isDone)
 			{
-				DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
-				Traverse powerupFields = Traverse.Create(powerups);
+				DadPowerUps powerUps = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
+				Traverse powerupFields = Traverse.Create(powerUps);
 				ActionText bigAction = powerupFields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 				bigAction.ActionDone("Chore Completed");
 				var audio = bigAction.GetComponent<AudioSource>();
@@ -60,11 +60,11 @@ namespace HexaMod.Patches.Fixes
 
 					if (ChallengeManager == null)
 					{
-						DadPowerUps powerups = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
-						Traverse fields = Traverse.Create(powerups);
+						DadPowerUps powerUps = HexaGlobal.networkManager.playerObj.GetComponent<DadPowerUps>();
+						Traverse fields = Traverse.Create(powerUps);
 						ActionText bigAction = fields.Field<GameObject>("bigAction").Value.GetComponent<ActionText>();
 						bigAction.ActionDone("Chore Completed");
-						powerups.SendMessage("RandomPowerUp");
+						powerUps.SendMessage("RandomPowerUp");
 					}
 					else
 					{

@@ -5,7 +5,7 @@ using UnityStandardAssets.Characters.FirstPerson;
 namespace HexaMod.Patches.Feature
 {
 	[HarmonyPatch(typeof(FirstPersonController))]
-	internal static class PlayerControllersParent
+	internal static class PlayerControllers
 	{
 		public static Transform parent;
 		// TODO: make a static list of different transforms and have this parent just be the main transform so that custom logic that needs to reparent players to another object is supported
@@ -39,6 +39,10 @@ namespace HexaMod.Patches.Feature
 			return players;
 		}
 
+		public static FirstPersonController LocalPlayer => HexaGlobal.networkManager.playerObj?.GetComponent<FirstPersonController>();
+		public static FirstPersonController HostPlayer => GetPlayers()[0];
+
+
 		public static Transform[] GetPlayerTransforms()
 		{
 			int children = parent.childCount;
@@ -51,6 +55,11 @@ namespace HexaMod.Patches.Feature
 			}
 
 			return playerTransforms;
+		}
+
+		public static FirstPersonController GetPlayer(string name)
+		{
+			return parent.Find(name)?.GetComponent<FirstPersonController>();
 		}
 	}
 }
