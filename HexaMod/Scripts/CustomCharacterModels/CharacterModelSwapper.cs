@@ -88,13 +88,61 @@ namespace HexaMod.Scripts.CustomCharacterModels
 			SetShirt(initShirt);
 		}
 
+		Renderer[] cullRenderers;
+		ShadowCastingMode[] cullRendererShadowCastingModes;
+		bool culled = false;
+
+		public void HandleCameraPreRender(Camera camera)
+		{
+			if (camera == currentCamera)
+			{
+				if (!culled)
+				{
+					culled = true;
+
+					for (int i = 0; i < cullRenderers.Length; i++)
+					{
+						cullRendererShadowCastingModes[i] = cullRenderers[i].shadowCastingMode;
+						cullRenderers[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+					}
+				}
+			}
+			else
+			{
+				if (culled)
+				{
+					culled = false;
+
+					for (int i = 0; i < cullRenderers.Length; i++)
+					{
+						cullRenderers[i].shadowCastingMode = cullRendererShadowCastingModes[i];
+					}
+				}
+			}
+		}
+
+		public void HandleCameraPostRender(Camera camera)
+		{
+			if (camera == currentCamera)
+			{
+				if (culled)
+				{
+					culled = false;
+
+					for (int i = 0; i < cullRenderers.Length; i++)
+					{
+						cullRenderers[i].shadowCastingMode = cullRendererShadowCastingModes[i];
+					}
+				}
+			}
+		}
+
 		public void InitialStateDone()
 		{
 			bool selfCulled = currentModel != null && currentModel is ModCharacterModel && (currentModel as ModCharacterModel).selfCulling;
 
 			if (currentCamera)
 			{
-				Renderer[] renderers;
 				CharacterSelfCuller[] selfCullers = currentV2Model ? currentV2Model.GetComponentsInChildren<CharacterSelfCuller>() : new CharacterSelfCuller[0];
 
 				{
@@ -108,57 +156,21 @@ namespace HexaMod.Scripts.CustomCharacterModels
 						}
 					}
 
-					renderers = rendererList.ToArray();
+					cullRenderers = rendererList.ToArray();
 				}
 
-				ShadowCastingMode[] shadowCastingModes = new ShadowCastingMode[renderers.Length];
-				bool culled = false;
+				cullRendererShadowCastingModes = new ShadowCastingMode[cullRenderers.Length];
+				culled = false;
 
-				Camera.onPreRender += camera =>
-				{
-					if (camera == currentCamera)
-					{
-						if (!culled)
-						{
-							culled = true;
-
-							for (int i = 0; i < renderers.Length; i++)
-							{
-								shadowCastingModes[i] = renderers[i].shadowCastingMode;
-								renderers[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-							}
-						}
-					}
-					else
-					{
-						if (culled)
-						{
-							culled = false;
-
-							for (int i = 0; i < renderers.Length; i++)
-							{
-								renderers[i].shadowCastingMode = shadowCastingModes[i];
-							}
-						}
-					}
-				};
-
-				Camera.onPostRender += camera =>
-				{
-					if (camera == currentCamera)
-					{
-						if (culled)
-						{
-							culled = false;
-
-							for (int i = 0; i < renderers.Length; i++)
-							{
-								renderers[i].shadowCastingMode = shadowCastingModes[i];
-							}
-						}
-					}
-				};
+				Camera.onPreRender += HandleCameraPreRender;
+				Camera.onPostRender += HandleCameraPostRender;
 			}
+		}
+
+		public void OnDestroy()
+		{
+			Camera.onPreRender -= HandleCameraPreRender;
+			Camera.onPostRender -= HandleCameraPostRender;
 		}
 
 		public void SetCharacterModel(string modelName)
