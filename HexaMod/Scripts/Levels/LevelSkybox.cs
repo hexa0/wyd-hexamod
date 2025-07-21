@@ -14,7 +14,11 @@ namespace HexaMapAssemblies
 		public bool useRenderSettings = true;
 
 		public Cubemap reflectionCubemap;
+		public AmbientMode ambientMode = AmbientMode.Skybox;
 		public Color[] ambientProbeCoefficients = new Color[9];
+		public Color ambientGroundColor;
+		public Color ambientEquatorColor;
+		public Color ambientSkyColor;
 		public Material skybox;
 		public CameraClearFlags clearFlags;
 		public Light sunSource;
@@ -24,6 +28,10 @@ namespace HexaMapAssemblies
 		{
 			skybox = RenderSettings.skybox;
 			reflectionCubemap = RenderSettings.customReflection;
+			ambientMode = RenderSettings.ambientMode;
+			ambientGroundColor = RenderSettings.ambientGroundColor;
+			ambientEquatorColor = RenderSettings.ambientEquatorColor;
+			ambientSkyColor = RenderSettings.ambientSkyColor;
 
 			for (int i = 0; i < 9; i++)
 			{
@@ -42,7 +50,10 @@ namespace HexaMapAssemblies
 
 			CurrentLevelSkybox.current = this;
 			RenderSettings.skybox = skybox;
-			RenderSettings.ambientMode = AmbientMode.Skybox;
+			RenderSettings.ambientMode = ambientMode;
+			RenderSettings.ambientGroundColor = ambientGroundColor;
+			RenderSettings.ambientEquatorColor = ambientEquatorColor;
+			RenderSettings.ambientSkyColor = ambientSkyColor;
 
 			if (ambientProbeCoefficients != null)
 			{

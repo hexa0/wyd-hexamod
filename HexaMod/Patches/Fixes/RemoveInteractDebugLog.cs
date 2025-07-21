@@ -38,11 +38,9 @@ namespace HexaMod.Patches.Fixes
 			static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 			{
 				var patchedInstructions = new List<CodeInstruction>(instructions);
-				// ILDebugger.SetOriginalInstructionStrings(patchedInstructions);
 
 				patchedInstructions[5] = new CodeInstruction(OpCodes.Pop);
 
-				// ILDebugger.LogILDiff(patchedInstructions);
 				return patchedInstructions.ToArray();
 			}
 		}

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using HexaMapAssemblies;
+using HexaMod.Patches.Feature;
 using HexaMod.ScriptableObjects;
 using HexaMod.Scripts;
 using HexaMod.Util;
@@ -257,6 +258,14 @@ namespace HexaMod
 							defaultLevelObjects.Add(child);
 						}
 					}
+				}
+			}
+
+			foreach (Transform child in ItemSpawnerParent.parent.GetComponentInChildren<Transform>())
+			{
+				if (child.name.StartsWith("Pool Cover") || child.name.StartsWith("Baby Car"))
+				{
+					defaultLevelObjects.Add(child.gameObject);
 				}
 			}
 

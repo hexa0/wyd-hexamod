@@ -5,8 +5,8 @@ namespace HexaMapAssemblies
 {
 	public static class GlobalPhotonFactory
 	{
-		private static int startingNetId = 10000;
-		private static int startingAltNetId = 90000; // alt ids are for fixing issues with the base map without messing with mod ids
+		private static readonly int startingNetId = 10000;
+		private static readonly int startingAltNetId = 90000; // alt ids are for fixing issues with the base map without messing with mod ids
 		private static int currentNetId = startingNetId;
 		private static int currentAltNetId = startingAltNetId;
 
@@ -18,12 +18,7 @@ namespace HexaMapAssemblies
 
 		public static void Register(GameObject gameObject, bool alt = false)
 		{
-			var view = gameObject.GetComponent<PhotonView>();
-
-			if (view == null)
-			{
-				view = gameObject.AddComponent<PhotonView>();
-			}
+			var view = gameObject.GetComponent<PhotonView>() ?? gameObject.AddComponent<PhotonView>();
 
 			if (alt)
 			{
@@ -54,7 +49,7 @@ namespace HexaMapAssemblies
 
 	public class PhotonFactory : MonoBehaviour
 	{
-		void Start()
+		void Awake()
 		{
 			GlobalPhotonFactory.Register(gameObject);
 

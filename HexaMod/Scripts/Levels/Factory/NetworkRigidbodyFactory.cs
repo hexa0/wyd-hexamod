@@ -7,8 +7,7 @@ namespace HexaMapAssemblies
 	{
 		void Start()
 		{
-			var networkMovement = gameObject.AddComponent<RigidBodyReplication>();
-
+			gameObject.AddComponent<RigidBodyReplication>();
 			Destroy(this);
 		}
 	}

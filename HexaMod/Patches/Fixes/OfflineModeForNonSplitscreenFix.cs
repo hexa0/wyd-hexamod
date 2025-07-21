@@ -45,7 +45,7 @@ namespace HexaMod.Patches.Fixes
 
 		static IEnumerable<CodeInstruction> PatchOfflineModeGetterCalls(List<CodeInstruction> instructions)
 		{
-			foreach (var instruction in instructions)
+			foreach (CodeInstruction instruction in instructions)
 			{
 				if (instruction.Calls(originalMethod))
 				{
