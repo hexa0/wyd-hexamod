@@ -108,7 +108,7 @@ namespace HexaMod.Patches.Fixes
 		}
 
 		readonly static float characterHeight = 2.8f;
-		readonly static int ceilingRaycastMask = ~671088640;
+		readonly static int ceilingRaycastMask = (~671088640) & ~(1 << 2);
 
 		[HarmonyPatch(typeof(Crouch), "Start")]
 		[HarmonyPrefix]

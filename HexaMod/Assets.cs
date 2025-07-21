@@ -6,6 +6,7 @@ using HexaMod.ScriptableObjects;
 using HexaMod.Scripts;
 using HexaMod.Util;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityStandardAssets.Characters.FirstPerson;
 using static HexaMod.Scripts.PunRpcExtensions.Lobby.HexaLobby;
 
@@ -125,6 +126,7 @@ namespace HexaMod
 		}
 
 		public static List<GameObject> defaultLevelObjects = new List<GameObject>();
+		public static bool clearDefaultLevelObjectsOnReady = false;
 
 		public static void FixDefaultLevel()
 		{
@@ -180,7 +182,7 @@ namespace HexaMod
 		{
 			if (defaultLevelObjects.Count == 0)
 			{
-				foreach (var child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+				foreach (GameObject child in SceneManager.GetActiveScene().GetRootGameObjects())
 				{
 					var bad = false;
 
@@ -235,11 +237,23 @@ namespace HexaMod
 						bad = true;
 					}
 
-					if (bad && child.activeInHierarchy)
+					if (bad)
 					{
-						defaultLevelObjects.Add(child);
+						if (!child.activeInHierarchy)
+						{
+							Object.Destroy(child);
+						}
+						else
+						{
+							defaultLevelObjects.Add(child);
+						}
 					}
 				}
+			}
+
+			if (PhotonNetwork.room != null && !PhotonNetwork.room.IsOpen)
+			{
+				clearDefaultLevelObjectsOnReady = true;
 			}
 
 			foreach (var levelObject in defaultLevelObjects)
@@ -422,6 +436,7 @@ namespace HexaMod
 			loadedLevel = null;
 			loadedLevelInstance = null;
 			defaultLevelObjects.Clear();
+			clearDefaultLevelObjectsOnReady = false;
 			gameStarted = HexaGlobal.networkManager.gameStarted;
 
 			if (PhotonNetwork.inRoom)

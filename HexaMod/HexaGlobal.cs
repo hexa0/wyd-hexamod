@@ -65,6 +65,7 @@ namespace HexaMod
 			if (activeScene.name == "Game")
 			{
 				PlayerControllers.parent = new GameObject("Players").GetComponent<Transform>();
+				ItemSpawnerParent.parent = new GameObject("Items").GetComponent<Transform>();
 
 				if (!PhotonNetwork.inRoom)
 				{

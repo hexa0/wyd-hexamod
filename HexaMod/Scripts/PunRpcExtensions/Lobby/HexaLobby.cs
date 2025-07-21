@@ -346,6 +346,11 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 			HexaMenus.startupScreen.loadingText.SetText("Loaded");
 			HexaMenus.startupScreen.fader.fadeState = false;
 
+			if (Assets.clearDefaultLevelObjectsOnReady)
+			{
+				StartCoroutine(FullyDestroyDefaultLevelAssets());
+			}
+
 			if (inGame)
 			{
 				VoiceChat.SetMicrophoneChannels(1);
@@ -371,6 +376,16 @@ namespace HexaMod.Scripts.PunRpcExtensions.Lobby
 				WYDMenus.title.menuController.ChangeToMenu(hostMenuId);
 
 				StartCoroutine(HexaModReturnedLobbyInit());
+			}
+		}
+
+		IEnumerator FullyDestroyDefaultLevelAssets()
+		{
+			yield return new WaitForEndOfFrame();
+
+			foreach (var levelObject in Assets.defaultLevelObjects)
+			{
+				Destroy(levelObject);
 			}
 		}
 

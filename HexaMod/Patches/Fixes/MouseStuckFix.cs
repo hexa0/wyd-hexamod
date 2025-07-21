@@ -29,7 +29,7 @@ namespace HexaMod.Patches.Fixes
 
 		[HarmonyPatch(typeof(InGameMenuHelper), "Update")]
 		[HarmonyPostfix]
-		static void Update(ref InGameMenuHelper __instance)
+		static void Update()
 		{
 			bool mouseLocked = !Menu.WYDMenus.AnyMenuOpen();
 
