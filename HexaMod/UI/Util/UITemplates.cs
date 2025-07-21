@@ -21,6 +21,7 @@ namespace HexaMod.UI.Util
 			if (!buttonTemplate)
 			{
 				buttonTemplate = Object.Instantiate(playLocalButton).GetComponent<Button>();
+				Object.DontDestroyOnLoad(buttonTemplate);
 				buttonTemplate.name = "buttonTemplate";
 				buttonTemplate.GetComponentInChildren<Text>(true).text = "buttonTemplate";
 
@@ -30,6 +31,7 @@ namespace HexaMod.UI.Util
 			if (!textInputFieldTemplate)
 			{
 				textInputFieldTemplate = Object.Instantiate(LobbyNameOriginal);
+				Object.DontDestroyOnLoad(textInputFieldTemplate);
 				textInputFieldTemplate.name = "textInputFieldTemplate";
 
 				InputField field = textInputFieldTemplate.transform.GetChild(0).GetComponent<InputField>();
@@ -50,6 +52,7 @@ namespace HexaMod.UI.Util
 			if (!hostControlToggleTemplate)
 			{
 				hostControlToggleTemplate = Object.Instantiate(SetSpectateOriginal).GetComponent<Toggle>();
+				Object.DontDestroyOnLoad(hostControlToggleTemplate);
 				hostControlToggleTemplate.name = "hostControlToggleTemplate";
 				hostControlToggleTemplate.transform.GetComponentInChildren<Text>(true).text = "hostControlToggleTemplate";
 				hostControlToggleTemplate.onValueChanged = new Toggle.ToggleEvent();

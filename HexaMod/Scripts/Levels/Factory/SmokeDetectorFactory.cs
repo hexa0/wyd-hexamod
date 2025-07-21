@@ -13,6 +13,8 @@ namespace HexaMapAssemblies
 			smokeDetector.gameStateController = GameObject.Find("GameStateController");
 			smokeDetector.beepSound = beepSound;
 			smokeDetector.tag = "Use";
+
+			Destroy(this);
 		}
 
 		public Material lightOnMat;

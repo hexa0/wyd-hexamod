@@ -57,6 +57,8 @@ namespace HexaMapAssemblies
 		void Start()
 		{
 			GlobalPhotonFactory.Register(gameObject);
+
+			Destroy(this);
 		}
 	}
 }

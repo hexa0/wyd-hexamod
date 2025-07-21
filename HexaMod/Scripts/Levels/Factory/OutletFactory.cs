@@ -13,6 +13,8 @@ namespace HexaMapAssemblies
 			outlet.explosion = Assets.StaticAssets.outletExplosion;
 			outlet.shockSound = Assets.StaticAssets.outletShockSound;
 			outlet.coverPrefab = Assets.StaticAssets.outletCoverPrefab;
+
+			Destroy(this);
 		}
 	}
 }

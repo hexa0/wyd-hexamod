@@ -26,6 +26,8 @@ namespace HexaMapAssemblies
 			pickup.holding = "";
 			pickup.lastHolder = "";
 			pickup.player = player;
+
+			Destroy(this);
 		}
 
 		public bool babyCannotGrab = false;

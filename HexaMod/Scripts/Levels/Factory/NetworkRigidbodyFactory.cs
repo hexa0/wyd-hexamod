@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HexaMod.Patches.Fixes;
+using UnityEngine;
 
 namespace HexaMapAssemblies
 {
@@ -6,7 +7,9 @@ namespace HexaMapAssemblies
 	{
 		void Start()
 		{
-			var networkMovement = gameObject.AddComponent<NetworkMovementRB>();
+			var networkMovement = gameObject.AddComponent<RigidBodyReplication>();
+
+			Destroy(this);
 		}
 	}
 }

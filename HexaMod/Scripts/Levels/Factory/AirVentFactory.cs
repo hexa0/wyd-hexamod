@@ -32,6 +32,7 @@ namespace HexaMapAssemblies
 			yield return new WaitForSeconds(1f);
 			gameObject.GetComponent<AirVent>().correspondingVent = correspondingVent.GetComponent<AirVent>();
 			gameObject.GetComponent<AirVent>().netView = gameObject.GetComponent<PhotonView>();
+			Destroy(this);
 		}
 
 		public Transform exitPos;

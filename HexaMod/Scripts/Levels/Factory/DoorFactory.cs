@@ -36,6 +36,8 @@ namespace HexaMapAssemblies
 			door.openSound = openSound != null ? openSound : Assets.StaticAssets.doorOpen;
 			door.closeSound = closeSound != null ? closeSound : Assets.StaticAssets.doorClose;
 			door.occPortal = occPortal;
+
+			Destroy(this);
 		}
 
 		public bool locked = false;

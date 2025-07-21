@@ -9,6 +9,8 @@ namespace HexaMapAssemblies
 			var timer = gameObject.AddComponent<DestroyTimer>();
 			timer.timeToDestroy = timeToDestroy;
 			timer.afterSound = afterSound;
+
+			Destroy(this);
 		}
 
 		public float timeToDestroy;

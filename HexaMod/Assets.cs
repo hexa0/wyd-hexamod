@@ -222,6 +222,15 @@ namespace HexaMod
 						case "Baby Car":
 							bad = true;
 							break;
+						case "DaddysNightmareSpawns":
+							bad = true;
+							break;
+						case "Daddys Nightmare":
+							child.SetParent(GameObject.Find("BackendObjects"));
+							break;
+						case "Pets":
+							bad = true;
+							break;
 						case "BackendObjects":
 							defaultLevelObjects.Add(child.Find("Dadlympics").Find("PoolChoreObjs"));
 							break;

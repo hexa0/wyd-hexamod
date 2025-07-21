@@ -24,6 +24,8 @@ namespace HexaMapAssemblies
 			// done with a delay so the other factories are done adding the Drawer components
 			yield return new WaitForSeconds(1f);
 			gameObject.GetComponent<Drawer>().dependentD = blockerDrawer.GetComponent<Drawer>();
+
+			Destroy(this);
 		}
 
 		public DrawerFactory blockerDrawer;

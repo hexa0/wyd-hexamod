@@ -21,6 +21,8 @@ namespace HexaMapAssemblies
 			cabinet.state = false;
 			cabinet.dir = 1;
 			cabinet.dir2 = 1;
+
+			Destroy(this);
 		}
 
 		public bool locked = false;

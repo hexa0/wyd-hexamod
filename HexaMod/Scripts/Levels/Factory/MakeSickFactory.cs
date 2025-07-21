@@ -22,6 +22,8 @@ namespace HexaMapAssemblies
 			{
 				sick.tag = "Eat";
 			}
+
+			Destroy(this);
 		}
 
 		public float sicknessFactor = 0.1f;
