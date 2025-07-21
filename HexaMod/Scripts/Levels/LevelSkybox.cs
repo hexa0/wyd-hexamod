@@ -1,5 +1,4 @@
-﻿using HexaMod.Util;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace HexaMapAssemblies
@@ -21,13 +20,8 @@ namespace HexaMapAssemblies
 		public Light sunSource;
 		public LevelSkybox dnmSkybox;
 
-		public void Update()
+		void UpdateFromRenderSettings()
 		{
-			if (!Application.isEditor || !useRenderSettings)
-			{
-				return;
-			}
-
 			skybox = RenderSettings.skybox;
 			reflectionCubemap = RenderSettings.customReflection;
 
@@ -37,14 +31,9 @@ namespace HexaMapAssemblies
 			}
 		}
 
-		public void Start()
+		void SetupLevelLighting()
 		{
-			if (Application.isEditor)
-			{
-				return;
-			}
-
-			if (dnmSkybox != null && HexaMod.HexaGlobal.networkManager.curGameMode == GameModes.GetId("daddysNightmare"))
+			if (dnmSkybox != null && HexaMod.HexaGlobal.networkManager.curGameMode == HexaMod.Util.GameModes.GetId("daddysNightmare"))
 			{
 				sunSource.enabled = false;
 				dnmSkybox.Start();
@@ -82,6 +71,22 @@ namespace HexaMapAssemblies
 
 			lightHolder.sunLight = RenderSettings.sun;
 			lightHolder.Start();
+		}
+
+		void Update()
+		{
+			if (Application.isEditor && useRenderSettings)
+			{
+				UpdateFromRenderSettings();
+			}
+		}
+
+		void Start()
+		{
+			if (!Application.isEditor)
+			{
+				SetupLevelLighting();
+			}
 		}
 	}
 }

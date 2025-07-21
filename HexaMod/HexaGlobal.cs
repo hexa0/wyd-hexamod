@@ -12,7 +12,6 @@ using HexaMod.Patches.Hooks;
 using System;
 using System.Linq;
 using Object = UnityEngine.Object;
-using HexaMod.UI.Element.HexaMod.Loading;
 using HexaMod.Scripts;
 using HexaMod.Scripts.PunRpcExtensions.Lobby;
 using HexaMod.Patches.Feature;
