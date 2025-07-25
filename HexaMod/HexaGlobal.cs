@@ -14,7 +14,6 @@ using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Persistent;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.Characters.FirstPerson;
 using static System.Guid;

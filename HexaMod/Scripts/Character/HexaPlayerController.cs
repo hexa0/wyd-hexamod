@@ -11,7 +11,6 @@ using HexaMod.Scripts.Util;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Utility;
-using static UnityEngine.GridBrushBase;
 
 namespace HexaMod.Scripts.Character
 {
