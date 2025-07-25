@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexaMapAssemblies;
+using HexaMod.SDK.Levels.Scripts.Lighting;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature.CustomLevels

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
-using HexaMod.UI.Util;
+using HexaMod.API.UI.Util;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
@@ -21,7 +21,7 @@ namespace HexaMod.Patches.Fixes
 				patchedInstructions[62] = pop;
 				patchedInstructions[64] = pop;
 				patchedInstructions[70] = pop;
-				patchedInstructions[72] = pop; 
+				patchedInstructions[72] = pop;
 
 				return patchedInstructions;
 			}

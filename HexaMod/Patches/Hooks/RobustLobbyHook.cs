@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using HarmonyLib;
-using HexaMod.Scripts;
-using HexaMod.UI.Util;
-using HexaMod.Util;
+using HexaMod.API.UI.Util;
+using HexaMod.API.Util.WhosYourDaddy;
+using HexaMod.Scripts.Persistent;
 using UnityEngine;
 
 namespace HexaMod.Patches.Hooks

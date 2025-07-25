@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using HarmonyLib;
-using HexaMapAssemblies;
+using HexaMod.SDK.Levels.Scripts.Factory;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
@@ -33,7 +33,7 @@ namespace HexaMod.Patches.Fixes
 					if (!brokenJoints[i])
 					{
 						brokenJoints[i] = true;
-						GetComponent<PhotonView>().RPC("OnJointIdBroken", PhotonTargets.Others, (byte)i);
+						GetComponent<PhotonView>().RPC("OnJointIdBroken", PhotonTargets.OthersBuffered, (byte)i);
 					}
 				}
 			}

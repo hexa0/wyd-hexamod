@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
-using HexaMapAssemblies;
-using HexaMod.Scripts;
+using HexaMod.Scripts.Persistent;
+using HexaMod.Scripts.PunRpcExtensions;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature

@@ -1,0 +1,64 @@
+﻿using HexaMod.API.Util.Migration;
+using HexaMod.API.Util.WhosYourDaddy;
+using HexaMod.Scripts.Character;
+using UnityEngine;
+
+namespace HexaMod.SDK.Levels.Scripts.Interactables
+{
+	[UnityMigrationIdentifier("HexaMod.5fbf637b-d698-45fb-af38-607a9d164d86")]
+	public class CustomPlayerInteractable : MigratablePhotonMonoBehavior, ICustomPlayerInteractable
+	{
+		#region ICustomPlayerInteractable Default Implemenation
+		public virtual bool CanInteract(HexaPlayerController player) => true;
+		public virtual bool CanUseOn(HexaPlayerController player, GameObject target) => true;
+
+		public virtual Color ReticleColor(HexaPlayerController player) => CharacterItemInteraction.ReticleColor.Useable;
+		public virtual string ReticleText(HexaPlayerController player) => $"Interact With {name} as teamSelector {player.teamSelector}";
+
+		public virtual void CustomInteract(HexaPlayerController player) => player.ActionMessage($"Interacted with {name} as teamSelector {player.teamSelector}.");
+		[PunRPC]
+		public virtual void CustomInteractRPC(PhotonMessageInfo messageInfo)
+		{
+			foreach (HexaPlayerController player in PlayerControllers.GetPlayers())
+			{
+				if (player.View.owner == messageInfo.sender)
+				{
+					CustomInteract(player);
+					return;
+				}
+			}
+		}
+		[PunRPC]
+		public virtual void CustomUse(HexaPlayerController player) => player.ActionMessage($"Used {name} as teamSelector {player.teamSelector}.");
+		public virtual void CustomUseRPC(PhotonMessageInfo messageInfo) {
+			foreach (HexaPlayerController player in PlayerControllers.GetPlayers())
+			{
+				if (player.View.owner == messageInfo.sender)
+				{
+					CustomUse(player);
+					return;
+				}
+			}
+		}
+		#endregion
+
+		#region CustomPlayerInteractable Utils
+		public string GetName() => CharacterItemInteraction.GetTargetName(gameObject);
+		#endregion
+	}
+
+	public interface ICustomPlayerInteractable
+	{
+		bool CanInteract(HexaPlayerController player);
+		bool CanUseOn(HexaPlayerController player, GameObject target);
+		string ReticleText(HexaPlayerController player);
+		Color ReticleColor(HexaPlayerController player);
+
+		void CustomInteract(HexaPlayerController player);
+		[PunRPC]
+		void CustomInteractRPC(PhotonMessageInfo messageInfo);
+
+		[PunRPC]
+		void CustomUse(HexaPlayerController player);
+	}
+}

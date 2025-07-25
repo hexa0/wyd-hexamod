@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace HexaMapAssemblies
+namespace HexaMod.Scripts.PunRpcExtensions
 {
 	public class DoorSoundRPC : MonoBehaviour
 	{

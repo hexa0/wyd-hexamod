@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches.Fixes

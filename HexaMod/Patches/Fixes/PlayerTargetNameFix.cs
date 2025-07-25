@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexaMod.UI;
+using HexaMod.API.UI;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 

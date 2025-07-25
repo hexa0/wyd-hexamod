@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexaMod.Settings;
+using HexaMod.API.Util.Unity.Settings;
 
 namespace HexaMod.Patches.Fixes
 {
@@ -8,11 +8,15 @@ namespace HexaMod.Patches.Fixes
 	{
 		[HarmonyPatch("ToggleLights")]
 		[HarmonyPrefix]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0031:Use null propagation", Justification = "because it doesn't work dumbass, it throws errors")]
 		static bool ToggleLights(ref LightHolder __instance, bool input)
 		{
 			for (int i = 0; i < __instance.lights.Length; i++)
 			{
-				__instance.lights[i]?.SetActive(input);
+				if (__instance.lights[i] != null)
+				{
+					__instance.lights[i].SetActive(input);
+				}
 			}
 
 			WYDPreferences.dynamicLightingEnabled.Set(input);

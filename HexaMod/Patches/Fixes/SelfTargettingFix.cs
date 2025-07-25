@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using HexaMod.UI;
+using HexaMod.API.UI;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes

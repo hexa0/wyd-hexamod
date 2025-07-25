@@ -1,12 +1,12 @@
 ﻿using System.Net;
 using System.Text;
+using HexaNet;
+using HexaNet.PeerConnection;
 using NAudio.Wave;
 using RNNoise.NET;
 using VoiceChatHost.Opus;
 using VoiceChatShared;
 using VoiceChatShared.Enums;
-using HexaNet;
-using HexaNet.PeerConnection;
 
 namespace VoiceChatHost
 {

@@ -1,7 +1,8 @@
 ﻿using System;
 using HarmonyLib;
-using HexaMod.Scripts;
-using HexaMod.UI;
+using HexaMod.API.UI;
+using HexaMod.Scripts.Multiplayer.Lobby;
+using HexaMod.Scripts.Persistent;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -12,6 +13,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void CreateRoom()
 		{
+			LobbySettings.InitSettingsForCreatedRoom(HexaPersistentLobby.instance.lobbySettings);
 			HexaMenus.loadingOverlay.controller.SetTaskState("RoomCreate", true);
 		}
 

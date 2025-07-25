@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
-using HexaMapAssemblies;
-using HexaMod.Patches.Feature;
+using HexaMod.API.UI;
+using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.Patches.Fixes;
-using HexaMod.UI;
-using HexaMod.Util;
+using HexaMod.Scripts.Character;
+using HexaMod.SDK.Levels.Scripts.Factory;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Effects;
-using static HexaMod.UI.Util.Menu;
+using static HexaMod.API.UI.Util.Menu;
 
 namespace HexaMod.Patches.Hooks
 {
@@ -115,7 +115,7 @@ namespace HexaMod.Patches.Hooks
 			stats.mainCam.GetComponent<Camera>().enabled = false;
 			stats.mainCam.GetComponent<AudioListener>().enabled = false;
 
-			string chatColor = MainUI.GetCurrentShirtColorHex();
+			string chatColor = MainUI.GetCurrentDadShirtColorHex();
 
 			if (!chatColor.StartsWith("#"))
 			{

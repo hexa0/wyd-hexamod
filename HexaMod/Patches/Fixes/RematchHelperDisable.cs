@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using HexaMod.Util;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes

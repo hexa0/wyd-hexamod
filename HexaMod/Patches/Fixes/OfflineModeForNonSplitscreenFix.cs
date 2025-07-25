@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using HexaMod.UI;
+using HexaMod.API.UI;
+using HexaMod.API.Util.Patching;
 
 namespace HexaMod.Patches.Fixes
 {
@@ -43,22 +44,9 @@ namespace HexaMod.Patches.Fixes
 			).Cast<MethodBase>();
 		}
 
-		static IEnumerable<CodeInstruction> PatchOfflineModeGetterCalls(List<CodeInstruction> instructions)
-		{
-			foreach (CodeInstruction instruction in instructions)
-			{
-				if (instruction.Calls(originalMethod))
-				{
-					instruction.operand = replacementMethod;
-				}
-			}
-
-			return instructions;
-		}
-
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			return PatchOfflineModeGetterCalls(new List<CodeInstruction>(instructions));
+			return MethodReferenceUpdater.PatchMethodReferences(new List<CodeInstruction>(instructions), originalMethod, replacementMethod);
 		}
 	}
 }

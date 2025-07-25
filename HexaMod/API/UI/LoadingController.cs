@@ -1,0 +1,84 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace HexaMod.API.UI
+{
+	public class LoadingController : MonoBehaviour
+	{
+		private readonly Dictionary<string, bool> tasks = new Dictionary<string, bool>();
+
+		public void ResetTasks()
+		{
+			tasks.Clear();
+		}
+
+		public void SetTaskState(string taskName, bool working)
+		{
+			tasks[taskName] = working;
+		}
+
+		public bool GetTaskState(string taskName)
+		{
+			return tasks.ContainsKey(taskName) && tasks[taskName];
+		}
+
+		private bool currentlyShown = false;
+		private void ShowLoading(bool loadingShown)
+		{
+			if (loadingShown != currentlyShown)
+			{
+				currentlyShown = loadingShown;
+
+				HexaMenus.loadingOverlay.fader.fadeState = loadingShown;
+			}
+		}
+
+		private static readonly Dictionary<string, string> taskNames = new Dictionary<string, string>()
+		{
+			{ "PhotonConnect", "Connecting to Photon" },
+			{ "LobbyJoin", "Fetching lobby list" },
+			{ "RoomLookForOrCreateTag", "Searching for lobby" },
+			{ "RoomCreate", "Creating lobby" },
+			{ "RoomJoin", "Joining lobby" },
+		}
+;
+
+		private float lastWasWorking = 0f;
+		private void Update()
+		{
+			var isCurrentlyWorking = tasks.ContainsValue(true);
+
+			if (isCurrentlyWorking)
+			{
+				lastWasWorking = Time.time;
+				ShowLoading(true);
+			}
+			else
+			{
+				ShowLoading((Time.time - lastWasWorking) < 0.1f);
+			}
+
+			List<string> activeTasks = new List<string>();
+			foreach (var task in tasks)
+			{
+				if (task.Value)
+				{
+					if (taskNames.ContainsKey(task.Key))
+					{
+						activeTasks.Add(taskNames[task.Key]);
+					}
+					else
+					{
+						Mod.Warn($"Unknown task name: {task.Key}");
+						activeTasks.Add(task.Key);
+					}
+				}
+			}
+
+			if (activeTasks.Count > 0)
+			{
+				HexaMenus.loadingOverlay.cornerLoadingAnimation.loadingText.SetText(string.Join(", ", activeTasks.ToArray()));
+			}
+		}
+	}
+}

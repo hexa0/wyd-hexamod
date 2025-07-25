@@ -1,7 +1,7 @@
 ﻿using System;
 using HarmonyLib;
-using HexaMod.Patches.Feature;
-using HexaMod.Settings;
+using HexaMod.API.Util.Unity.Settings;
+using HexaMod.Scripts.Character;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -144,21 +144,14 @@ namespace HexaMod.Patches.Fixes
 			}
 
 			WallClipFixBehavior self = __instance.GetComponent<WallClipFixBehavior>();
-			CameraController cameraController = __instance.GetComponent<CameraController>();
-
-			if (!cameraController.cameraOffsets.ContainsKey("crouch"))
-			{
-				cameraController.cameraOffsets.Add("crouch", Vector3.zero);
-			}
-
-			CharacterController controller = __instance.charCont;
+			HexaPlayerController playerController = __instance.GetComponent<HexaPlayerController>() ?? throw new Exception($"{__instance.name} has no HexaPlayerController.");
 
 			__instance.GetControls();
 
-			Vector3 floorPosition = __instance.transform.position + __instance.transform.rotation * new Vector3(controller.center.x, controller.center.y - (controller.height / 2f), controller.center.z);
-			bool ceilingDetected = Physics.SphereCast(floorPosition, controller.radius, Vector3.up, out RaycastHit ceilingRaycast, characterHeight, ceilingRaycastMask);
+			Vector3 floorPosition = __instance.transform.position + __instance.transform.rotation * new Vector3(playerController.characterController.center.x, playerController.characterController.center.y - (playerController.characterController.height / 2f), playerController.characterController.center.z);
+			bool ceilingDetected = Physics.SphereCast(floorPosition, playerController.characterController.radius, Vector3.up, out RaycastHit ceilingRaycast, characterHeight, ceilingRaycastMask);
 
-			bool blocked = ceilingDetected && ceilingRaycast.distance + controller.radius <= characterHeight;
+			bool blocked = ceilingDetected && ceilingRaycast.distance + playerController.characterController.radius <= characterHeight;
 
 			self.crouching = __instance.btnDown || (blocked && self.crouching);
 			self.proning = __instance.btn2Down || (blocked && self.proning);
@@ -167,18 +160,18 @@ namespace HexaMod.Patches.Fixes
 			Vector3 targetCenter = self.proning ? new Vector3(0f, -0.8f, 0.9f) : (self.crouching ? new Vector3(0f, -0.6f, -0.28f) : new Vector3(0f, 0.1f, -0.28f));
 			Vector3 targetCameraOffset = self.proning ? new Vector3(0f, __instance.proneHeight, __instance.proneDis) : (self.crouching ? new Vector3(0f, __instance.crouchHeight, 0f) : Vector3.zero);
 
-			controller.center = Vector3.Lerp(controller.center, targetCenter, Mathf.Min(delta * 15f, 1f));
-			controller.height = Mathf.Lerp(controller.height, targetHeight, Mathf.Min(delta * 15f, 1f));
+			playerController.characterController.center = Vector3.Lerp(playerController.characterController.center, targetCenter, Mathf.Min(delta * 15f, 1f));
+			playerController.characterController.height = Mathf.Lerp(playerController.characterController.height, targetHeight, Mathf.Min(delta * 15f, 1f));
 			
 			if (HexaModPreferences.smoothCrouching.Value)
 			{
 				self.crouchHeight = Mathf.Lerp(self.crouchHeight, self.crouching ? __instance.crouchHeight : 0f, Mathf.Min(delta * 15f, 1f));
-				cameraController.cameraOffsets["crouch"] = Vector3.Lerp(cameraController.cameraOffsets["crouch"], targetCameraOffset, Mathf.Min(delta * 15f, 1f));
+				playerController.cameraController.cameraOffsets["crouch"] = Vector3.Lerp(playerController.cameraController.cameraOffsets["crouch"], targetCameraOffset, Mathf.Min(delta * 15f, 1f));
 			}
 			else
 			{
 				self.crouchHeight = self.crouching ? __instance.crouchHeight : 0f;
-				cameraController.cameraOffsets["crouch"] = targetCameraOffset;
+				playerController.cameraController.cameraOffsets["crouch"] = targetCameraOffset;
 			}
 
 			return false;

@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
-using HexaMod.Scripts;
-using HexaMod.Util;
+using HexaMod.API.Util.Extensions;
+using HexaMod.Scripts.Persistent;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature

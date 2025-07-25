@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
+using HexaMod.API.UI.Util;
 using HexaMod.Patches.Hooks;
-using HexaMod.UI.Util;
 using UnityEngine;
 using UnityEngine.UI;
 

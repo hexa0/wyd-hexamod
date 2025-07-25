@@ -117,4 +117,8 @@ internal static class BuildInfo
 		<PackageReference Include="Mono.pdb2mdb" Version="0.1.0.20130128" PrivateAssets="all" />
 		<PackageReference Include="NAudio" Version="1.10.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="SDK\Levels\Scripts\Util\" />
+	</ItemGroup>
 </Project>

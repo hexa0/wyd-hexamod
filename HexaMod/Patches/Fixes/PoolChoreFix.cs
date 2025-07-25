@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
-using HexaMod.Patches.Feature;
-using HexaMod.UI;
+using HexaMod.API.UI;
+using HexaMod.API.Util.WhosYourDaddy;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 

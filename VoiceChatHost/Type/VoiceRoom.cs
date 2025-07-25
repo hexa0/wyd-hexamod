@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using VoiceChatShared.Enums;
 using HexaNet;
 using HexaNet.PeerConnection;
+using VoiceChatShared.Enums;
 
 namespace VoiceChatHost.Type
 {

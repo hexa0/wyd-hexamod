@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
-using HexaMod.Patches.Feature;
+using HexaMod.API.Util.WhosYourDaddy;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
-	internal class RigidBodyReplication : NetworkMovementRB
+	internal class RigidBodyReplication : NetworkMovementRB, IPunObservable
 	{
 		internal Rigidbody rigidBody;
 		internal PickUp pickUpScript;
@@ -105,7 +105,7 @@ namespace HexaMod.Patches.Fixes
 			}
 		}
 
-		new void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo _)
+		void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo _)
 		{
 			if (IsMine && stream.isWriting)
 			{

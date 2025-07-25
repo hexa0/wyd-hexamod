@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
-using HexaMod.Scripts;
+using HexaMod.Scripts.Persistent;
+using HexaMod.Scripts.PunRpcExtensions;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature
@@ -56,7 +57,7 @@ namespace HexaMod.Patches.Feature
 
 						if (holder)
 						{
-							holder.SendMessage("DropItem2");
+							holder.SendMessage("DropProp");
 						}
 					}
 

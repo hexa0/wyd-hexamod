@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using HexaMod.Scripts;
+using HexaMod.Scripts.Persistent;
 
 namespace HexaMod.Patches.Feature
 {

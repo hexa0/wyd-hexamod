@@ -1,0 +1,45 @@
+﻿using System.Collections;
+using HexaMod.API.Util.Migration;
+using UnityEngine;
+
+namespace HexaMod.SDK.Levels.Scripts.Factory
+{
+	[UnityMigrationIdentifier("HexaMod.b8657b9b-9a46-4608-bff9-c223c5b8668b")]
+	public class AirVentFactory : MigratableMonoBehavior
+	{
+		void Start()
+		{
+			var vent = gameObject.AddComponent<AirVent>();
+			vent.exitPos = exitPos;
+			vent.broken = broken;
+			vent.correspondingVent = vent;
+			vent.brokenVent = brokenVent;
+
+			if (vent.exitPos != null)
+			{
+				vent.gameObject.layer = 8;
+				vent.tag = "Enter";
+			}
+			else
+			{
+				vent.gameObject.layer = 0;
+			}
+
+			StartCoroutine(AssignCorrespondingVent());
+		}
+
+		IEnumerator AssignCorrespondingVent()
+		{
+			// done with a delay so the other factories are done adding the AirVent components
+			yield return new WaitForSeconds(1f);
+			gameObject.GetComponent<AirVent>().correspondingVent = correspondingVent.GetComponent<AirVent>();
+			gameObject.GetComponent<AirVent>().netView = gameObject.GetComponent<PhotonView>();
+			Destroy(this);
+		}
+
+		public Transform exitPos;
+		public bool broken;
+		public GameObject correspondingVent;
+		public GameObject brokenVent;
+	}
+}

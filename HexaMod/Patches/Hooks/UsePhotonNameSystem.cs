@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using HarmonyLib;
-using HexaMod.Scripts.PunRpcExtensions.Lobby;
-using HexaMod.UI;
+using HexaMod.API.UI;
+using HexaMod.Scripts.Multiplayer.Lobby;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -171,7 +171,7 @@ namespace HexaMod.Patches.Hooks
 
 		public void SendFormattedChatMessage(string author, string message)
 		{
-			string chatColor = MainUI.GetCurrentShirtColorHex();
+			string chatColor = MainUI.GetCurrentDadShirtColorHex();
 
 			if (!chatColor.StartsWith("#"))
 			{

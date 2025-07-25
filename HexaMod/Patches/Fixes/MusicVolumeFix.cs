@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
-using HexaMod.Scripts;
+using HexaMod.API.Util.Unity.Settings;
+using HexaMod.Scripts.Persistent;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,12 +17,10 @@ namespace HexaMod.Patches.Fixes
 
 		[HarmonyPatch(typeof(SetOptions), "Start")]
 		[HarmonyPrefix]
-		static bool Start(ref SetOptions __instance)
+		static bool Start()
 		{
 			QualitySettings.antiAliasing = PlayerPrefs.GetInt("AntiAliasing", 0);
 			QualitySettings.vSyncCount = PlayerPrefs.GetInt("UseVSync", 1);
-			HexaGlobal.networkManager.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
-
 			return false; // MasterVolume is now handled by TabOutMuteBehavior
 		}
 
@@ -32,19 +31,20 @@ namespace HexaMod.Patches.Fixes
 			if (__instance.audSlide)
 			{
 				UpdateVolume();
-				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MasterVolume", 0.75f);
+				__instance.GetComponent<Slider>().value = WYDPreferences.masterVolume.Value;
+			}
+			if (__instance.musicSlide)
+			{
+				UpdateVolume();
+				__instance.GetComponent<Slider>().value = WYDPreferences.musicVolume.Value;
 			}
 			if (__instance.sensSlide)
 			{
-				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSensitivity", (float)1);
+				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSensitivity", 1f);
 			}
 			if (__instance.barSlide)
 			{
 				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("SplitScreenBarSize", 0.75f);
-			}
-			if (__instance.musicSlide)
-			{
-				__instance.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
 			}
 
 			return false; // MasterVolume is now handled by TabOutMuteBehavior
@@ -54,7 +54,16 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPrefix]
 		static bool ControlVolume(ref float val)
 		{
-			PlayerPrefs.SetFloat("MasterVolume", val);
+			WYDPreferences.masterVolume.Value = val;
+			UpdateVolume();
+			return false;
+		}
+
+		[HarmonyPatch(typeof(OptionsController), "ControlMusicVolume")]
+		[HarmonyPrefix]
+		static bool ControlMusicVolume(ref float val)
+		{
+			WYDPreferences.musicVolume.Value = val;
 			UpdateVolume();
 			return false;
 		}

@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using HarmonyLib;
-using HexaMod.UI;
+using HexaMod.API.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

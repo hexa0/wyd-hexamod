@@ -8,16 +8,16 @@ namespace HexaMod.Patches.Fixes
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class NanFix
 	{
-		private static int memorySize = 120;
-		private static List<Vector3> characterPositionMemory = new List<Vector3>();
-		private static List<Quaternion> characterRotationMemory = new List<Quaternion>();
-		private static List<Vector3> cameraPositionMemory = new List<Vector3>();
-		private static List<Quaternion> cameraRotationMemory = new List<Quaternion>();
+		private static readonly int memorySize = 120;
+		private static readonly List<Vector3> characterPositionMemory = new List<Vector3>();
+		private static readonly List<Quaternion> characterRotationMemory = new List<Quaternion>();
+		private static readonly List<Vector3> cameraPositionMemory = new List<Vector3>();
+		private static readonly List<Quaternion> cameraRotationMemory = new List<Quaternion>();
 		public static bool fixingNaN = false;
 
 		[HarmonyPatch("Start")]
 		[HarmonyPostfix]
-		static void Start(ref FirstPersonController __instance)
+		static void Start()
 		{
 			fixingNaN = false;
 			characterPositionMemory.Clear();

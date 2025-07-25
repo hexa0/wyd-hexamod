@@ -1,20 +1,25 @@
-﻿using System.IO;
-using System.Reflection;
-using UnityEngine;
-using HexaMod.UI;
-using HexaMod.UI.Util;
-using HexaMod.Util;
-using UnityEngine.SceneManagement;
-using UnityEngine.EventSystems;
-using static HexaMod.UI.Util.Menu;
-using static System.Guid;
-using HexaMod.Patches.Hooks;
-using System;
+﻿using System;
+using System.IO;
 using System.Linq;
-using Object = UnityEngine.Object;
-using HexaMod.Scripts;
-using HexaMod.Scripts.PunRpcExtensions.Lobby;
+using System.Reflection;
+using HexaMod.API.UI;
+using HexaMod.API.UI.Util;
+using HexaMod.API.Util.Unity;
+using HexaMod.API.Util.WhosYourDaddy;
+using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
+using HexaMod.Patches.Hooks;
+using HexaMod.Scripts.Character;
+using HexaMod.Scripts.Multiplayer.Lobby;
+using HexaMod.Scripts.Persistent;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+using UnityStandardAssets.Characters.FirstPerson;
+using static System.Guid;
+using static HexaMod.API.UI.Util.Menu;
+using Object = UnityEngine.Object;
 
 namespace HexaMod
 {
@@ -45,6 +50,8 @@ namespace HexaMod
 				Object.Destroy(GameObject.Find("Canvas"));
 			}
 
+			ExtendPrefabs();
+
 			SceneManager.sceneLoaded += delegate (Scene scene, LoadSceneMode loadingMode)
 			{
 				OnGameSceneStart();
@@ -54,6 +61,7 @@ namespace HexaMod
 		public static void Init()
 		{
 			GameModes.DefineStandardGameModes();
+			GameModes.DefineDefaultModdedGameModes();
 			Assets.Init();
 			HexaPersistentLobby.instance.Init();
 		}
@@ -77,6 +85,7 @@ namespace HexaMod
 				Cursor.lockState = CursorLockMode.None;
 
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
+				networkManager.aud.Stop();
 				if (Mod.GAME_VERSION == null)
 				{
 					Mod.GAME_VERSION = networkManager.version;
@@ -119,6 +128,58 @@ namespace HexaMod
 			foreach (var rigidbody in Object.FindObjectsOfType<Rigidbody>())
 			{
 				rigidbody.interpolation = preferedInterpolation;
+			}
+		}
+
+		public static void ExtendPrefabs()
+		{
+			Object.DontDestroyOnLoad(PrefabExtensionUtils.customPrefabStorage);
+			PrefabExtensionUtils.customPrefabStorage.SetActive(false);
+
+			GameObject ExtendCharacter<PlayerController>(GameObject character) where PlayerController : HexaPlayerController
+			{
+				character.AddComponent<CharacterModelSwapper>();
+				character.AddComponent<PlayerVoiceEmitterRPC>();
+				character.AddComponent<CameraController>();
+				character.AddComponent<CharacterItemInteraction>();
+				ComponentSwapper.SwapComponents<FirstPersonController, PlayerController>(character);
+				ComponentSwapper.SwapComponents<NetworkMovement, CharacterReplication>(character);
+
+				return character;
+			}
+
+			GameObject dad = PrefabExtensionUtils.GetCachedNetworkPrefab("dadObj");
+			GameObject baby = PrefabExtensionUtils.GetCachedNetworkPrefab("babyObj");
+
+			ExtendCharacter<HexaDadController>(dad);
+			ExtendCharacter<HexaBabyController>(baby);
+
+			{
+				GameObject luigi = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
+				luigi.name = "luigiObj";
+				luigi.transform.localScale = new Vector3(0.95f, 1f, 0.95f);
+				ComponentSwapper.SwapComponents<FirstPersonController, HexaLuigiController>(luigi);
+				SkinnedMeshRenderer luigiMesh = luigi.transform.FindDeep("generic_male_01.005").GetComponent<SkinnedMeshRenderer>();
+				Material shirt = luigiMesh.materials[4];
+				shirt.color = new Color(0.2f, 0.6f, 0.2f, 1f);
+				luigiMesh.materials[4] = shirt;
+				PrefabExtensionUtils.RegisterCustomPrefab("luigiObj", luigi);
+			}
+
+			{
+				GameObject ghost = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
+				ghost.name = "ghostObj";
+				HexaPlayerController ghostController = ghost.GetComponent<HexaPlayerController>();
+				ghostController.teamSelector = "G";
+				PrefabExtensionUtils.RegisterCustomPrefab("ghostObj", ghost);
+			}
+
+			{
+				GameObject prop = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
+				prop.name = "propObj";
+				HexaPlayerController propController = prop.GetComponent<HexaPlayerController>();
+				propController.teamSelector = "P";
+				PrefabExtensionUtils.RegisterCustomPrefab("propObj", prop);
 			}
 		}
 

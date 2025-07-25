@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using HexaMapAssemblies;
 using HexaMod.Patches.Feature;
-using HexaMod.ScriptableObjects;
-using HexaMod.Scripts;
-using HexaMod.Util;
+using HexaMod.Scripts.Persistent;
+using HexaMod.SDK.Levels.Scripts.Customization;
+using HexaMod.SDK.Levels.Scripts.Factory;
+using HexaMod.SDK.Levels.Scripts.Spawning.Item;
+using HexaMod.SDK.Levels.Scripts.Spawning.Player;
+using HexaMod.SDK.ScriptableObjects;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityStandardAssets.Characters.FirstPerson;
-using static HexaMod.Scripts.PunRpcExtensions.Lobby.HexaLobby;
 
 namespace HexaMod
 {
@@ -40,19 +40,13 @@ namespace HexaMod
 			public static GameObject outletShockSound;
 			public static GameObject outletCoverPrefab;
 
-			public static AudioClip titleSong;
-			public static AudioClip daddySong;
-			public static AudioClip babySong;
-			public static AudioClip hgSong;
-			public static AudioClip dadlympicSong;
-			public static AudioClip dadNightmareSongDad;
-			public static AudioClip dadNightmareSongBaby;
-
 			public static GameObject cabinetOpen;
 			public static GameObject cabinetClose;
 			public static GameObject cabinetLocked;
 			public static GameObject doorOpen;
 			public static GameObject doorClose;
+
+			public static LevelSongEntry[] defaultLevelThemes = new LevelSongEntry[0];
 
 			public static bool didCache = false;
 
@@ -89,15 +83,57 @@ namespace HexaMod
 				doorOpen = door.openSound;
 				doorClose = door.closeSound;
 
-				daddySong = HexaGlobal.networkManager.daddySong;
-				babySong = HexaGlobal.networkManager.babySong;
-				hgSong = HexaGlobal.networkManager.hgSong;
-				dadlympicSong = HexaGlobal.networkManager.dadlympicSong;
-				dadNightmareSongDad = HexaGlobal.networkManager.dadNightmareSongDad;
-				dadNightmareSongBaby = HexaGlobal.networkManager.dadNightmareSongBaby;
-				if (!gameStarted)
 				{
-					titleSong = HexaGlobal.networkManager.aud.clip;
+					List<LevelSongEntry> tempDefaultSongList = new List<LevelSongEntry>();
+					tempDefaultSongList.AddRange(new LevelSongEntry[] {
+						new LevelSongEntry()
+						{
+							gamemode = "title:A",
+							value = HexaGlobal.networkManager.aud.clip
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "default:A",
+							value = HexaGlobal.networkManager.daddySong
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "default:D",
+							value = HexaGlobal.networkManager.daddySong
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "default:B",
+							value = HexaGlobal.networkManager.babySong
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "hungryGames:A",
+							value = HexaGlobal.networkManager.hgSong
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "dadlympics:A",
+							value = HexaGlobal.networkManager.dadlympicSong
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "daddysNightmare:A",
+							value = HexaGlobal.networkManager.dadNightmareSongDad
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "daddysNightmare:D",
+							value = HexaGlobal.networkManager.dadNightmareSongDad
+						},
+						new LevelSongEntry()
+						{
+							gamemode = "daddysNightmare:B",
+							value = HexaGlobal.networkManager.dadNightmareSongBaby
+						}
+					});
+
+					defaultLevelThemes = tempDefaultSongList.ToArray();
 				}
 
 				didCache = true;
@@ -149,20 +185,6 @@ namespace HexaMod
 					renderer.material.doubleSidedGI = false;
 				}
 			}
-			//Rigidbody[] rigidbodies = Object.FindObjectsOfType<Rigidbody>();
-
-			//foreach (var rigidbody in rigidbodies)
-			//{
-			//	if (rigidbody.GetComponent<NetworkMovementRB>() == null)
-			//	{
-			//		rigidbody.gameObject.AddComponent<NetworkMovementRB>();
-			//	}
-
-			//	if (rigidbody.GetComponent<PhotonView>() == null)
-			//	{
-			//		GlobalPhotonFactory.Register(rigidbody.gameObject, true);
-			//	}
-			//}
 		}
 
 		public static void ActivateDefaultLevel()
@@ -177,7 +199,6 @@ namespace HexaMod
 				levelObject.SetActive(true);
 			}
 		}
-
 
 		public static void CleanupDefaultLevel()
 		{
@@ -224,7 +245,7 @@ namespace HexaMod
 							bad = true;
 							break;
 						case "DaddysNightmareSpawns":
-							bad = true;
+							//bad = true;
 							break;
 						case "Daddys Nightmare":
 							child.SetParent(GameObject.Find("BackendObjects"));
@@ -280,38 +301,18 @@ namespace HexaMod
 			}
 		}
 
-		public static DadSpawn dadSpawn;
-		public static BabySpawn babySpawn;
+		public static TeamSpawn teamSpawn;
 		private static LowSpawn lowSpawn;
 		private static MidSpawn midSpawn;
 		private static SpecialSpawn specialSpawn;
 		private static KeySpawn keySpawn;
-		private static LevelMusic customLevelMusic;
+		public static LevelMusic customLevelMusic;
 		public static Transform loadedLevelInstance;
 		public static ModLevel loadedLevel;
 
-		public static Transform GetSpawnTransform(FirstPersonController player)
+		public static Transform GetSpawnTransform(int teamPlayerId)
 		{
-			TeamSpawn spawn = player.name.ToLower().StartsWith("dad") ? (TeamSpawn)dadSpawn : (TeamSpawn)babySpawn;
-
-			if (babySpawn.hgSpawns != null && HexaGlobal.networkManager.curGameMode == GameModes.GetId("hungryGames"))
-			{
-				spawn = babySpawn.hgSpawns;
-			}
-
-			return spawn.GetSpawn(HexaLobbyState.spawnIndex);
-		}
-
-		public static void HandleSpawnTeleport(FirstPersonController player)
-		{
-			if (dadSpawn && babySpawn)
-			{
-				Transform spawnTransform = GetSpawnTransform(player);
-
-				player.transform.position = spawnTransform.position;
-				player.transform.rotation = spawnTransform.rotation;
-				player.m_MouseLook.Init(player.transform, player.myCam.transform); // required or else character rotation isn't applied
-			}
+			return teamSpawn.GetSpawn(teamPlayerId);
 		}
 
 		static void LoadLevel(ModLevel level)
@@ -349,30 +350,15 @@ namespace HexaMod
 				ActivateDefaultLevel();
 			}
 
-			dadSpawn = level.levelPrefab.GetComponentInChildren<DadSpawn>();
-			babySpawn = level.levelPrefab.GetComponentInChildren<BabySpawn>();
+			loadedLevelInstance = Object.Instantiate(level.levelPrefab).transform;
+			loadedLevelInstance.name = level.LevelIdentifier;
 
-			if (dadSpawn)
-			{
-				dadSpawn.Init();
-				HexaGlobal.networkManager.dadSpawnPos = dadSpawn.GetSpawn(0);
-			}
+			teamSpawn = loadedLevelInstance.GetComponentInChildren<TeamSpawn>();
 
-			if (babySpawn)
-			{
-				babySpawn.Init();
-				HexaGlobal.networkManager.babySpawnPos = babySpawn.GetSpawn(0);
-
-				if (babySpawn.hgSpawns)
-				{
-					babySpawn.hgSpawns.Init();
-				}
-			}
-
-			lowSpawn = level.levelPrefab.GetComponentInChildren<LowSpawn>();
-			midSpawn = level.levelPrefab.GetComponentInChildren<MidSpawn>();
-			specialSpawn = level.levelPrefab.GetComponentInChildren<SpecialSpawn>();
-			keySpawn = level.levelPrefab.GetComponentInChildren<KeySpawn>();
+			lowSpawn = loadedLevelInstance.GetComponentInChildren<LowSpawn>();
+			midSpawn = loadedLevelInstance.GetComponentInChildren<MidSpawn>();
+			specialSpawn = loadedLevelInstance.GetComponentInChildren<SpecialSpawn>();
+			keySpawn = loadedLevelInstance.GetComponentInChildren<KeySpawn>();
 
 			if (lowSpawn && midSpawn && specialSpawn && keySpawn)
 			{
@@ -399,54 +385,18 @@ namespace HexaMod
 
 			if (level != defaultLevel)
 			{
-				// prevent StartClocks from throwing an error
-
 				HexaGlobal.gameStateController.clocks = new GameObject[] { };
 				HexaGlobal.gameStateController.radio = HexaGlobal.gameStateController.gameObject.AddComponent<AudioSource>();
 			}
 
-			customLevelMusic = level.levelPrefab.GetComponentInChildren<LevelMusic>();
-
-			if (customLevelMusic != null)
-			{
-				HexaGlobal.networkManager.daddySong = customLevelMusic.DadTheme;
-				HexaGlobal.networkManager.babySong = customLevelMusic.BabyTheme;
-				HexaGlobal.networkManager.dadlympicSong = customLevelMusic.DadlympicTheme;
-				HexaGlobal.networkManager.hgSong = customLevelMusic.HungryGamesTheme;
-				HexaGlobal.networkManager.dadNightmareSongDad = customLevelMusic.DadNightmaresDadTheme;
-				HexaGlobal.networkManager.dadNightmareSongBaby = customLevelMusic.DadNightmaresBabyTheme;
-				if (!gameStarted)
-				{
-					HexaGlobal.networkManager.aud.clip = customLevelMusic.TitleTheme;
-					HexaGlobal.networkManager.aud.Play();
-				}
-			}
-			else
-			{
-				HexaGlobal.networkManager.daddySong = StaticAssets.daddySong;
-				HexaGlobal.networkManager.babySong = StaticAssets.babySong;
-				HexaGlobal.networkManager.dadlympicSong = StaticAssets.dadlympicSong;
-				HexaGlobal.networkManager.hgSong = StaticAssets.hgSong;
-				HexaGlobal.networkManager.dadNightmareSongDad = StaticAssets.dadNightmareSongDad;
-				HexaGlobal.networkManager.dadNightmareSongBaby = StaticAssets.dadNightmareSongBaby;
-				if (!gameStarted)
-				{
-					HexaGlobal.networkManager.aud.clip = StaticAssets.titleSong;
-					HexaGlobal.networkManager.aud.Play();
-				}
-			}
-
-			var loaded = Object.Instantiate(level.levelPrefab);
-			loaded.name = level.LevelIdentifier;
-			loadedLevelInstance = loaded.transform;
+			customLevelMusic = loadedLevelInstance.GetComponentInChildren<LevelMusic>();
 
 			HexaGlobal.hexaLobby.SendReadyToMasterClient();
 		}
 
 		public static void InitScene()
 		{
-			dadSpawn = null;
-			babySpawn = null;
+			teamSpawn = null;
 			lowSpawn = null;
 			midSpawn = null;
 			specialSpawn = null;
