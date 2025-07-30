@@ -12,8 +12,10 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 		public virtual bool CanInteract(HexaPlayerController player) => true;
 		public virtual bool CanUseOn(HexaPlayerController player, GameObject target) => true;
 
-		public virtual Color ReticleColor(HexaPlayerController player) => CharacterItemInteraction.ReticleColor.Useable;
 		public virtual string ReticleText(HexaPlayerController player) => $"Interact With {name} as teamSelector {player.teamSelector}";
+		public virtual Color ReticleColor(HexaPlayerController player) => CharacterInteraction.ReticleColor.Useable;
+		public virtual string UseReticleText(HexaPlayerController player, GameObject target) => $"Use {CharacterInteraction.GetTargetName(gameObject)} on {CharacterInteraction.GetTargetName(target)}";
+		public virtual Color UseReticleColor(HexaPlayerController player, GameObject target) => CharacterInteraction.ReticleColor.Useable;
 
 		public virtual void CustomInteract(HexaPlayerController player) => player.ActionMessage($"Interacted with {name} as teamSelector {player.teamSelector}.");
 		[PunRPC]
@@ -28,14 +30,21 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 				}
 			}
 		}
+		public virtual void CustomUse(HexaPlayerController player, GameObject usedOn = null, bool usedOnIsUsable = false) => player.ActionMessage($"Used {name} as teamSelector {player.teamSelector}.");
 		[PunRPC]
-		public virtual void CustomUse(HexaPlayerController player) => player.ActionMessage($"Used {name} as teamSelector {player.teamSelector}.");
-		public virtual void CustomUseRPC(PhotonMessageInfo messageInfo) {
+		public virtual void CustomUseRPC(int usedOnId, bool usedOnIsUsable, PhotonMessageInfo messageInfo) {
+			GameObject usedOn = null;
+
+			if (usedOnId != -1)
+			{
+				usedOn = PhotonView.Find(usedOnId).gameObject;
+			}
+
 			foreach (HexaPlayerController player in PlayerControllers.GetPlayers())
 			{
 				if (player.View.owner == messageInfo.sender)
 				{
-					CustomUse(player);
+					CustomUse(player, usedOn, usedOnIsUsable);
 					return;
 				}
 			}
@@ -43,7 +52,7 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 		#endregion
 
 		#region CustomPlayerInteractable Utils
-		public string GetName() => CharacterItemInteraction.GetTargetName(gameObject);
+		public string GetName() => CharacterInteraction.GetTargetName(gameObject);
 		#endregion
 	}
 
@@ -53,12 +62,14 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 		bool CanUseOn(HexaPlayerController player, GameObject target);
 		string ReticleText(HexaPlayerController player);
 		Color ReticleColor(HexaPlayerController player);
+		string UseReticleText(HexaPlayerController player, GameObject target);
+		Color UseReticleColor(HexaPlayerController player, GameObject target);
 
 		void CustomInteract(HexaPlayerController player);
 		[PunRPC]
 		void CustomInteractRPC(PhotonMessageInfo messageInfo);
 
 		[PunRPC]
-		void CustomUse(HexaPlayerController player);
+		void CustomUse(HexaPlayerController player, GameObject usedOn = null, bool usedOnIsUsable = false);
 	}
 }

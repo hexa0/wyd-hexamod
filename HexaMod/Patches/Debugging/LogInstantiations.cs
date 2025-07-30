@@ -1,9 +1,11 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 
 namespace HexaMod.Patches.Debugging
 {
+	[OptionalPatch("logPhotonInstantiateCalls", "Log PhotonNetwork.Instantiate Calls", "Debugging", false)]
 	[HarmonyPatch(typeof(PhotonNetwork))]
 	internal class LogInstantiations
 	{
@@ -12,7 +14,7 @@ namespace HexaMod.Patches.Debugging
 		static void Instantiate(string prefabName)
 		{
 			//Mod.Debug($"Photon Instantation of \"{prefabName}\", trace: {Environment.StackTrace}");
-			Mod.Debug($"Photon Instantation of \"{prefabName}\"");
+			Mod.Print($"Photon Instantation of \"{prefabName}\"");
 		}
 	}
 }

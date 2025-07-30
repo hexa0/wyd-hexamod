@@ -140,8 +140,6 @@ namespace HexaMod
 			}
 		}
 
-		static bool gameStarted = false;
-
 		public static void ScanForAssets(string directory)
 		{
 			foreach (string file in Directory.GetFiles(directory))
@@ -405,7 +403,6 @@ namespace HexaMod
 			loadedLevelInstance = null;
 			defaultLevelObjects.Clear();
 			clearDefaultLevelObjectsOnReady = false;
-			gameStarted = HexaGlobal.networkManager.gameStarted;
 
 			if (PhotonNetwork.inRoom)
 			{

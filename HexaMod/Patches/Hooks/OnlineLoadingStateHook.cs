@@ -1,11 +1,13 @@
 ﻿using System;
 using HarmonyLib;
 using HexaMod.API.UI;
+using HexaMod.API.Util.Patching;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Persistent;
 
 namespace HexaMod.Patches.Hooks
 {
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal class OnlineLoadingStateHook
 	{

@@ -8,6 +8,7 @@ using HexaMod.Scripts.Character;
 
 namespace HexaMod.Patches.Feature
 {
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal static class UseNewCharacterReplication
 	{

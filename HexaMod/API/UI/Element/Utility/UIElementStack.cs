@@ -61,6 +61,19 @@ namespace HexaMod.API.UI.Element.Utility
 			return this;
 		}
 
+		public UIElementStack Clear()
+		{
+			// temporary array so we don't itterate while modifying
+			HexaUIElement[] allChildren = children.ToArray();
+
+			foreach (HexaUIElement child in allChildren)
+			{
+				RemoveChild(child);
+			}
+
+			return this;
+		}
+
 		public UIElementStack SetAlignment(StackAlignment alignment)
 		{
 			Alignment = alignment;

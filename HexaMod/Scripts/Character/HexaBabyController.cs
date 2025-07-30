@@ -21,8 +21,8 @@
 		{
 			base.Start();
 
-			characterItemInteraction.reach -= 2f;
-			characterItemInteraction.pickupMask = (1 << CharacterItemInteraction.babyGrabableLayer) | (1 << CharacterItemInteraction.toyLayer);
+			characterInteraction.reach -= 2f;
+			characterInteraction.pickupMask = (1 << CharacterInteraction.babyGrabableLayer) | (1 << CharacterInteraction.toyLayer);
 		}
 	}
 }

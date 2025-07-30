@@ -9,8 +9,8 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 	[RequireComponent(typeof(Renderer), typeof(Collider), typeof(AudioSource))]
 	public class BanishExampleInteractable : CustomPlayerInteractable
 	{
-		public override Color ReticleColor(HexaPlayerController player) => Color.HSVToRGB(Time.time % 1f, 1f, 1f);
 		public override string ReticleText(HexaPlayerController player) => $"Banish the {GetName()} to the shadow realm";
+		public override Color ReticleColor(HexaPlayerController player) => Color.HSVToRGB(Time.time % 1f, 1f, 1f);
 		public override bool CanInteract(HexaPlayerController player)
 		{
 			return player.teamSelector != "B";

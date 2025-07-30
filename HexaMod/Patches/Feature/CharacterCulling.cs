@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches.Feature
 {
+	[ModdedPatch]
 	[HarmonyPatch(typeof(FirstPersonController))]
 	internal class CharacterCulling
 	{

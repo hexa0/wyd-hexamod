@@ -1,0 +1,56 @@
+﻿using HexaMod.API.UI.Element;
+using HexaMod.API.UI.Element.Utility;
+using HexaMod.API.Util.WhosYourDaddy;
+
+namespace HexaMod.API.UI.Menu.HostMenu
+{
+	public class HostMenu : HexaUIElement
+	{
+		public UIElementStack teamsStack;
+
+		public HostMenu AddTeam(Team team)
+		{
+			teamsStack.AddChild(new TeamStack(team)
+				.SetParent(teamsStack.rectTransform)
+				.SetName(team.selectorName)
+				.SetAnchors(0.5f, 0.5f)
+				.SetPivot(0.5f, 0.5f)
+			);
+
+			return this;
+		}
+
+		public HostMenu AddTeams(Team[] teams)
+		{
+			foreach (Team team in teams)
+			{
+				AddTeam(team);
+			}
+
+			return this;
+		}
+
+		public HostMenu ClearTeams()
+		{
+			teamsStack.Clear();
+
+			return this;
+		}
+
+		public override void Shown()
+		{
+
+		}
+
+		public HostMenu() : base()
+		{
+			teamsStack = new UIElementStack(5f)
+				.SetName("teamsStack")
+				.SetAnchors(0.5f, 0.5f)
+				.SetPivot(0.5f, 0.5f)
+				.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
+
+			gameObject = teamsStack.gameObject;
+		}
+	}
+}

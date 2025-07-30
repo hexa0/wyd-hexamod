@@ -13,7 +13,7 @@ namespace HexaMod.Scripts.PunRpcExtensions
 		public void MakeSound(string type)
 		{
 			byte asByte = (byte)(type == "Open" ? 0x01 : 0x00);
-			netView.RPC("RPCMakeSound", PhotonTargets.All, new object[] { asByte });
+			netView.RPC("RPCMakeSound", PhotonTargets.All, asByte);
 		}
 
 		[PunRPC]

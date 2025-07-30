@@ -31,20 +31,19 @@ namespace HexaMod.Scripts.Util
 		{
 			GetComponent<AudioSource>().PlayOneShot(sound);
 
-			GetComponent<PhotonView>().RPC("PlayNetworkedSound", PhotonTargets.Others, new object[]
-			{
+			GetComponent<PhotonView>().RPC("PlayNetworkedSound", PhotonTargets.Others, 
 				(byte)clips.FindIndex(s => s == sound)
-			});
+			);
 		}
 
 		public void Play(AudioClip sound, float volume)
 		{
 			GetComponent<AudioSource>().PlayOneShot(sound, volume);
 
-			GetComponent<PhotonView>().RPC("PlayNetworkedSoundWithVolume", PhotonTargets.Others, new object[]
-			{
-				(byte)clips.FindIndex(s => s == sound), (byte)(volume * byte.MaxValue)
-			});
+			GetComponent<PhotonView>().RPC("PlayNetworkedSoundWithVolume", PhotonTargets.Others,
+				(byte)clips.FindIndex(s => s == sound),
+				(byte)(volume * byte.MaxValue)
+			);
 		}
 
 		private AudioClip GetSound(byte soundID)

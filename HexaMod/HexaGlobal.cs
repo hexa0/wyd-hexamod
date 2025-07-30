@@ -12,8 +12,8 @@ using HexaMod.Patches.Hooks;
 using HexaMod.Scripts.Character;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Persistent;
+using HexaMod.Scripts.Util;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.Characters.FirstPerson;
 using static System.Guid;
@@ -24,21 +24,16 @@ namespace HexaMod
 {
 	public static class HexaGlobal
 	{
-		public static string assetDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		public static AssetBundle coreBundle;
 
-		public static int sendRate = 30;
-		public static int defaultMaxPlayers = 64;
-		public static RigidbodyInterpolation preferedInterpolation = RigidbodyInterpolation.Interpolate;
+		public static bool inVanillaMode = false;
 
 		public static PhotonNetworkManager networkManager;
 		public static GameStateController gameStateController;
 		public static RematchHelper rematchHelper;
-		public static EventSystem eventSystem;
 		public static RpcChatExtended textChat;
 		public static HexaModPersistence hexaModPersistence = new GameObject("HexaModPersistent").AddComponent<HexaModPersistence>();
 		public static HexaLobby hexaLobby;
-		public static MainUI mainUI;
 
 		public static void Load()
 		{
@@ -80,40 +75,41 @@ namespace HexaMod
 					HexaMenus.startupScreen.fader.fadeState = false;
 				}
 
-				Cursor.visible = true;
-				Cursor.lockState = CursorLockMode.None;
-
 				networkManager = Object.FindObjectOfType<PhotonNetworkManager>();
 				networkManager.aud.Stop();
+
 				if (Mod.GAME_VERSION == null)
 				{
 					Mod.GAME_VERSION = networkManager.version;
 				}
 
-				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies"))
+				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies") && !inVanillaMode)
 				{
 					networkManager.version = $"hm:{BuildInfo.GitHash}";
 				}
 
 				gameStateController = Object.FindObjectOfType<GameStateController>();
-				eventSystem = Object.FindObjectOfType<EventSystem>();
 
-				hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
-				hexaLobby.enabled = true;
-
-				EnableInterpolationForAll();
-				SnappierReplication();
-
-				Menu.Init();
-				mainUI = menuCanvas.gameObject.AddComponent<MainUI>();
-				mainUI.Init();
-
-				textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
-				textChat.Init();
-
-				if (!PhotonNetwork.inRoom)
+				if (!inVanillaMode)
 				{
-					HexaPersistentLobby.instance.Reset();
+					Cursor.visible = true;
+					Cursor.lockState = CursorLockMode.None;
+
+					hexaLobby = networkManager.gameObject.AddComponent<HexaLobby>();
+					hexaLobby.enabled = true;
+
+					EnableInterpolationForAll();
+
+					Menu.Init();
+					menuCanvas.gameObject.AddComponent<MainUI>().Init();
+
+					textChat = Object.FindObjectOfType<RpcChat>().gameObject.AddComponent<RpcChatExtended>();
+					textChat.Init();
+
+					if (!PhotonNetwork.inRoom)
+					{
+						HexaPersistentLobby.instance.Reset();
+					}
 				}
 			}
 			else if (activeScene.name == "CompanyLogo")
@@ -126,7 +122,7 @@ namespace HexaMod
 		{
 			foreach (var rigidbody in Object.FindObjectsOfType<Rigidbody>())
 			{
-				rigidbody.interpolation = preferedInterpolation;
+				rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 			}
 		}
 
@@ -135,23 +131,24 @@ namespace HexaMod
 			Object.DontDestroyOnLoad(PrefabExtensionUtils.customPrefabStorage);
 			PrefabExtensionUtils.customPrefabStorage.SetActive(false);
 
-			GameObject ExtendCharacter<PlayerController>(GameObject character) where PlayerController : HexaPlayerController
+			GameObject ExtendCharacter<PlayerController>(string oldName, string newName) where PlayerController : HexaPlayerController
 			{
+				GameObject character = Object.Instantiate(PrefabExtensionUtils.GetCachedNetworkPrefab(oldName), PrefabExtensionUtils.Storage, false);
+				character.name = newName;
 				character.AddComponent<CharacterModelSwapper>();
 				character.AddComponent<PlayerVoiceEmitterRPC>();
 				character.AddComponent<CameraController>();
-				character.AddComponent<CharacterItemInteraction>();
+				character.AddComponent<CharacterInteraction>();
+				character.AddComponent<NetworkedSoundBehavior>();
 				ComponentSwapper.SwapComponents<FirstPersonController, PlayerController>(character);
 				ComponentSwapper.SwapComponents<NetworkMovement, CharacterReplication>(character);
+				PrefabExtensionUtils.RegisterCustomPrefab(newName, character);
 
 				return character;
 			}
 
-			GameObject dad = PrefabExtensionUtils.GetCachedNetworkPrefab("dadObj");
-			GameObject baby = PrefabExtensionUtils.GetCachedNetworkPrefab("babyObj");
-
-			ExtendCharacter<HexaDadController>(dad);
-			ExtendCharacter<HexaBabyController>(baby);
+			GameObject dad = ExtendCharacter<HexaDadController>("dadObj", "dadV2");
+			ExtendCharacter<HexaBabyController>("babyObj", "babyV2");
 
 			{
 				GameObject luigi = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
@@ -168,7 +165,7 @@ namespace HexaMod
 			{
 				GameObject ghost = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
 				ghost.name = "ghostObj";
-				HexaPlayerController ghostController = ghost.GetComponent<HexaPlayerController>();
+				HexaDadController ghostController = ghost.GetComponent<HexaDadController>();
 				ghostController.teamSelector = "G";
 				PrefabExtensionUtils.RegisterCustomPrefab("ghostObj", ghost);
 			}
@@ -176,17 +173,12 @@ namespace HexaMod
 			{
 				GameObject prop = Object.Instantiate(dad, PrefabExtensionUtils.Storage, false);
 				prop.name = "propObj";
-				HexaPlayerController propController = prop.GetComponent<HexaPlayerController>();
+				HexaDadController propController = prop.GetComponent<HexaDadController>();
 				propController.teamSelector = "P";
 				PrefabExtensionUtils.RegisterCustomPrefab("propObj", prop);
 			}
 		}
 
-		public static void SnappierReplication()
-		{
-			PhotonNetwork.sendRate = sendRate;
-			PhotonNetwork.sendRateOnSerialize = sendRate;
-		}
 		public static readonly string instanceGuid = NewGuid().ToString();
 		public static void MakeTestGame(bool spawnAsDad = true)
 		{

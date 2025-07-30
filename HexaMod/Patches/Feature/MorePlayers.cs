@@ -8,14 +8,16 @@ namespace HexaMod.Patches.Feature
 	[HarmonyPatch]
 	internal class MorePlayers
 	{
+		public static int defaultMaxPlayers = 64;
+
 		[HarmonyPatch(typeof(PhotonNetworkManager), "Start")]
 		[HarmonyPostfix]
 		static void MorePlayersByDefaultPatch(ref PhotonNetworkManager __instance)
 		{
-			__instance.maxPlayer = HexaGlobal.defaultMaxPlayers;
+			__instance.maxPlayer = defaultMaxPlayers;
 			for (int i = 0; i < __instance.maxPlayerText.Length; i++)
 			{
-				__instance.maxPlayerText[i].text = HexaGlobal.defaultMaxPlayers.ToString();
+				__instance.maxPlayerText[i].text = defaultMaxPlayers.ToString();
 			}
 		}
 

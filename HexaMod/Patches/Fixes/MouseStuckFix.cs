@@ -2,10 +2,12 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using HexaMod.API.UI.Util;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal class MouseStuckFix
 	{

@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 
-namespace HexaMod.Patches.Feature.CustomLevels
+namespace HexaMod.Patches.Performance
 {
+	[OptionalPatch("useLayerDistanceCulling", "Use Distance Culling", "Rendering")]
 	[HarmonyPatch(typeof(SpecFXHelper))]
 	internal class DistanceCulling
 	{
@@ -31,7 +33,6 @@ namespace HexaMod.Patches.Feature.CustomLevels
 			__instance.cam.useOcclusionCulling = true;
 			// the default near clip plane is pretty acceptable actually so we keep it
 			__instance.cam.farClipPlane = 245f;
-			__instance.cam.renderingPath = UnityEngine.RenderingPath.DeferredShading;
 		}
 	}
 }

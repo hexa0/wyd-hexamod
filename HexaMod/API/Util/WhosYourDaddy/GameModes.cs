@@ -21,7 +21,7 @@ namespace HexaMod.API.Util.WhosYourDaddy
 		{
 			displayName = "Dad",
 			selectorName = "D",
-			prefabName = "dadObj",
+			prefabName = "dadV2",
 			canBeButtered = false,
 			maxPlayers = 0
 		};
@@ -30,7 +30,7 @@ namespace HexaMod.API.Util.WhosYourDaddy
 		{
 			displayName = "Baby",
 			selectorName = "B",
-			prefabName = "babyObj",
+			prefabName = "babyV2",
 			canBeButtered = true,
 			maxPlayers = 0
 		};

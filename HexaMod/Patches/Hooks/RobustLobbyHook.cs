@@ -19,20 +19,11 @@ namespace HexaMod.Patches.Hooks
 	[HarmonyPatch]
 	internal class RobustLobbyHook
 	{
-		[HarmonyPatch(typeof(PhotonNetworkManager), "RematchReady")]
-		[HarmonyPostfix]
-		static IEnumerator RematchReady(IEnumerator result)
-		{
-			yield return 0;
-
-			Mod.Error("RematchReadyPatch was somehow called, trace:\n", Environment.StackTrace);
-		}
-
 		[HarmonyPatch(typeof(PhotonNetworkManager), "Rematch")]
 		[HarmonyPrefix]
 		static void Rematch()
 		{
-			if (PhotonNetwork.isMasterClient && PhotonNetwork.room != null && !PhotonNetwork.room.IsOpen)
+			if (!HexaGlobal.inVanillaMode && PhotonNetwork.isMasterClient && PhotonNetwork.room != null && !PhotonNetwork.room.IsOpen)
 			{
 				HexaPersistentLobby.instance.lobbySettings.roundNumber++;
 				HexaPersistentLobby.instance.CommitChanges();
@@ -43,7 +34,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool SpawnPlayerInLobby()
 		{
-			return false;
+			return HexaGlobal.inVanillaMode;
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "Start")]
@@ -72,14 +63,18 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void MoveDaddy(int oldSpot, ref PlayerNames __instance)
 		{
-			PhotonPlayer player = __instance.daddyPlayerIds[oldSpot];
-			HexaPersistentLobby.instance.dads[player.ID] = false;
+			if (!HexaGlobal.inVanillaMode)
+			{
+				PhotonPlayer player = __instance.daddyPlayerIds[oldSpot];
+				HexaPersistentLobby.instance.dads[player.ID] = false;
+			}
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "KickDadPlayer")]
 		[HarmonyPrefix]
 		static bool KickDadPlayer(int input, ref PlayerNames __instance)
 		{
+			__instance.gameObject.GetPhotonView().RPC("KickedFromLobby", __instance.daddyPlayerIds[input]);
 			PhotonNetwork.CloseConnection(__instance.daddyPlayerIds[input]);
 			return false;
 		}
@@ -88,6 +83,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool KickBabyPlayer(int input, ref PlayerNames __instance)
 		{
+			__instance.gameObject.GetPhotonView().RPC("KickedFromLobby", __instance.babyPlayerIds[input]);
 			PhotonNetwork.CloseConnection(__instance.babyPlayerIds[input]);
 			return false;
 		}
@@ -96,8 +92,10 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static void MoveBaby(int oldSpot, ref PlayerNames __instance)
 		{
-			PhotonPlayer player = __instance.babyPlayerIds[oldSpot];
-			HexaPersistentLobby.instance.dads[player.ID] = true;
+			if (!HexaGlobal.inVanillaMode) {
+				PhotonPlayer player = __instance.babyPlayerIds[oldSpot];
+				HexaPersistentLobby.instance.dads[player.ID] = true;
+			}
 		}
 
 		[HarmonyPatch(typeof(PlayerNames), "AddDaddy")]
@@ -138,6 +136,8 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool OnJoinedRoom()
 		{
+			if (HexaGlobal.inVanillaMode) { return true; }
+
 			if (PhotonNetwork.room.Name.Contains(HexaGlobal.instanceGuid))
 			{
 				return false;
@@ -166,7 +166,7 @@ namespace HexaMod.Patches.Hooks
 		[HarmonyPrefix]
 		static bool OnPhotonPlayerDisconnected()
 		{
-			return false;
+			return HexaGlobal.inVanillaMode;
 		}
 	}
 }

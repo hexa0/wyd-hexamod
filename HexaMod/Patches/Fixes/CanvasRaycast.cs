@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
+	[ModdedPatch]
 	[HarmonyPatch(typeof(anvasHelper))]
 	internal class CanvasRaycast
 	{

@@ -1,12 +1,13 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 
 namespace HexaMod.Patches.Fixes
 {
+	[VanillaPatch]
 	[HarmonyPatch(typeof(Fork))]
 	internal class ForkStuck
 	{
-
 		[HarmonyPatch("Update")]
 		[HarmonyPostfix]
 		static void ForkStuckPatch(ref Fork __instance)
@@ -17,7 +18,8 @@ namespace HexaMod.Patches.Fixes
 				{
 					var dadItemTargetting = HexaGlobal.networkManager.playerObj.GetComponent<DadItemTargeting>();
 					var itemTargetting = HexaGlobal.networkManager.playerObj.GetComponent<ItemTargeting>();
-					if (dadItemTargetting)
+					
+					if (dadItemTargetting && dadItemTargetting.enabled)
 					{
 						if (dadItemTargetting.heldItem == null && dadItemTargetting.heldItem2 == null)
 						{
@@ -26,7 +28,7 @@ namespace HexaMod.Patches.Fixes
 							__instance.Drop(Vector3.zero);
 						}
 					}
-					else if (itemTargetting)
+					else if (itemTargetting && itemTargetting.enabled)
 					{
 						if (itemTargetting.heldItem == null && itemTargetting.heldItem2 == null)
 						{

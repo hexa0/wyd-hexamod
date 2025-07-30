@@ -20,7 +20,7 @@
 		{
 			base.Start();
 
-			JumpSpeed *= 1.25f;
+			JumpForce *= 1.25f;
 		}
 	}
 }

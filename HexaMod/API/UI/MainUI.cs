@@ -431,6 +431,14 @@ namespace HexaMod.API.UI
 				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Options").gameObject));
 				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Quit").gameObject));
 
+				bottomRow.AddChild(new WTextButton()
+					.SetName("testHostMenu")
+					.SetTextAuto("Test HostMenu")
+					.AddListener(() =>
+					{
+
+					}));
+
 				UIElementStack titleStack = new UIElementStack(WTextButton.padding.y)
 					.SetParent(splashMenu)
 					.SetName("titleStack")
@@ -688,7 +696,7 @@ namespace HexaMod.API.UI
 					errorMessage
 						.SetText("")
 						.SetTextAligment(TextAnchor.MiddleCenter)
-						.SetTextFontSize(WUIGlobals.Fonts.Sizes.MenuError);
+						.SetTextFontSize(WUIGlobals.Resources.FontSizes.MenuError);
 
 					UIElementStack bottomBarStack = new UIElementStack(WTextButton.padding.x)
 						.SetParent(menu.transform)

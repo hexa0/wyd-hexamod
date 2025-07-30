@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature
 {
+	[OptionalPatch("useHexasSmokeDetectorSound", "Smoke Detector Uses Actual Smoke Detector Sound", "Tweaks", true)]
 	[HarmonyPatch(typeof(SmokeDectector))]
 	internal class BetterSmokeDetector
 	{

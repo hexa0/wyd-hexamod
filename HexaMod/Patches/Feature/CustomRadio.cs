@@ -1,10 +1,12 @@
 ﻿using HarmonyLib;
 using HexaMod.API.Util.Extensions;
+using HexaMod.API.Util.Patching;
 using HexaMod.Scripts.Persistent;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature
 {
+	[ModdedPatch]
 	[HarmonyPatch(typeof(Radio))]
 	internal class CustomRadio
 	{

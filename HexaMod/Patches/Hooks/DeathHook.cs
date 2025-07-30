@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.API.UI;
+using HexaMod.API.Util.Patching;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.Patches.Fixes;
 using HexaMod.Scripts.Character;
@@ -38,13 +39,13 @@ namespace HexaMod.Patches.Hooks
 	public class DeathManager : Photon.MonoBehaviour
 	{
 		BabyStats stats;
-		ItemTargeting itemTargetting;
+		CharacterInteraction characterInteraction;
 		BabyChallengeManager babyChallengeManager;
 
 		void Awake()
 		{
 			stats = GetComponent<BabyStats>();
-			itemTargetting = GetComponent<ItemTargeting>();
+			characterInteraction = GetComponent<CharacterInteraction>();
 
 			GameObject babyChallengeManagerObject = GameObject.Find("BabyChallengeManager");
 
@@ -182,7 +183,7 @@ namespace HexaMod.Patches.Hooks
 			isDead = true;
 			stats.dead = true;
 			stats.controlScript.enabled = false;
-			itemTargetting.enabled = false;
+			characterInteraction.enabled = false;
 			stats.babyModel.SendMessage("Death");
 			stats.headBone.SendMessage("Death");
 
@@ -200,9 +201,9 @@ namespace HexaMod.Patches.Hooks
 
 			if (photonView.isMine)
 			{
-				itemTargetting.reticle.gameObject.SetActive(false);
-				itemTargetting.textComp.gameObject.SetActive(false);
-				itemTargetting.enabled = false;
+				characterInteraction.InteractReticle.gameObject.SetActive(false);
+				characterInteraction.InteractText.gameObject.SetActive(false);
+				characterInteraction.enabled = false;
 			}
 		}
 
@@ -242,6 +243,7 @@ namespace HexaMod.Patches.Hooks
 		}
 	}
 
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal class DeathHook
 	{
@@ -272,13 +274,20 @@ namespace HexaMod.Patches.Hooks
 			return false;
 		}
 
+		private static IEnumerator ShockedEnumerator(BabyStats stats)
+		{
+			stats.heat = 200f;
+			stats.cooking = true;
+			stats.Dead();
+
+			yield return 0;
+		}
+
 		[HarmonyPatch(typeof(BabyStats), "ShockedRPC")]
 		[HarmonyPrefix]
-		static bool ShockedRPC(ref BabyStats __instance)
+		static bool ShockedRPC(ref IEnumerator __result, ref BabyStats __instance)
 		{
-			__instance.heat = 200f;
-			__instance.cooking = true;
-			__instance.Dead();
+			__result = ShockedEnumerator(__instance);
 
 			return false;
 		}

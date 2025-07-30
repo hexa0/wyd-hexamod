@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using HarmonyLib;
 using HexaMod.API.UI;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -47,6 +48,8 @@ namespace HexaMod.Patches.Hooks
 			}
 		}
 	}
+
+	[ModdedPatch]
 	[HarmonyPatch(typeof(MenuController))]
 	internal class HexaModRematchHook
 	{

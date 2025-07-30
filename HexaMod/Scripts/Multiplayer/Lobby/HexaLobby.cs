@@ -112,7 +112,7 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		{
 			if (PhotonNetwork.isMasterClient && PhotonNetwork.inRoom)
 			{
-				netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, new object[] { LobbySettings.serializer.Serialize(newSettings) });
+				netView.RPC("SetLobbySettingsRPC", PhotonTargets.Others, LobbySettings.serializer.Serialize(newSettings));
 			}
 		}
 
@@ -228,7 +228,7 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 
 			if (PhotonNetwork.isMasterClient)
 			{
-				gameStateController.GetComponent<PhotonView>().RPC("SetAllMustDie", PhotonTargets.Others, new object[] { gameStateController.allMustDie });
+				gameStateController.GetComponent<PhotonView>().RPC("SetAllMustDie", PhotonTargets.Others, gameStateController.allMustDie);
 			}
 
 			if (!lobby.dads.ContainsKey(PhotonNetwork.player.ID))
@@ -294,7 +294,7 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 				MatchStartObject matchStartObject = new MatchStartObject();
 				//	.DetermineSpawns(HexaPersistentLobby.instance.lobbySettings);
 
-				netView.RPC("HexaModMatchStarted", PhotonTargets.All, new object[] { !PhotonNetwork.room.IsOpen, MatchStartObject.serializer.Serialize(matchStartObject) });
+				netView.RPC("HexaModMatchStarted", PhotonTargets.All, !PhotonNetwork.room.IsOpen, MatchStartObject.serializer.Serialize(matchStartObject));
 
 				if (PhotonNetwork.room.IsOpen == false)
 				{

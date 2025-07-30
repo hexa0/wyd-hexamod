@@ -13,7 +13,6 @@ namespace HexaMod.Scripts.Character
 		internal float bobCycleX = 0f;
 		internal float bobCycleY = 0f;
 
-		internal float speed = 0f;
 		internal Traverse<float> bobBaseInterval;
 
 		public Dictionary<string, Vector3> cameraOffsets = new Dictionary<string, Vector3>();
@@ -45,7 +44,7 @@ namespace HexaMod.Scripts.Character
 			{
 				if (CharacterController.velocity.magnitude > 0f && CharacterController.isGrounded)
 				{
-					float bobSpeed = CharacterController.velocity.magnitude + speed * (!PlayerController.IsWalking ? PlayerController.RunstepLenghten : 1f);
+					float bobSpeed = CharacterController.velocity.magnitude + PlayerController.currentSpeed * (!PlayerController.IsWalking ? PlayerController.RunstepLenghten : 1f);
 					float cycleTime = PlayerController.HeadBob.Bobcurve[PlayerController.HeadBob.Bobcurve.length - 1].time;
 
 					bobCycleX += bobSpeed * Time.smoothDeltaTime / bobBaseInterval.Value;

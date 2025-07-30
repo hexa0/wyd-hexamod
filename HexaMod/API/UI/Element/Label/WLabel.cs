@@ -15,12 +15,12 @@ namespace HexaMod.API.UI.Element.Label
 			gameObject = new GameObject("wLabel", typeof(RectTransform));
 
 			text = gameObject.AddComponent<Text>();
-			text.font = WUIGlobals.instance?.fonts.primary;
+			text.font = WUIGlobals.instance?.resources.fontPrimary;
 			if (text.font == null)
 			{
 				text.font = fallback;
 			}
-			text.fontSize = (int)WUIGlobals.Fonts.Sizes.ButtonRegular;
+			text.fontSize = (int)WUIGlobals.Resources.FontSizes.ButtonRegular;
 			text.alignment = TextAnchor.MiddleCenter;
 			text.raycastTarget = false;
 

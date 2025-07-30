@@ -1,4 +1,4 @@
-﻿using HexaModEditor.Scripts;
+﻿using HexaModEditor.EditorSDK;
 using UnityEditor;
 using UnityEngine;
 

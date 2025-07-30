@@ -1,10 +1,12 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using HexaMod.API.Util.Unity;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature
 {
+	[ModdedPatch]
 	[HarmonyPatch(typeof(Resources))]
 	internal class CustomPrefabs
 	{

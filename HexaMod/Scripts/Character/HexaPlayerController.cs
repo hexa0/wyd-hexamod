@@ -1,16 +1,20 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
+using HexaMod.API.Util.Data;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
-using HexaMod.Patches.Fixes;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Multiplayer.SerializableObjects;
 using HexaMod.Scripts.Persistent;
 using HexaMod.Scripts.Util;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Utility;
+using static UnityEngine.GridBrushBase;
 
 namespace HexaMod.Scripts.Character
 {
@@ -36,7 +40,7 @@ namespace HexaMod.Scripts.Character
 			public Traverse<float> WalkSpeed { get; set; }
 			public Traverse<float> RunSpeed { get; set; }
 			public Traverse<float> RunstepLenghten { get; set; }
-			public Traverse<float> JumpSpeed { get; set; }
+			public Traverse<float> JumpForce { get; set; }
 			public Traverse<float> StickToGroundForce { get; set; }
 			public Traverse<float> GravityMultiplier { get; set; }
 			public Traverse<bool> UseFovKick { get; set; }
@@ -58,7 +62,6 @@ namespace HexaMod.Scripts.Character
 			public Traverse<float> StepCycle { get; set; }
 			public Traverse<float> NextStep { get; set; }
 			public Traverse<bool> Jumping { get; set; }
-			public Traverse<AudioSource> AudioSource { get; set; }
 			public Traverse<bool> UnlimitedRun { get; set; }
 			public Traverse<bool> TripleJump { get; set; }
 			public Traverse<bool> SpeedBoosted { get; set; }
@@ -70,7 +73,7 @@ namespace HexaMod.Scripts.Character
 				WalkSpeed = traverse.Field<float>("m_WalkSpeed");
 				RunSpeed = traverse.Field<float>("m_RunSpeed");
 				RunstepLenghten = traverse.Field<float>("m_RunstepLenghten");
-				JumpSpeed = traverse.Field<float>("m_JumpSpeed");
+				JumpForce = traverse.Field<float>("m_JumpSpeed");
 				StickToGroundForce = traverse.Field<float>("m_StickToGroundForce");
 				GravityMultiplier = traverse.Field<float>("m_GravityMultiplier");
 				UseFovKick = traverse.Field<bool>("m_UseFovKick");
@@ -92,7 +95,6 @@ namespace HexaMod.Scripts.Character
 				StepCycle = traverse.Field<float>("m_StepCycle");
 				NextStep = traverse.Field<float>("m_NextStep");
 				Jumping = traverse.Field<bool>("m_Jumping");
-				AudioSource = traverse.Field<AudioSource>("m_AudioSource");
 				UnlimitedRun = traverse.Field<bool>("unlimitedRun");
 				TripleJump = traverse.Field<bool>("tripleJump");
 				SpeedBoosted = traverse.Field<bool>("speedBoosted");
@@ -125,10 +127,10 @@ namespace HexaMod.Scripts.Character
 			get => fields.RunstepLenghten.Value;
 			set => fields.RunstepLenghten.Value = value;
 		}
-		public float JumpSpeed
+		public float JumpForce
 		{
-			get => fields.JumpSpeed.Value;
-			set => fields.JumpSpeed.Value = value;
+			get => fields.JumpForce.Value;
+			set => fields.JumpForce.Value = value;
 		}
 		public float StickToGroundForce
 		{
@@ -235,11 +237,6 @@ namespace HexaMod.Scripts.Character
 			get => fields.Jumping.Value;
 			set => fields.Jumping.Value = value;
 		}
-		public AudioSource AudioSource
-		{
-			get => fields.AudioSource.Value;
-			set => fields.AudioSource.Value = value;
-		}
 		public bool UnlimitedRun
 		{
 			get => fields.UnlimitedRun.Value;
@@ -265,14 +262,13 @@ namespace HexaMod.Scripts.Character
 
 		internal MethodInfo baseStart = typeof(FirstPersonController).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance);
 		internal MethodInfo baseUpdate = typeof(FirstPersonController).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-		internal MethodInfo baseMovementUpdate = typeof(FirstPersonController).GetMethod("FixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance);
 		internal MethodInfo baseUpdateCameraPosition = typeof(FirstPersonController).GetMethod("UpdateCameraPosition", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		public NetworkedSoundBehavior networkedSound;
 		public CameraController cameraController;
 		public CharacterController characterController;
 		public CharacterModelSwapper characterModelSwapper;
-		public CharacterItemInteraction characterItemInteraction;
+		public CharacterInteraction characterInteraction;
 		public Crouch crouch;
 		public DadAnimator dadAnimator;
 		public BabyAnimator babyAnimator;
@@ -280,6 +276,20 @@ namespace HexaMod.Scripts.Character
 		public AudioListener audioListener;
 		public ActionInput input;
 		public PlayerVoiceEmitterRPC voiceEmitter;
+		public AudioSource audioSource;
+
+		[System.Flags]
+		public enum PlayerFlags
+		{
+			None = 0,
+			UseClassicProjectOnPlane = 1,
+			UseClassicFixedUpdate = 2,
+			UseClassicGroundedCheckForJumps = 3,
+		}
+
+
+		PlayerFlags _playerFlags = PlayerFlags.None;
+		public FlagHelper<PlayerFlags> playerFlags;
 
 		public ActionText ActionText => GameObject.Find("ActionText").GetComponent<ActionText>();
 		public AchievementManager AchievementManager => GameObject.Find("AchievementManager").GetComponent<AchievementManager>();
@@ -310,7 +320,13 @@ namespace HexaMod.Scripts.Character
 						rightHand = value; }
 		}
 
+		private static readonly int NAN_FIX_MEMORY_SIZE = 120;
+		private readonly List<Vector3> positionMemory = new List<Vector3>();
+		private readonly List<Quaternion> rotationMemory = new List<Quaternion>();
+		private readonly List<Quaternion> cameraRotationMemory = new List<Quaternion>();
+
 		public bool noclip = false;
+		public bool fixingNaN = false;
 		public bool InThirdPerson => cameraPerspective != 0;
 		public int cameraPerspective = 0;
 		public CameraPerspective CameraPerspectiveEnum => (CameraPerspective)cameraPerspective;
@@ -324,17 +340,19 @@ namespace HexaMod.Scripts.Character
 
 		public virtual void Awake()
 		{
-			networkedSound = gameObject.AddComponent<NetworkedSoundBehavior>();
+			playerFlags = new FlagHelper<PlayerFlags>(() => { return ref _playerFlags; } );
+			networkedSound = gameObject.GetComponent<NetworkedSoundBehavior>();
 			cameraController = GetComponent<CameraController>();
 			characterModelSwapper = GetComponent<CharacterModelSwapper>();
 			characterController = GetComponent<CharacterController>();
-			characterItemInteraction = GetComponent<CharacterItemInteraction>();
+			characterInteraction = GetComponent<CharacterInteraction>();
 			crouch = GetComponent<Crouch>();
 			dadAnimator = GetComponentInChildren<DadAnimator>();
 			babyAnimator = GetComponentInChildren<BabyAnimator>();
 			deathCam = GetComponentInChildren<DeathCam>();
 			audioListener = GetComponentInChildren<AudioListener>();
 			voiceEmitter = GetComponent<PlayerVoiceEmitterRPC>();
+			audioSource = GetComponent<AudioSource>();
 
 			if (View && View.isMine)
 			{
@@ -342,8 +360,8 @@ namespace HexaMod.Scripts.Character
 				input = HexaGlobal.networkManager.player1Input;
 				input.igmh = GetComponentInChildren<InGameMenuHelper>();
 				input.myPlayer = this;
-				input.dadItem = characterItemInteraction.dadItemTargetting;
-				input.babyItem = characterItemInteraction.itemTargetting;
+				input.dadItem = characterInteraction.dadItemTargetting;
+				input.babyItem = characterInteraction.itemTargetting;
 				input.dadCrouch = crouch;
 				input.dadAnim = dadAnimator;
 				input.babyAnim = babyAnimator;
@@ -368,7 +386,10 @@ namespace HexaMod.Scripts.Character
 
 		public void ActionMessage(string text)
 		{
-			StartCoroutine(ActionText.ActionDone(text));
+			if (View & View.isMine)
+			{
+				StartCoroutine(ActionText.ActionDone(text));
+			}
 		}
 
 		/// <summary>
@@ -376,61 +397,143 @@ namespace HexaMod.Scripts.Character
 		/// </summary>
 		/// <param name="toHold">the gameObject to grab up.</param>
 		/// <param name="useHandPrimary">whether to pickup with the primary hand or not.</param>
-		public void Hold(GameObject toHold, bool useHandPrimary = true)
+		/// <returns>Whether the object was succesfully held or not</returns>
+		public bool Hold(GameObject toHold, bool useHandPrimary = true)
 		{
-			if (characterItemInteraction.Buttered)
+			if (characterInteraction.Buttered)
 			{
-				ActionMessage($"The {CharacterItemInteraction.GetTargetName(toHold)} slips through your buttery fingers.");
-				return;
+				ActionMessage($"The {CharacterInteraction.GetTargetName(toHold)} slips through your buttery fingers.");
+				return false;
 			}
 			else
 			{
 				if (useHandPrimary)
 				{
-					if (!characterItemInteraction.PrimaryItemTransform)
+					if (characterInteraction.PrimaryItemTransform)
 					{
-						toHold.SendMessage("Grab", SendMessageOptions.DontRequireReceiver);
-						toHold.transform.SetParent(PrimaryHoldTransform, true);
-						toHold.transform.localPosition = Vector3.zero;
-						toHold.transform.localRotation = Quaternion.identity;
-						toHold.layer = CharacterItemInteraction.ignoreRaycastLayer;
-						characterItemInteraction.PrimaryItemTransform = toHold.transform;
+						Transform item = characterInteraction.PrimaryItemTransform;
+						DropPrimaryItem();
+						item.SetPositionAndRotation(toHold.transform.position, toHold.transform.rotation);
 					}
 				}
 				else
 				{
-					if (!characterItemInteraction.SecondaryItemTransform)
+					if (characterInteraction.SecondaryItemTransform)
 					{
-						toHold.SendMessage("Grab", SendMessageOptions.DontRequireReceiver);
-						toHold.transform.SetParent(SecondaryHoldTransform, true);
-						toHold.transform.localPosition = Vector3.zero;
-						toHold.transform.localRotation = Quaternion.identity;
-						toHold.layer = CharacterItemInteraction.ignoreRaycastLayer;
-						characterItemInteraction.SecondaryItemTransform = toHold.transform;
+						Transform item = characterInteraction.SecondaryItemTransform;
+						DropSecondaryItem();
+						item.SetPositionAndRotation(toHold.transform.position, toHold.transform.rotation);
 					}
 				}
+
+				View.RPC("HoldRPC", PhotonTargets.All, toHold.GetPhotonView().viewID, useHandPrimary);
+				toHold.SendMessage("Grab", SendMessageOptions.DontRequireReceiver);
+
+				return true;
 			}
 		}
 
-		public void DropPrimaryItem()
+		[PunRPC]
+		public void HoldRPC(int toHoldId, bool useHandPrimary = true)
 		{
-			if (characterItemInteraction.PrimaryItemTransform)
+			GameObject toHold = PhotonView.Find(toHoldId).gameObject;
+
+			if (useHandPrimary)
 			{
-				ActionMessage($"You drop the {CharacterItemInteraction.GetTargetName(characterItemInteraction.PrimaryItemTransform.gameObject)}");
-				characterItemInteraction.PrimaryItemTransform.SetParent(ItemSpawnerParent.parent, true);
-				characterItemInteraction.PrimaryItemTransform = null;
+				toHold.transform.SetParent(PrimaryHoldTransform, true);
+				characterInteraction.PrimaryItemTransform = toHold.transform;
+			}
+			else
+			{
+				toHold.transform.SetParent(SecondaryHoldTransform, true);
+				characterInteraction.SecondaryItemTransform = toHold.transform;
+			}
+
+			Fork fork = toHold.GetComponent<Fork>();
+			LeftHand leftHand = toHold.GetComponent<LeftHand>();
+
+			if (fork != null)
+			{
+				fork.curHoldPos = toHold.transform.parent;
+				fork.held = true;
+			}
+
+			if (leftHand != null)
+			{
+				leftHand.curHoldPos = toHold.transform.parent;
+				leftHand.held = true;
+			}
+
+			Rigidbody rigidbody = toHold.GetComponent<Rigidbody>();
+
+			if (rigidbody)
+			{
+				rigidbody.isKinematic = true;
+				rigidbody.interpolation = RigidbodyInterpolation.None;
+			}
+
+			toHold.transform.localPosition = Vector3.zero;
+			toHold.transform.localRotation = Quaternion.identity;
+			toHold.layer = CharacterInteraction.ignoreRaycastLayer;
+		}
+
+		public void DropItem(Transform item)
+		{
+			if (item)
+			{
+				ActionMessage($"You drop the {CharacterInteraction.GetTargetName(item.gameObject)}");
+
+				View.RPC("DropItemRPC", PhotonTargets.All, item.gameObject.GetPhotonView().viewID);
+				item.SendMessage("Drop", Vector3.zero, SendMessageOptions.DontRequireReceiver);
 			}
 		}
 
-		public void DropSecondaryItem()
+		[PunRPC]
+		public void DropItemRPC(int itemId)
 		{
-			if (characterItemInteraction.SecondaryItemTransform)
+			Transform item = PhotonView.Find(itemId).transform;
+
+			if (characterInteraction.leftHandItem == item)
 			{
-				ActionMessage($"You drop the {CharacterItemInteraction.GetTargetName(characterItemInteraction.SecondaryItemTransform.gameObject)}");
-				characterItemInteraction.SecondaryItemTransform.SetParent(ItemSpawnerParent.parent, true);
-				characterItemInteraction.SecondaryItemTransform = null;
+				characterInteraction.leftHandItem = null;
 			}
+
+			if (characterInteraction.rightHandItem == item)
+			{
+				characterInteraction.rightHandItem = null;
+			}
+
+			Fork fork = item.GetComponent<Fork>();
+			LeftHand leftHand = item.GetComponent<LeftHand>();
+
+			if (fork != null)
+			{
+				fork.curHoldPos = null;
+				fork.held = false;
+			}
+
+			if (leftHand != null)
+			{
+				leftHand.curHoldPos = null;
+				leftHand.held = false;
+			}
+
+			Rigidbody rigidbody = item.GetComponent<Rigidbody>();
+
+			if (rigidbody)
+			{
+				rigidbody.isKinematic = false;
+				rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+			}
+
+			item.gameObject.layer = CharacterInteraction.grabableLayer;
+
+			item.SetParent(ItemSpawnerParent.parent, true);
 		}
+
+		public void DropPrimaryItem() => DropItem(characterInteraction.PrimaryItemTransform);
+
+		public void DropSecondaryItem() => DropItem(characterInteraction.SecondaryItemTransform);
 
 		/// <summary>
 		/// picks up the specified gameObject as a prop
@@ -438,26 +541,26 @@ namespace HexaMod.Scripts.Character
 		/// <param name="toPickUp">the gameObject to pick up.</param>
 		public void PickUpProp(GameObject toPickUp)
 		{
-			if (!characterItemInteraction.heldProp)
+			if (!characterInteraction.heldProp)
 			{
-				characterItemInteraction.heldProp = toPickUp.GetComponent<PickUp>();
+				characterInteraction.heldProp = toPickUp.GetComponent<PickUp>();
 				toPickUp.SendMessage("PickUp", transform, SendMessageOptions.DontRequireReceiver);
 			}
 		}
 
 		public void DropProp()
 		{
-			if (characterItemInteraction.heldProp)
+			if (characterInteraction.heldProp)
 			{
-				ActionMessage($"You drop the {CharacterItemInteraction.GetTargetName(characterItemInteraction.heldProp.gameObject)}");
-				characterItemInteraction.heldProp.SendMessage("PutDown");
-				characterItemInteraction.heldProp = null;
+				ActionMessage($"You drop the {CharacterInteraction.GetTargetName(characterInteraction.heldProp.gameObject)}");
+				characterInteraction.heldProp.SendMessage("PutDown");
+				characterInteraction.heldProp = null;
 			}
 		}
 
-		public virtual void UpdateCameraPosition(float speed)
+		public void MouseLookUseCurrentTransform()
 		{
-			cameraController.speed = speed;
+			m_MouseLook.Init(transform, myCam.transform);
 		}
 
 		public virtual void Update()
@@ -488,10 +591,36 @@ namespace HexaMod.Scripts.Character
 
 				if (!noclip)
 				{
-					baseMovementUpdate.Invoke(this, null);
+					if (!fixingNaN)
+					{
+						ProcessMovement();
+
+						model.tased = blasted < 0f;
+
+						if (float.IsNaN(transform.position.x) || float.IsNaN(transform.position.y) || float.IsNaN(transform.position.z))
+						{
+							fixingNaN = true;
+							StartCoroutine(Unstuck());
+						}
+						else
+						{
+							positionMemory.Add(transform.position);
+							rotationMemory.Add(transform.rotation);
+							cameraRotationMemory.Add(myCam.transform.rotation);
+
+							if (positionMemory.Count > NAN_FIX_MEMORY_SIZE)
+							{
+								positionMemory.RemoveAt(0);
+								rotationMemory.RemoveAt(0);
+								cameraRotationMemory.RemoveAt(0);
+							}
+						}
+					}
 				}
 				else
 				{
+					fixingNaN = false;
+
 					Vector3 moveVector = new Vector3(
 						xAxis,
 						0f +
@@ -504,12 +633,218 @@ namespace HexaMod.Scripts.Character
 				}
 
 				cameraController.UpdateCamera();
+				characterInteraction.UpdateItemInteraction();
 			}
 		}
 
-		public virtual void FixedUpdate()
+		public float currentSpeed = 0f;
+		public void UpdatePlayerSpeed()
 		{
-			// not used currently but is required to disable the original FixedUpdate method from being called
+			blasted += Time.deltaTime * 0.5f;
+
+			if (blasted > 1f)
+			{
+				blasted = 1f;
+			}
+			if (hasCuffs)
+			{
+				blasted = 0.5f;
+			}
+
+			currentSpeed = ((!IsWalking) ? (RunSpeed * stabbed * blasted) : (WalkSpeed * stabbed * blasted)) * Mathf.Clamp(energy, 0.15f, 1f);
+
+			if (dash)
+			{
+				currentSpeed = Mathf.Clamp(currentSpeed, WalkSpeed, RunSpeed);
+				currentSpeed *= blasted;
+
+				if (!IsWalking)
+				{
+					if (!UnlimitedRun)
+					{
+						energy -= Time.deltaTime / 2f;
+					}
+				}
+				else
+				{
+					energy += Time.deltaTime / 24f;
+					if (restrainedHeld)
+					{
+						energy += Time.deltaTime / 12f;
+					}
+				}
+
+				cooldownImg.GetComponent<Image>().fillAmount = energy;
+
+				energy = Mathf.Clamp01(energy);
+
+				if (energy == 1f && restrainedHeld)
+				{
+					restrainer.SendMessage("DropItem");
+					restrainedHeld = false;
+				}
+			}
+
+			if (blasted < 0f)
+			{
+				currentSpeed = 0f;
+			}
+
+			if (SpeedBoosted)
+			{
+				currentSpeed *= 2f;
+			}
+		}
+
+		public Vector2 GetRawInput()
+		{
+			if (haltInput)
+			{
+				return Vector2.zero;
+			}
+			else
+			{
+				return new Vector2(
+					xAxis,
+					yAxis
+				);
+			}
+		}
+
+		public void ProcessInputs()
+		{
+			Vector2 rawInput = GetRawInput();
+
+			bool wasWalking = IsWalking;
+			IsWalking = !runButton;
+
+			MoveInput = rawInput;
+			if (MoveInput.sqrMagnitude > 1f)
+			{
+				MoveInput.Normalize();
+			}
+
+			if (IsWalking != wasWalking && UseFovKick && characterController.velocity.sqrMagnitude > 0f)
+			{
+				StopCoroutine("FOVKickDown");
+				StopCoroutine("FOVKickUp");
+				StartCoroutine(IsWalking ? FovKick.FOVKickDown() : FovKick.FOVKickUp());
+			}
+		}
+
+		public virtual void ProcessMovement() {
+			UpdatePlayerSpeed();
+			ProcessInputs();
+
+			Vector3 moveInputInWorldSpace = transform.forward * MoveInput.y + transform.right * MoveInput.x;
+			Vector3 position = transform.position;
+			position.y -= rayHeight;
+
+			if (playerFlags.IsSet(PlayerFlags.UseClassicProjectOnPlane))
+			{
+				Physics.SphereCast(position, characterController.radius, Vector3.down, out RaycastHit floorRaycast, characterController.height / 2f);
+				moveInputInWorldSpace = Vector3.ProjectOnPlane(moveInputInWorldSpace, floorRaycast.normal).normalized;
+			}
+			else
+			{
+				moveInputInWorldSpace = moveInputInWorldSpace.normalized;
+			}
+
+			Vector3 moveDir = MoveDir;
+
+			moveDir.x = moveInputInWorldSpace.x * currentSpeed;
+			moveDir.z = moveInputInWorldSpace.z * currentSpeed;
+
+			if (characterController.isGrounded)
+			{
+				moveDir.y = -StickToGroundForce;
+
+				bool grounded = playerFlags.IsSet(PlayerFlags.UseClassicGroundedCheckForJumps) ? ClassicCharIsGrounded() : characterController.isGrounded;
+
+				if (Jump && grounded)
+				{
+					moveDir.y = TripleJump ? JumpForce * 2f : JumpForce;
+					PlayJumpSound();
+					Jump = false;
+					Jumping = true;
+				}
+			}
+
+			moveDir += Physics.gravity * GravityMultiplier * Time.smoothDeltaTime;
+			CollisionFlags = characterController.Move(moveDir * Time.smoothDeltaTime);
+			MoveDir = moveDir;
+			ProgressStepCycle();
+		}
+
+		public bool ClassicCharIsGrounded()
+		{
+
+			if (!Physics.SphereCast(transform.position, 0.2f, Vector3.down, out RaycastHit raycastHit, GetComponent<CharacterController>().height + 0.3f + transform.localScale.x - 0.75f) && !Physics.Raycast(transform.position, Vector3.down, out raycastHit, GetComponent<CharacterController>().height + 0.2f))
+			{
+				Jump = false;
+				Jumping = false;
+
+				return false;
+			}
+
+			Rigidbody rigidbody = raycastHit.rigidbody;
+
+			if (!rigidbody)
+			{
+				return true;
+			}
+
+			if (Mathf.Abs(rigidbody.velocity.y) > 0.25f)
+			{
+				Jump = false;
+				Jumping = false;
+
+				return false;
+			}
+
+			return true;
+		}
+
+		public virtual void ProgressStepCycle()
+		{
+			if (characterController.velocity.sqrMagnitude > 0f && (MoveInput.magnitude > 0f))
+			{
+				StepCycle += (characterController.velocity.magnitude + currentSpeed * ((!IsWalking) ? RunstepLenghten : 1f)) * Time.smoothDeltaTime;
+			}
+
+			if (StepCycle <= NextStep)
+			{
+				return;
+			}
+
+			NextStep = StepCycle + StepInterval;
+
+			if (characterController.isGrounded)
+			{
+				PlayFootStepAudio();
+			}
+		}
+
+		// not used currently but is required to disable the original FixedUpdate method from being called
+		public virtual void FixedUpdate() { }
+
+		void PlayFootStepAudio()
+		{
+			int randomAudio = Random.Range(1, FootstepSounds.Length);
+			AudioClip randomClip = FootstepSounds[randomAudio];
+			networkedSound.Play(randomClip, Mathf.Clamp01(characterController.velocity.magnitude / currentSpeed));
+			FootstepSounds[randomAudio] = FootstepSounds[0];
+			FootstepSounds[0] = randomClip;
+		}
+
+		void PlayJumpSound()
+		{
+			networkedSound.Play(JumpSound);
+		}
+
+		void PlayLandSound()
+		{
+			networkedSound.Play(LandSound);
 		}
 
 		void ProcessInitialState()
@@ -540,18 +875,36 @@ namespace HexaMod.Scripts.Character
 
 			networkedSound.RegisterSounds(GetSounds());
 
-			string shirtColor = PlayerPrefs.GetString($"HMV2_{teamSelector}ShirtColor", defaultShirtColor);
-			string skinColor = PlayerPrefs.GetString($"HMV2_{teamSelector}SkinColor", defaultSkinColor);
-
-			initialState = new InitialPlayerState()
+			if (View & View.isMine)
 			{
-				shirtColor = new SerializableColor(new Color().FromHex(shirtColor)),
-				skinColor = new SerializableColor(new Color().FromHex(skinColor)),
-				characterModel = PlayerPrefs.GetString($"HMV2_{teamSelector}CharacterModel", "default"),
-				shirtMaterial = PlayerPrefs.GetString($"HMV2_{teamSelector}ShirtMaterial", "default")
-			};
+				audioSource.volume = 0.35f;
+				audioSource.spatialize = false;
+				audioSource.spatialBlend = 0f;
+				audioSource.bypassEffects = true;
+				audioSource.panStereo = 0f;
 
-			View.RPC("SetInitialState", PhotonTargets.AllBuffered, new object[] { InitialPlayerState.serializer.Serialize(initialState) });
+				string shirtColor = PlayerPrefs.GetString($"HMV2_{teamSelector}ShirtColor", defaultShirtColor);
+				string skinColor = PlayerPrefs.GetString($"HMV2_{teamSelector}SkinColor", defaultSkinColor);
+
+				initialState = new InitialPlayerState()
+				{
+					shirtColor = new SerializableColor(new Color().FromHex(shirtColor)),
+					skinColor = new SerializableColor(new Color().FromHex(skinColor)),
+					characterModel = PlayerPrefs.GetString($"HMV2_{teamSelector}CharacterModel", "default"),
+					shirtMaterial = PlayerPrefs.GetString($"HMV2_{teamSelector}ShirtMaterial", "default")
+				};
+
+				View.RPC("SetInitialState", PhotonTargets.AllBuffered, InitialPlayerState.serializer.Serialize(initialState));
+			}
+			else {
+				if (audioSource)
+				{
+					audioSource.spatialize = true;
+					audioSource.spatialBlend = 1f;
+					audioSource.bypassEffects = true;
+					audioSource.panStereo = 0f;
+				}
+			}
 		}
 
 		[PunRPC]
@@ -561,15 +914,40 @@ namespace HexaMod.Scripts.Character
 			ProcessInitialState();
 		}
 
-		[PunRPC]
-		public void FixNan(Vector3 characterPosition, Quaternion characterRotation, Vector3 cameraPosition, Quaternion cameraRotation)
+		public IEnumerator Unstuck()
 		{
-			NaNFixBehavior nanFixBehavior = gameObject.AddComponent<NaNFixBehavior>();
-			nanFixBehavior.firstPersonController = GetComponent<FirstPersonController>();
-			nanFixBehavior.characterPosition = characterPosition;
-			nanFixBehavior.characterRotation = characterRotation;
-			nanFixBehavior.cameraPosition = cameraPosition;
-			nanFixBehavior.cameraRotation = cameraRotation;
+			int count = positionMemory.Count;
+
+			if (count <= 5)
+			{
+				transform.position = Vector3.zero;
+				transform.rotation = Quaternion.identity;
+				myCam.transform.rotation = Quaternion.identity;
+				MouseLookUseCurrentTransform();
+				characterController.center = transform.position;
+			}
+			else
+			{
+				while (count > 0)
+				{
+					int index = count - 1;
+					transform.position = positionMemory[index];
+					transform.rotation = rotationMemory[index];
+					myCam.transform.rotation = cameraRotationMemory[index];
+					MouseLookUseCurrentTransform();
+					characterController.center = characterController.center;
+
+					positionMemory.RemoveAt(index);
+					rotationMemory.RemoveAt(index);
+					cameraRotationMemory.RemoveAt(index);
+
+					yield return new WaitForEndOfFrame();
+
+					count = positionMemory.Count;
+				}
+			}
+
+			fixingNaN = false;
 		}
 	}
 }

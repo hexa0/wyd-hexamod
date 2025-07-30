@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -9,6 +10,7 @@ namespace HexaMod.Patches.Hooks
 		public static PhotonPlayer lastPlayerWon;
 	}
 
+	[ModdedPatch]
 	[HarmonyPatch(typeof(GameStateController))]
 	internal class DadWinHook
 	{

@@ -1,10 +1,12 @@
 ﻿using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using HexaMod.Scripts.Persistent;
 using HexaMod.Scripts.PunRpcExtensions;
 using UnityEngine;
 
 namespace HexaMod.Patches.Feature
 {
+	[ModdedPatch]
 	[HarmonyPatch(typeof(PickUp))]
 	internal class PickUpScrollWheel
 	{
@@ -29,7 +31,7 @@ namespace HexaMod.Patches.Feature
 						float newDistance = grabbedDisCurrent + (Input.mouseScrollDelta.y / 2f);
 						if (newDistance != grabbedDisCurrent)
 						{
-							__instance.GetComponent<PhotonView>().RPC("SetGrabbedDistance", PhotonTargets.Others, new object[] { newDistance });
+							__instance.GetComponent<PhotonView>().RPC("SetGrabbedDistance", PhotonTargets.Others, newDistance);
 							Traverse.Create(__instance).Field("grabbedDis").SetValue(newDistance);
 						}
 					}
@@ -75,7 +77,7 @@ namespace HexaMod.Patches.Feature
 		static void PickUp(ref PickUp __instance)
 		{
 			PhotonView netView = __instance.GetComponent<PhotonView>();
-			netView.RPC("SetGrabbedDistance", PhotonTargets.Others, new object[] { (float)Traverse.Create(__instance).Field("grabbedDis").GetValue() });
+			netView.RPC("SetGrabbedDistance", PhotonTargets.Others, (float)Traverse.Create(__instance).Field("grabbedDis").GetValue());
 		}
 	}
 }

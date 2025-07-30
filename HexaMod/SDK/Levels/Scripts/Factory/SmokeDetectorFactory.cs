@@ -12,7 +12,7 @@ namespace HexaMod.SDK.Levels.Scripts.Factory
 			smokeDetector.lightOnMat = lightOnMat;
 			smokeDetector.lightOffMat = lightOffMat;
 			smokeDetector.rend = rend;
-			smokeDetector.gameStateController = GameObject.Find("GameStateController");
+			smokeDetector.gameStateController = HexaGlobal.gameStateController.gameObject;
 			smokeDetector.beepSound = beepSound;
 			smokeDetector.tag = "Use";
 

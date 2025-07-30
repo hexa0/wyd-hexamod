@@ -1,10 +1,12 @@
 ﻿using HarmonyLib;
 using HexaMod.API.UI;
+using HexaMod.API.Util.Patching;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace HexaMod.Patches.Fixes
 {
+	[VanillaPatch]
 	[HarmonyPatch]
 	internal class PlayerTargetNameFix
 	{

@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using HexaMod.API.Util.Patching;
 using HexaMod.API.Util.Unity.Settings;
 using HexaMod.Scripts.Character;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace HexaMod.Patches.Fixes
 {
 	// this patch basically completely rewrites the crouching system to fix wall clipping issues
 	// this also adds options for smoother crouching
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal class WallClipFix
 	{

@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
 using HexaMod.API.UI.Util;
+using HexaMod.API.Util.Patching;
 
 namespace HexaMod.Patches.Hooks
 {
+	[ModdedPatch]
 	[HarmonyPatch]
 	internal class BackstatesHook
 	{

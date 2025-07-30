@@ -4,11 +4,13 @@ using UnityEngine.UI;
 
 namespace HexaMod.Scripts.Character
 {
-	public class CharacterItemInteraction : Photon.MonoBehaviour
+	public class CharacterInteraction : Photon.MonoBehaviour
 	{
 		HexaPlayerController player;
 		public ItemTargeting itemTargetting;
 		public DadItemTargeting dadItemTargetting;
+
+		internal static readonly bool ENABLE_DEBUG_TEXT = false;
 
 		internal static int defaultLayer = LayerMask.NameToLayer("Default"); // 0
 		internal static int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast"); // 2
@@ -106,8 +108,88 @@ namespace HexaMod.Scripts.Character
 
 		public PickUp heldProp;
 
-		void Update()
+		public ICustomPlayerInteractable GetCustomInteractable(GameObject gameObject)
 		{
+			foreach (Behaviour behavior in gameObject.GetComponents<Behaviour>())
+			{
+				if (behavior as ICustomPlayerInteractable != null)
+				{
+					return behavior as ICustomPlayerInteractable;
+				}
+			}
+
+			return null;
+		}
+
+		int _oldLayer;
+		public void PreRaycastSetup()
+		{
+			_oldLayer = gameObject.layer;
+			gameObject.layer = ignoreRaycastLayer;
+		}
+		public void PostRaycastSetup()
+		{
+			gameObject.layer = _oldLayer;
+		}
+
+		public void UpdateItemInteraction()
+		{
+			bool CheckItem(Transform item)
+			{
+				ICustomPlayerInteractable customPlayerInteractable = null;
+
+				if (item)
+				{
+					customPlayerInteractable = GetCustomInteractable(item.gameObject);
+				}
+
+				if (customPlayerInteractable != null)
+				{
+					PreRaycastSetup();
+					Physics.Raycast(player.myCam.transform.position, player.myCam.transform.forward, out hit, reach, ~raycastIgnoreMask);
+					PostRaycastSetup();
+
+					GameObject target = hit.transform?.gameObject;
+
+					bool isTargetUsable = false;
+					if (target && target.layer == useableLayer && target.tag == "Use")
+					{
+						InteractText.text = customPlayerInteractable.UseReticleText(player, target);
+						InteractReticle.color = customPlayerInteractable.UseReticleColor(player, target);
+						isTargetUsable = true;
+					}
+
+					if (UseButtonDown)
+					{
+						int targetId = -1;
+
+						if (target)
+						{
+							PhotonView targetView = target.GetPhotonView();
+							if (targetView)
+							{
+								targetId = targetView.viewID;
+							}
+						}
+
+						PhotonView.Get(item).RPC("CustomUseRPC", PhotonTargets.All, targetId, isTargetUsable);
+					}
+
+					return isTargetUsable;
+				}
+
+				return false;
+			}
+
+			bool customItemsOverideLogic = false;
+			customItemsOverideLogic |= CheckItem(leftHandItem);
+			customItemsOverideLogic |= CheckItem(rightHandItem);
+
+			if (customItemsOverideLogic)
+			{
+				return;
+			}
+
 			// something is causing these to get re-enabled and i can't be bothered to write a patch to log the source of the setter so here we are
 			if (itemTargetting)
 			{
@@ -123,41 +205,33 @@ namespace HexaMod.Scripts.Character
 				butterTimer -= Time.deltaTime;
 			}
 
-			Transform cameraTransform = player.myCam.transform;
+			PreRaycastSetup();
+			bool didHit = Physics.Raycast(player.myCam.transform.position, player.myCam.transform.forward, out hit, reach, ~raycastIgnoreMask);
+			PostRaycastSetup();
 
-			int oldLayer = gameObject.layer;
-			gameObject.layer = ignoreRaycastLayer;
-			bool didHit = Physics.Raycast(cameraTransform.position, cameraTransform.forward, out hit, reach, ~raycastIgnoreMask);
-			gameObject.layer = oldLayer;
-
-			InteractText.text = "";
+			InteractText.text = ENABLE_DEBUG_TEXT ? $"{targetName}:{LayerMask.LayerToName(target.layer)}:{target.tag}" : "";
 			InteractReticle.color = ReticleColor.Nothing;
 			if (didHit && !SecondaryItemTransform && !heldProp)
 			{
 				target = hit.transform.gameObject;
 				targetName = GetTargetName(target);
-				
-				InteractText.text = $"{targetName}:{LayerMask.LayerToName(target.layer)}:{target.tag}";
 
-				foreach (Behaviour behavior in target.GetComponents<Behaviour>())
+				ICustomPlayerInteractable customPlayerInteractable = GetCustomInteractable(target);
+
+				if (customPlayerInteractable != null)
 				{
-					if (behavior as ICustomPlayerInteractable != null)
+					if (customPlayerInteractable.CanInteract(player))
 					{
-						ICustomPlayerInteractable customPlayerInteractable = behavior as ICustomPlayerInteractable;
-					
-						if (customPlayerInteractable.CanInteract(player))
+						InteractText.text = customPlayerInteractable.ReticleText(player);
+						InteractReticle.color = customPlayerInteractable.ReticleColor(player);
+
+						if (UseButtonDown)
 						{
-							InteractText.text = customPlayerInteractable.ReticleText(player);
-							InteractReticle.color = customPlayerInteractable.ReticleColor(player);
-
-							if (UseButtonDown)
-							{
-								PhotonView.Get(target).RPC("CustomInteractRPC", PhotonTargets.All);
-							}
+							PhotonView.Get(target).RPC("CustomInteractRPC", PhotonTargets.All);
 						}
-
-						return; // logic overidden by ICustomPlayerInteractable
 					}
+
+					return; // logic overidden by ICustomPlayerInteractable
 				}
 
 				if (target.layer == useableLayer)
@@ -172,7 +246,18 @@ namespace HexaMod.Scripts.Character
 							if (UseButtonDown)
 							{
 								player.ActionMessage($"You use {GetTargetName(PrimaryItemTransform.gameObject)} on the {targetName}");
-								target.SendMessage("Interact", gameObject, SendMessageOptions.DontRequireReceiver);
+								target.SendMessage("UseInteract", new string[] { PrimaryItemTransform.name, gameObject.name }, SendMessageOptions.DontRequireReceiver);
+							}
+						}
+						else if (SecondaryItemTransform)
+						{
+							InteractText.text = $"Use {GetTargetName(SecondaryItemTransform.gameObject)} on {targetName}";
+							InteractReticle.color = ReticleColor.Useable;
+
+							if (UseButtonDown)
+							{
+								player.ActionMessage($"You use {GetTargetName(SecondaryItemTransform.gameObject)} on the {targetName}");
+								target.SendMessage("UseInteract", new string[] { SecondaryItemTransform.name, gameObject.name }, SendMessageOptions.DontRequireReceiver);
 							}
 						}
 						else
@@ -216,8 +301,10 @@ namespace HexaMod.Scripts.Character
 
 						if (UseButtonDown)
 						{
-							player.ActionMessage($"You grab the {targetName}");
-							player.Hold(target);
+							if (player.Hold(target, target.GetComponent<LeftHand>() == null))
+							{
+								player.ActionMessage($"You grab the {targetName}");
+							}
 						}
 					}
 				}

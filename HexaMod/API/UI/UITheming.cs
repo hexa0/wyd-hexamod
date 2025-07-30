@@ -1,4 +1,5 @@
-﻿using HexaMod.API.UI.Element.Control;
+﻿using HexaMod.API.UI.Element;
+using HexaMod.API.UI.Element.Control;
 using UnityEngine;
 using UnityEngine.UI;
 using static HexaMod.API.UI.Util.Menu;
@@ -16,9 +17,6 @@ namespace HexaMod.API.UI
 				return;
 			}
 
-			var spriteInputField128 = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/InputField128.png");
-			var spriteButton = HexaGlobal.coreBundle.LoadAsset<Sprite>("Assets/ModResources/Core/Sprite/Button.png");
-
 			{ // Lobby Join Button
 				var gameJoiner = HexaGlobal.networkManager.gameJoiner;
 				var joinButton = gameJoiner.GetComponentInChildren<Button>();
@@ -30,7 +28,7 @@ namespace HexaMod.API.UI
 				newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
 
 				joinButton.colors = newColors;
-				joinImage.sprite = spriteButton;
+				joinImage.sprite = WUIGlobals.instance.resources.spriteButton;
 				joinImage.color = Color.white;
 			}
 			{ // Lobby BG
@@ -39,7 +37,7 @@ namespace HexaMod.API.UI
 					var playerNames = title.FindMenu(hostMenu).Find("PlayerNames");
 					foreach (var image in playerNames.GetComponentsInChildren<Image>(true))
 					{
-						image.sprite = spriteInputField128;
+						image.sprite = WUIGlobals.instance.resources.spriteInputField128;
 						image.color = new Color(15f / 255f, 13f / 255f, 13f / 255f, 0.5f);
 					}
 
@@ -54,7 +52,7 @@ namespace HexaMod.API.UI
 					if (background)
 					{
 						var image = background.GetComponent<Image>();
-						image.sprite = spriteInputField128;
+						image.sprite = WUIGlobals.instance.resources.spriteInputField128;
 						image.color = new Color(1f, 1f, 1f, 0.9f);
 						check = background.transform.GetChild(0).gameObject;
 
@@ -99,7 +97,7 @@ namespace HexaMod.API.UI
 					if (image)
 					{
 						image.color = new Color(15f / 255f, 13f / 255f, 13f / 255f, 0.9f);
-						image.sprite = spriteInputField128;
+						image.sprite = WUIGlobals.instance.resources.spriteInputField128;
 						image.type = Image.Type.Sliced;
 					}
 				}
@@ -119,7 +117,7 @@ namespace HexaMod.API.UI
 						inputFieldComponent.colors = newColors;
 
 						image.color = new Color(1f, 1f, 1f, 0.9f);
-						image.sprite = spriteInputField128;
+						image.sprite = WUIGlobals.instance.resources.spriteInputField128;
 						image.type = Image.Type.Sliced;
 
 						foreach (var text in inputFieldComponent.GetComponentsInChildren<Text>(true))
@@ -154,7 +152,7 @@ namespace HexaMod.API.UI
 							buttonComponent.colors = newColors;
 
 							image.color = new Color(1f, 1f, 1f, 0.9f);
-							image.sprite = spriteButton;
+							image.sprite = WUIGlobals.instance.resources.spriteButton;
 
 							foreach (var text in buttonComponent.GetComponentsInChildren<Text>(true))
 							{

@@ -10,8 +10,8 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPostfix]
 		static void IncreaseReplicationRatePatch()
 		{
-			PhotonNetwork.sendRate = HexaGlobal.sendRate;
-			PhotonNetwork.sendRateOnSerialize = HexaGlobal.sendRate;
+			// PhotonNetwork.sendRate = HexaGlobal.sendRate;
+			// PhotonNetwork.sendRateOnSerialize = HexaGlobal.sendRate;
 		}
 	}
 }

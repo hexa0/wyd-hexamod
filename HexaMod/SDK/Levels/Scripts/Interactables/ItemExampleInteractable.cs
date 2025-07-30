@@ -8,11 +8,15 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 	[RequireComponent(typeof(Renderer), typeof(Collider), typeof(AudioSource))]
 	internal class ItemExampleInteractable : CustomPlayerInteractable
 	{
-		public override Color ReticleColor(HexaPlayerController player) => CharacterItemInteraction.ReticleColor.Grabable;
 		public override string ReticleText(HexaPlayerController player) => $"Grab {GetName()}";
+		public override Color ReticleColor(HexaPlayerController player) => CharacterInteraction.ReticleColor.Grabable;
+		public override string UseReticleText(HexaPlayerController player, GameObject target) => $"{actionName} at {CharacterInteraction.GetTargetName(target)}";
 		public override bool CanInteract(HexaPlayerController player) => true;
 
-		public AudioSource audioSource;
+		public string actionName = "Squeak";
+		public string actionNamePlural = "squeaked";
+
+		AudioSource audioSource;
 
 		public void Start()
 		{
@@ -21,14 +25,27 @@ namespace HexaMod.SDK.Levels.Scripts.Interactables
 
 		public override void CustomInteract(HexaPlayerController player)
 		{
-			player.ActionMessage($"You grab the {GetName()}");
-			player.Hold(gameObject, true);
+			if (player.Hold(gameObject, true))
+			{
+				player.ActionMessage($"You wield the power of the {GetName()}");
+			}
 		}
 
-		public override void CustomUse(HexaPlayerController player)
+		public override void CustomUse(HexaPlayerController player, GameObject usedOn = null, bool usedOnIsUsable = false)
 		{
-			audioSource.pitch = Random.Range(0.8f, 1.2f);
-			audioSource.Play();
+			if (usedOn && usedOnIsUsable)
+			{
+				player.ActionMessage($"You {actionNamePlural} at {CharacterInteraction.GetTargetName(usedOn)}");
+
+				audioSource.pitch = Random.Range(1.2f, 1.6f);
+				audioSource.Play();
+			}
+			else
+			{
+				player.ActionMessage($"You {actionNamePlural}");
+				audioSource.pitch = Random.Range(0.8f, 1.2f);
+				audioSource.Play();
+			}
 		}
 	}
 }
