@@ -24,15 +24,6 @@ namespace HexaMod.Scripts.Initialization
 			InitHexaMod();
 		}
 
-		void Update()
-		{
-			if (PhotonNetwork.sendRate != 30 || PhotonNetwork.sendRateOnSerialize != 30)
-			{
-				PhotonNetwork.sendRate = 30;
-				PhotonNetwork.sendRateOnSerialize = 30;
-			}
-		}
-
 		void SetLoadingText(string loadingText) => HexaMenus.startupScreen.loadingText.SetText(loadingText);
 
 		AsyncOperation sceneLoadOperation;

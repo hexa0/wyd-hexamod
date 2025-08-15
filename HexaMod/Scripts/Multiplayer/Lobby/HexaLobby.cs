@@ -47,6 +47,12 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 				return nickname;
 			}
 		}
+		
+		public void OnConnectedToPhoton()
+		{
+			PhotonNetwork.sendRate = 30;
+			PhotonNetwork.sendRateOnSerialize = 30;
+		}
 
 		public void SendReadyToMasterClient()
 		{
