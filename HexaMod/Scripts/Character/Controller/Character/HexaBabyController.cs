@@ -23,6 +23,7 @@
 
 			characterInteraction.reach -= 2f;
 			characterInteraction.pickupMask = 1 << CharacterInteraction.babyGrabableLayer | 1 << CharacterInteraction.toyLayer;
+			characterInteraction.canConsume = true;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using HexaMod.Scripts.Character.Controller.Character;
+﻿using System.Linq;
+using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.SDK.Levels.Scripts.Interactables;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,10 +25,17 @@ namespace HexaMod.Scripts.Character
 		internal static int babyGrabableLayer = LayerMask.NameToLayer("BabyGrabable"); // 26
 		internal static int cameraLayer = LayerMask.NameToLayer("Camera"); // 26
 		internal static int babyGateLayer = LayerMask.NameToLayer("BabyGate"); // 28
+		internal static string[] consumables = new string[] {
+			"Eat",
+			"Drink",
+			"Empty",
+			"Douse Body In"
+		};
 
 		internal int pickupMask = (1 << grabableLayer) | (1 << babyGrabableLayer) | (1 << toyLayer) | (1 << dishesLayer);
 		internal int grabMask = (1 << grabableLayer) | (1 << babyGrabableLayer) | (1 << toyLayer) | (1 << dishesLayer);
 		internal int raycastIgnoreMask = (1 << ignoreRaycastLayer) | (1 << waterLayer) | (1 << cameraLayer);
+		internal bool canConsume = false;
 
 		public Image InteractReticle => GameObject.Find("Reticle").GetComponent<Image>();
 		public Text InteractText => GameObject.Find("SightText").GetComponent<Text>();
@@ -291,6 +299,17 @@ namespace HexaMod.Scripts.Character
 						}
 					}
 				}
+				else if (canConsume && consumables.Contains(target.tag))
+				{
+					InteractText.text = $"{target.tag} {targetName}";
+					InteractReticle.color = ReticleColor.Useable;
+
+					if (UseButtonDown && target.tag != "Empty")
+					{
+						player.ActionMessage($"You {target.tag} the {targetName}");
+						target.SendMessage("Interact", gameObject.name, SendMessageOptions.DontRequireReceiver);
+					}
+				}
 				else if (((1 << target.layer) & grabMask) != 0)
 				{
 					if (target.tag != "Grab" && target.tag != "Food")
@@ -329,7 +348,6 @@ namespace HexaMod.Scripts.Character
 						Transform item = PrimaryItemTransform;
 						player.DropItem(item);
 						item.position = hit.point + new Vector3(0f, 0.05f, 0f);
-						//item.position = hit.point + transform.forward * (float)(-2);
 					}
 				}
 			}

@@ -26,6 +26,7 @@ namespace HexaMod.Scripts.Character
 			lastRotation = transform.rotation;
 
 			photonView.ObservedComponents.Add(this);
+			photonView.synchronization = ViewSynchronization.Unreliable;
 		}
 
 		void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

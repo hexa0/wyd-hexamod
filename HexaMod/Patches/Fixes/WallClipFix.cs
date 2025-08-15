@@ -168,7 +168,7 @@ namespace HexaMod.Patches.Fixes
 			if (HexaModPreferences.smoothCrouching.Value)
 			{
 				self.crouchHeight = Mathf.Lerp(self.crouchHeight, self.crouching ? __instance.crouchHeight : 0f, Mathf.Min(delta * 15f, 1f));
-				playerController.cameraController.cameraOffsets["crouch"] = Vector3.Lerp(playerController.cameraController.cameraOffsets["crouch"], targetCameraOffset, Mathf.Min(delta * 15f, 1f));
+				playerController.cameraController.cameraOffsets["crouch"] = Vector3.Lerp(playerController.cameraController.cameraOffsets.GetValueOrDefault("crouch"), targetCameraOffset, Mathf.Min(delta * 15f, 1f));
 			}
 			else
 			{
