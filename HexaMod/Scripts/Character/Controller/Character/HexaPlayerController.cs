@@ -6,7 +6,6 @@ using HexaMod.API.Util.Data;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
-using HexaMod.Scripts.Character.Controller;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Multiplayer.SerializableObjects;
 using HexaMod.Scripts.Persistent;
@@ -407,23 +406,12 @@ namespace HexaMod.Scripts.Character.Controller.Character
 			}
 			else
 			{
-				if (useHandPrimary)
+				Transform previousItem = useHandPrimary ? characterInteraction.PrimaryItemTransform : characterInteraction.SecondaryItemTransform;
+				
+				if (previousItem)
 				{
-					if (characterInteraction.PrimaryItemTransform)
-					{
-						Transform item = characterInteraction.PrimaryItemTransform;
-						DropPrimaryItem();
-						item.SetPositionAndRotation(toHold.transform.position, toHold.transform.rotation);
-					}
-				}
-				else
-				{
-					if (characterInteraction.SecondaryItemTransform)
-					{
-						Transform item = characterInteraction.SecondaryItemTransform;
-						DropSecondaryItem();
-						item.SetPositionAndRotation(toHold.transform.position, toHold.transform.rotation);
-					}
+					DropItem(previousItem);
+					previousItem.SetPositionAndRotation(toHold.transform.position, toHold.transform.rotation);
 				}
 
 				View.RPC("HoldRPC", PhotonTargets.All, toHold.GetPhotonView().viewID, useHandPrimary);
@@ -434,9 +422,16 @@ namespace HexaMod.Scripts.Character.Controller.Character
 		}
 
 		[PunRPC]
-		public void HoldRPC(int toHoldId, bool useHandPrimary = true)
+		public void HoldRPC(int toHoldId, bool useHandPrimary, PhotonMessageInfo info)
 		{
 			GameObject toHold = PhotonView.Find(toHoldId).gameObject;
+
+			PhotonView toHoldView = toHold.GetPhotonView();
+
+			if (toHoldView.ownerId != info.sender.ID)
+			{
+				toHoldView.TransferOwnership(info.sender);
+			}
 
 			if (useHandPrimary)
 			{

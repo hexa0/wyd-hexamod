@@ -92,6 +92,13 @@ namespace HexaMod.Scripts.Character
 
 		public static string GetTargetName(GameObject target)
 		{
+			HexaPlayerController targetPlayer = target.GetComponent<HexaPlayerController>();
+
+			if (targetPlayer != null)
+			{
+				return targetPlayer.playerName;
+			}
+
 			string targetName = target.name;
 
 			if (targetName.Length > 5)
@@ -133,60 +140,65 @@ namespace HexaMod.Scripts.Character
 			gameObject.layer = _oldLayer;
 		}
 
-		public void UpdateItemInteraction()
+		bool UpdateCustomItemInteraction()
 		{
-			bool CheckItem(Transform item)
-			{
-				ICustomPlayerInteractable customPlayerInteractable = null;
-
-				if (item)
-				{
-					customPlayerInteractable = GetCustomInteractable(item.gameObject);
-				}
-
-				if (customPlayerInteractable != null)
-				{
-					PreRaycastSetup();
-					Physics.Raycast(player.myCam.transform.position, player.myCam.transform.forward, out hit, reach, ~raycastIgnoreMask);
-					PostRaycastSetup();
-
-					GameObject target = hit.transform?.gameObject;
-
-					bool isTargetUsable = false;
-					if (target && target.layer == useableLayer && target.tag == "Use")
-					{
-						InteractText.text = customPlayerInteractable.UseReticleText(player, target);
-						InteractReticle.color = customPlayerInteractable.UseReticleColor(player, target);
-						isTargetUsable = true;
-					}
-
-					if (UseButtonDown)
-					{
-						int targetId = -1;
-
-						if (target)
-						{
-							PhotonView targetView = target.GetPhotonView();
-							if (targetView)
-							{
-								targetId = targetView.viewID;
-							}
-						}
-
-						PhotonView.Get(item).RPC("CustomUseRPC", PhotonTargets.All, targetId, isTargetUsable);
-					}
-
-					return isTargetUsable;
-				}
-
-				return false;
-			}
-
 			bool customItemsOverideLogic = false;
 			customItemsOverideLogic |= CheckItem(leftHandItem);
 			customItemsOverideLogic |= CheckItem(rightHandItem);
 
-			if (customItemsOverideLogic)
+			return customItemsOverideLogic;
+		}
+
+		bool CheckItem(Transform item)
+		{
+			ICustomPlayerInteractable customPlayerInteractable = null;
+
+			if (item)
+			{
+				customPlayerInteractable = GetCustomInteractable(item.gameObject);
+			}
+
+			if (customPlayerInteractable != null)
+			{
+				PreRaycastSetup();
+				Physics.Raycast(player.myCam.transform.position, player.myCam.transform.forward, out hit, reach, ~raycastIgnoreMask);
+				PostRaycastSetup();
+
+				GameObject target = hit.transform?.gameObject;
+
+				bool isTargetUsable = false;
+				if (target && target.layer == useableLayer && target.tag == "Use")
+				{
+					InteractText.text = customPlayerInteractable.UseReticleText(player, target);
+					InteractReticle.color = customPlayerInteractable.UseReticleColor(player, target);
+					isTargetUsable = true;
+				}
+
+				if (UseButtonDown)
+				{
+					int targetId = -1;
+
+					if (target)
+					{
+						PhotonView targetView = target.GetPhotonView();
+						if (targetView)
+						{
+							targetId = targetView.viewID;
+						}
+					}
+
+					PhotonView.Get(item).RPC("CustomUseRPC", PhotonTargets.All, targetId, isTargetUsable);
+				}
+
+				return isTargetUsable;
+			}
+
+			return false;
+		}
+
+		public void UpdateItemInteraction()
+		{
+			if (UpdateCustomItemInteraction())
 			{
 				return;
 			}
@@ -307,6 +319,17 @@ namespace HexaMod.Scripts.Character
 								player.ActionMessage($"You grab the {targetName}");
 							}
 						}
+					}
+				}
+				else
+				{
+					if (PrimaryItemTransform && UseButtonDown)
+					{
+						player.ActionMessage($"You drop the {GetTargetName(PrimaryItemTransform.gameObject)}");
+						Transform item = PrimaryItemTransform;
+						player.DropItem(item);
+						item.position = hit.point + new Vector3(0f, 0.05f, 0f);
+						//item.position = hit.point + transform.forward * (float)(-2);
 					}
 				}
 			}
