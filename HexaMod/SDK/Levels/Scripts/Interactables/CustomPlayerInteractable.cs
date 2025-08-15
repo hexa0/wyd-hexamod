@@ -1,6 +1,7 @@
 ﻿using HexaMod.API.Util.Migration;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.Scripts.Character;
+using HexaMod.Scripts.Character.Controller.Character;
 using UnityEngine;
 
 namespace HexaMod.SDK.Levels.Scripts.Interactables

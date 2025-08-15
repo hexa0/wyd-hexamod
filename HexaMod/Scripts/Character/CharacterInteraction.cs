@@ -1,4 +1,5 @@
-﻿using HexaMod.SDK.Levels.Scripts.Interactables;
+﻿using HexaMod.Scripts.Character.Controller.Character;
+using HexaMod.SDK.Levels.Scripts.Interactables;
 using UnityEngine;
 using UnityEngine.UI;
 

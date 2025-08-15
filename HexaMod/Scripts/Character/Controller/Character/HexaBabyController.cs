@@ -1,4 +1,4 @@
-﻿namespace HexaMod.Scripts.Character
+﻿namespace HexaMod.Scripts.Character.Controller.Character
 {
 	internal class HexaBabyController : HexaPlayerController
 	{
@@ -22,7 +22,7 @@
 			base.Start();
 
 			characterInteraction.reach -= 2f;
-			characterInteraction.pickupMask = (1 << CharacterInteraction.babyGrabableLayer) | (1 << CharacterInteraction.toyLayer);
+			characterInteraction.pickupMask = 1 << CharacterInteraction.babyGrabableLayer | 1 << CharacterInteraction.toyLayer;
 		}
 	}
 }

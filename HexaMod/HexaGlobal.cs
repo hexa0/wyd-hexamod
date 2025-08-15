@@ -10,6 +10,8 @@ using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
 using HexaMod.Patches.Hooks;
 using HexaMod.Scripts.Character;
+using HexaMod.Scripts.Character.Controller;
+using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Persistent;
 using HexaMod.Scripts.Util;

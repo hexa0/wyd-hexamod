@@ -1,4 +1,4 @@
-﻿namespace HexaMod.Scripts.Character
+﻿namespace HexaMod.Scripts.Character.Controller.Character
 {
 	internal class HexaLuigiController : HexaPlayerController
 	{

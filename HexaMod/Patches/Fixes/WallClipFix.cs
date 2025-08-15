@@ -2,7 +2,7 @@
 using HarmonyLib;
 using HexaMod.API.Util.Patching;
 using HexaMod.API.Util.Unity.Settings;
-using HexaMod.Scripts.Character;
+using HexaMod.Scripts.Character.Controller.Character;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 

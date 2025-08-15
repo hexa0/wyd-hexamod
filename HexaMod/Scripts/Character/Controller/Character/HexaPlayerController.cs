@@ -6,6 +6,7 @@ using HexaMod.API.Util.Data;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
+using HexaMod.Scripts.Character.Controller;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Multiplayer.SerializableObjects;
 using HexaMod.Scripts.Persistent;
@@ -14,9 +15,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Utility;
-using static UnityEngine.GridBrushBase;
 
-namespace HexaMod.Scripts.Character
+namespace HexaMod.Scripts.Character.Controller.Character
 {
 	public class HexaPlayerController : FirstPersonController
 	{
@@ -266,7 +266,7 @@ namespace HexaMod.Scripts.Character
 
 		public NetworkedSoundBehavior networkedSound;
 		public CameraController cameraController;
-		public CharacterController characterController;
+		public UnityEngine.CharacterController characterController;
 		public CharacterModelSwapper characterModelSwapper;
 		public CharacterInteraction characterInteraction;
 		public Crouch crouch;
@@ -344,7 +344,7 @@ namespace HexaMod.Scripts.Character
 			networkedSound = gameObject.GetComponent<NetworkedSoundBehavior>();
 			cameraController = GetComponent<CameraController>();
 			characterModelSwapper = GetComponent<CharacterModelSwapper>();
-			characterController = GetComponent<CharacterController>();
+			characterController = GetComponent<UnityEngine.CharacterController>();
 			characterInteraction = GetComponent<CharacterInteraction>();
 			crouch = GetComponent<Crouch>();
 			dadAnimator = GetComponentInChildren<DadAnimator>();
@@ -651,7 +651,7 @@ namespace HexaMod.Scripts.Character
 				blasted = 0.5f;
 			}
 
-			currentSpeed = ((!IsWalking) ? (RunSpeed * stabbed * blasted) : (WalkSpeed * stabbed * blasted)) * Mathf.Clamp(energy, 0.15f, 1f);
+			currentSpeed = (!IsWalking ? RunSpeed * stabbed * blasted : WalkSpeed * stabbed * blasted) * Mathf.Clamp(energy, 0.15f, 1f);
 
 			if (dash)
 			{
@@ -779,7 +779,7 @@ namespace HexaMod.Scripts.Character
 		public bool ClassicCharIsGrounded()
 		{
 
-			if (!Physics.SphereCast(transform.position, 0.2f, Vector3.down, out RaycastHit raycastHit, GetComponent<CharacterController>().height + 0.3f + transform.localScale.x - 0.75f) && !Physics.Raycast(transform.position, Vector3.down, out raycastHit, GetComponent<CharacterController>().height + 0.2f))
+			if (!Physics.SphereCast(transform.position, 0.2f, Vector3.down, out RaycastHit raycastHit, GetComponent<UnityEngine.CharacterController>().height + 0.3f + transform.localScale.x - 0.75f) && !Physics.Raycast(transform.position, Vector3.down, out raycastHit, GetComponent<UnityEngine.CharacterController>().height + 0.2f))
 			{
 				Jump = false;
 				Jumping = false;
@@ -807,9 +807,9 @@ namespace HexaMod.Scripts.Character
 
 		public virtual void ProgressStepCycle()
 		{
-			if (characterController.velocity.sqrMagnitude > 0f && (MoveInput.magnitude > 0f))
+			if (characterController.velocity.sqrMagnitude > 0f && MoveInput.magnitude > 0f)
 			{
-				StepCycle += (characterController.velocity.magnitude + currentSpeed * ((!IsWalking) ? RunstepLenghten : 1f)) * Time.smoothDeltaTime;
+				StepCycle += (characterController.velocity.magnitude + currentSpeed * (!IsWalking ? RunstepLenghten : 1f)) * Time.smoothDeltaTime;
 			}
 
 			if (StepCycle <= NextStep)

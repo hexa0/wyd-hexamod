@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.Scripts.Util;
 using HexaMod.SDK.CustomCharacterModels;
 using HexaMod.SDK.ScriptableObjects;

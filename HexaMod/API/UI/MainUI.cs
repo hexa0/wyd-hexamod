@@ -14,6 +14,7 @@ using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity.Settings;
 using HexaMod.API.Voice;
 using HexaMod.Scripts.Character;
+using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Persistent;
 using HexaMod.SDK.ScriptableObjects;

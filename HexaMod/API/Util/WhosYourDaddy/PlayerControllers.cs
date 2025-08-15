@@ -1,4 +1,4 @@
-﻿using HexaMod.Scripts.Character;
+﻿using HexaMod.Scripts.Character.Controller.Character;
 using UnityEngine;
 
 namespace HexaMod.API.Util.WhosYourDaddy

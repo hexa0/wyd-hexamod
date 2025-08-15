@@ -1,4 +1,5 @@
 ﻿using System;
+using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using UnityEngine;
 

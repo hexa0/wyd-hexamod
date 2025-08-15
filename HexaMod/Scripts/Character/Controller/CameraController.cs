@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.API.Util.Unity.Settings;
+using HexaMod.Scripts.Character.Controller.Character;
 using UnityEngine;
 
-namespace HexaMod.Scripts.Character
+namespace HexaMod.Scripts.Character.Controller
 {
 	public class CameraController : MonoBehaviour
 	{
 		internal HexaPlayerController PlayerController => GetComponent<HexaPlayerController>();
-		internal CharacterController CharacterController => PlayerController.characterController;
+		internal UnityEngine.CharacterController CharacterController => PlayerController.characterController;
 
 		internal float bobCycleX = 0f;
 		internal float bobCycleY = 0f;
