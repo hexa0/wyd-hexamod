@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using HarmonyLib;
+﻿using HarmonyLib;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.Scripts.Persistent;

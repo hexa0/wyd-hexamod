@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using HexaMod.API.UI;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity;
