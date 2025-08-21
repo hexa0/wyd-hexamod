@@ -232,7 +232,7 @@ namespace HexaMod.Scripts.Character
 
 			InteractText.text = ENABLE_DEBUG_TEXT ? $"{targetName}:{LayerMask.LayerToName(target.layer)}:{target.tag}" : "";
 			InteractReticle.color = ReticleColor.Nothing;
-			if (didHit && !SecondaryItemTransform && !heldProp)
+			if (didHit && !heldProp)
 			{
 				target = hit.transform.gameObject;
 				targetName = GetTargetName(target);
@@ -312,7 +312,7 @@ namespace HexaMod.Scripts.Character
 				}
 				else if (((1 << target.layer) & grabMask) != 0)
 				{
-					if (target.tag != "Grab" && target.tag != "Food")
+					if (target.tag != "Grab" && target.tag != "LeftGrab" && target.tag != "Food")
 					{
 						if (((1 << target.layer) & pickupMask) != 0)
 						{

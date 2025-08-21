@@ -110,7 +110,7 @@ namespace HexaMod.Patches.Fixes
 		}
 
 		readonly static float characterHeight = 2.8f;
-		readonly static int ceilingRaycastMask = (~671088640) & ~(1 << 2);
+		readonly static int ceilingRaycastMask = ~((1 << 2) | (1 << 4) | (1 << 11) | (1 << 12) | (1 << 27));
 
 		[HarmonyPatch(typeof(Crouch), "Start")]
 		[HarmonyPrefix]
@@ -152,6 +152,13 @@ namespace HexaMod.Patches.Fixes
 
 			Vector3 floorPosition = __instance.transform.position + __instance.transform.rotation * new Vector3(playerController.characterController.center.x, playerController.characterController.center.y - (playerController.characterController.height / 2f), playerController.characterController.center.z);
 			bool ceilingDetected = Physics.SphereCast(floorPosition, playerController.characterController.radius, Vector3.up, out RaycastHit ceilingRaycast, characterHeight, ceilingRaycastMask);
+
+			if (ceilingDetected && ((1 << ceilingRaycast.transform.gameObject.layer) & ceilingRaycastMask) == 0)
+			{
+				// this is an absolute hack but idc
+				ceilingRaycast.collider.gameObject.layer = ceilingRaycast.transform.gameObject.layer;
+				ceilingDetected = false;
+			}
 
 			bool blocked = ceilingDetected && ceilingRaycast.distance + playerController.characterController.radius <= characterHeight;
 

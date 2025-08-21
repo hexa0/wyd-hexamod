@@ -265,7 +265,7 @@ namespace HexaMod.Scripts.Character.Controller.Character
 
 		public NetworkedSoundBehavior networkedSound;
 		public CameraController cameraController;
-		public UnityEngine.CharacterController characterController;
+		public CharacterController characterController;
 		public CharacterModelSwapper characterModelSwapper;
 		public CharacterInteraction characterInteraction;
 		public Crouch crouch;
@@ -449,14 +449,91 @@ namespace HexaMod.Scripts.Character.Controller.Character
 
 			if (fork != null)
 			{
+				fork.dadHoldPos = toHold.transform.parent;
 				fork.curHoldPos = toHold.transform.parent;
+				fork.babyHoldPos = toHold.transform.parent;
 				fork.held = true;
 			}
 
 			if (leftHand != null)
 			{
+				leftHand.dadHoldPos = toHold.transform.parent;
 				leftHand.curHoldPos = toHold.transform.parent;
+				leftHand.babyHoldPos = toHold.transform.parent;
 				leftHand.held = true;
+
+				if (leftHand.blast)
+				{
+					leftHand.blast.held = true;
+				}
+
+				if (leftHand.laser)
+				{
+					leftHand.laser.held = true;
+				}
+
+				if (leftHand.fireEx)
+				{
+					leftHand.fireEx.held = true;
+				}
+
+				if (leftHand.taser)
+				{
+					leftHand.taser.held = true;
+				}
+
+				if (leftHand.tablet)
+				{
+					leftHand.tablet.held = true;
+				}
+
+				if (leftHand.waterGun)
+				{
+					leftHand.waterGun.held = true;
+				}
+
+				if (leftHand.swinger)
+				{
+					leftHand.swinger.held = true;
+				}
+
+				if (leftHand.grenade)
+				{
+					leftHand.grenade.held = true;
+					leftHand.grenade.player = transform;
+				}
+
+				if (leftHand.turrent)
+				{
+					leftHand.turrent.held = true;
+					leftHand.turrent.player = gameObject;
+					leftHand.turrent.playerStartPos = transform;
+				}
+
+				if (leftHand.kidCar)
+				{
+					leftHand.kidCar.netView.RequestOwnership();
+					leftHand.RPCInteract(transform.name);
+					leftHand.kidCar.SetUnHeld();
+					leftHand.kidCar.held = true;
+					leftHand.kidCar.SetHeld(gameObject.name, true);
+					leftHand.kidCar.player = gameObject;
+				}
+
+				if (leftHand.restrainy)
+				{
+					leftHand.restrainy.held = true;
+
+					if (teamSelector == "D")
+					{
+						leftHand.restrainy.dadHeld = characterInteraction.dadItemTargetting;
+					}
+				}
+
+				if (!leftHand.kidCar || !leftHand.kidCar.dad)
+				{
+					leftHand.RPCInteract(transform.name);
+				}
 			}
 
 			Rigidbody rigidbody = toHold.GetComponent<Rigidbody>();
@@ -511,6 +588,75 @@ namespace HexaMod.Scripts.Character.Controller.Character
 			{
 				leftHand.curHoldPos = null;
 				leftHand.held = false;
+
+				if (leftHand.blast)
+				{
+					leftHand.blast.held = false;
+					leftHand.mainCol.enabled = true;
+				}
+
+				if (leftHand.laser)
+				{
+					leftHand.laser.held = false;
+					leftHand.laser.TurnOffRPC();
+				}
+
+				if (leftHand.fireEx)
+				{
+					leftHand.fireEx.held = false;
+					leftHand.fireEx.TurnOffRPC();
+				}
+
+				if (leftHand.taser)
+				{
+					leftHand.taser.held = false;
+				}
+
+				if (leftHand.tablet)
+				{
+					leftHand.tablet.held = false;
+				}
+
+				if (leftHand.waterGun)
+				{
+					leftHand.waterGun.held = false;
+				}
+
+				if (leftHand.swinger)
+				{
+					leftHand.swinger.held = false;
+				}
+
+				if (leftHand.grenade)
+				{
+					leftHand.grenade.held = false;
+					leftHand.grenade.player = null;
+				}
+
+				if (leftHand.turrent)
+				{
+					leftHand.turrent.held = false;
+					haltInput = false;
+					allowTurning = false;
+					leftHand.turrent.player = null;
+				}
+
+				if (leftHand.kidCar)
+				{
+					leftHand.kidCar.held = false;
+
+					if (!leftHand.kidCar.dad)
+					{
+						leftHand.kidCar.SetUnHeld();
+						leftHand.kidCar.dad = true;
+					}
+				}
+
+				if (leftHand.restrainy)
+				{
+					leftHand.restrainy.held = false;
+					leftHand.restrainy.dadHeld = null;
+				}
 			}
 
 			Rigidbody rigidbody = item.GetComponent<Rigidbody>();
