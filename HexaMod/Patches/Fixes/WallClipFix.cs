@@ -156,7 +156,6 @@ namespace HexaMod.Patches.Fixes
 			if (ceilingDetected && ((1 << ceilingRaycast.transform.gameObject.layer) & ceilingRaycastMask) == 0)
 			{
 				// this is an absolute hack but idc
-				// ceilingRaycast.collider.gameObject.layer = ceilingRaycast.transform.gameObject.layer;
 				ceilingDetected = false;
 			}
 

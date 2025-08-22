@@ -74,6 +74,8 @@ namespace HexaMod.Scripts.Character
 		public float reach = 3.5f;
 
 		internal bool UseButtonDown => player.input.btn[7].isDown;
+		internal bool SecondaryUseButtonDown => player.input.btn[8].isDown || player.input.btn[8].axisVal >= 0.5f;
+		internal bool SecondaryDropButtonDown => player.input.btn[9].isDown;
 
 		public bool Buttered {
 			get => butterTimer > 0f;
@@ -229,6 +231,27 @@ namespace HexaMod.Scripts.Character
 			PreRaycastSetup();
 			bool didHit = Physics.Raycast(player.myCam.transform.position, player.myCam.transform.forward, out hit, reach, ~raycastIgnoreMask);
 			PostRaycastSetup();
+
+			if (SecondaryItemTransform && SecondaryDropButtonDown)
+			{
+				player.ActionMessage($"You drop the {GetTargetName(SecondaryItemTransform.gameObject)}");
+				Transform item = SecondaryItemTransform;
+				player.DropItem(item);
+
+				if (didHit)
+				{
+					item.position = hit.point + new Vector3(0f, 0.05f, 0f);
+				}
+				else
+				{
+					item.position = player.myCam.transform.position + (player.myCam.transform.forward * (reach / 2));
+				}
+			}
+
+			if (SecondaryItemTransform && SecondaryUseButtonDown)
+			{
+				SecondaryItemTransform.SendMessage("ButtonDown", SendMessageOptions.DontRequireReceiver);
+			}
 
 			InteractText.text = ENABLE_DEBUG_TEXT ? $"{targetName}:{LayerMask.LayerToName(target.layer)}:{target.tag}" : "";
 			InteractReticle.color = ReticleColor.Nothing;
