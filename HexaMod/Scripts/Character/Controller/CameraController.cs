@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.API.Util.Unity.Settings;
 using HexaMod.Scripts.Character.Controller.Character;
@@ -39,7 +40,7 @@ namespace HexaMod.Scripts.Character.Controller
 			bobBaseInterval = headBobFields.Field<float>("m_BobBaseInterval");
 		}
 
-		public void UpdateCamera()
+		public void UpdateCamera(Action beforeThirdPersonTransformation)
 		{
 			if (HexaModPreferences.viewBobbing.Value && ViewBobbingAllowed)
 			{
@@ -69,6 +70,8 @@ namespace HexaMod.Scripts.Character.Controller
 
 			Transform camera = PlayerController.myCam.transform;
 			camera.localPosition = CameraOffset;
+
+			beforeThirdPersonTransformation.Invoke();
 
 			switch (PlayerController.CameraPerspectiveEnum)
 			{

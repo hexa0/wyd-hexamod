@@ -11,7 +11,7 @@
 		public MatchSettingsButton() : base()
 		{
 			this.SetName("matchSettings")
-				.SetTextAuto("Match\nSettings");
+				.SetTextAuto("Lobby\nSettings");
 		}
 	}
 }

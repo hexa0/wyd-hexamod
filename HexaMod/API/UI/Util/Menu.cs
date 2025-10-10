@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HexaMod.API.UI.Element;
 using HexaMod.Scripts.Persistent;
 using UnityEngine;
 
@@ -76,6 +77,16 @@ namespace HexaMod.API.UI.Util
 		{
 			GameObject menu = new GameObject(name, typeof(RectTransform));
 
+			return NewMenu(menu);
+		}
+
+		public GameObject NewMenu(HexaUIElement menu)
+		{
+			return NewMenu(menu.gameObject);
+		}
+
+		public GameObject NewMenu(GameObject menu)
+		{
 			menu.SetActive(false);
 			menu.transform.SetParent(root, false);
 			menu.GetComponent<RectTransform>().ScaleWithParent();

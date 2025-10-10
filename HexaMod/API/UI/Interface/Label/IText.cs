@@ -13,6 +13,7 @@ namespace HexaMod.API.UI.Interface.Label
 		Self SetTextFontSize(object fontSize);
 		Self SetTextFontResizeMinSize(int minFontSize);
 		Self SetTextFontResizeMaxSize(int maxFontSize);
+		Self SetTextColor(Color color);
 
 		// Alignment
 		Self SetTextAligment(TextAnchor alignment);

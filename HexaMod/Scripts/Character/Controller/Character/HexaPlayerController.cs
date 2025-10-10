@@ -6,6 +6,7 @@ using HexaMod.API.Util.Data;
 using HexaMod.API.Util.WhosYourDaddy;
 using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
+using HexaMod.Patches.Hooks;
 using HexaMod.Scripts.Multiplayer.Lobby;
 using HexaMod.Scripts.Multiplayer.SerializableObjects;
 using HexaMod.Scripts.Persistent;
@@ -704,6 +705,34 @@ namespace HexaMod.Scripts.Character.Controller.Character
 			m_MouseLook.Init(transform, myCam.transform);
 		}
 
+		public virtual void RotateView()
+		{
+			// prevent base update from calling this
+		}
+
+		public virtual void UpdateLookRotation()
+		{
+			if (!haltInput || allowTurning)
+			{
+				m_MouseLook.LookRotation(transform, myCam.transform);
+			}
+			else
+			{
+				// this is a hack but it makes it so that the camera is always reset before the camera controller updates so we don't get flickering if the player went into third person at a different angle
+				float xS = m_MouseLook.XSensitivity;
+				float yS = m_MouseLook.YSensitivity;
+
+				m_MouseLook.XSensitivity = 0f;
+				m_MouseLook.YSensitivity = 0f;
+
+				m_MouseLook.LookRotation(transform, myCam.transform);
+
+				// reset the sensitivity back to normal
+				m_MouseLook.XSensitivity = xS;
+				m_MouseLook.YSensitivity = yS;
+			}
+		}
+
 		public virtual void Update()
 		{
 			baseUpdate.Invoke(this, null);
@@ -772,9 +801,28 @@ namespace HexaMod.Scripts.Character.Controller.Character
 
 					transform.Translate(moveVector * (Time.deltaTime * (runButton ? 20f : 10f)), myCam.transform);
 				}
+			}
+		}
 
-				cameraController.UpdateCamera();
-				characterInteraction.UpdateItemInteraction();
+		public virtual void LateUpdate()
+		{
+			if (View && View.isMine)
+			{
+				UpdateLookRotation();
+
+				cameraController.UpdateCamera(() =>
+				{
+					HandleLookRotationExternally.runningExternally = true;
+
+					foreach (ParRotation parRotation in GetComponentsInChildren<ParRotation>(true))
+					{
+						parRotation.LateUpdate();
+					}
+
+					HandleLookRotationExternally.runningExternally = false;
+
+					characterInteraction.UpdateItemInteraction();
+				});
 			}
 		}
 

@@ -83,11 +83,6 @@ namespace HexaMod
 					Mod.GAME_VERSION = networkManager.version;
 				}
 
-				if (!Environment.GetCommandLineArgs().Contains("ForceVanillaLobbies") && !inVanillaMode)
-				{
-					networkManager.version = $"hm:{BuildInfo.GitHash}";
-				}
-
 				gameStateController = Object.FindObjectOfType<GameStateController>();
 
 				if (!inVanillaMode)

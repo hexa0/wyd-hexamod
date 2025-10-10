@@ -9,6 +9,7 @@ namespace HexaMod.API.UI
 {
 	public class UITheming
 	{
+		static readonly float buttonColorFadeDuration = 1f / 25f;
 		public static void Init()
 		{
 			if (!HexaGlobal.coreBundle)
@@ -26,6 +27,7 @@ namespace HexaMod.API.UI
 				newColors.highlightedColor = new Color(1f, 1f, 1f);
 				newColors.normalColor = new Color(255f / 255f, 173f / 255f, 168f / 255f);
 				newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
+				newColors.fadeDuration = buttonColorFadeDuration;
 
 				joinButton.colors = newColors;
 				joinImage.sprite = WUIGlobals.instance.resources.spriteButton;
@@ -67,6 +69,7 @@ namespace HexaMod.API.UI
 					newColors.normalColor = new Color(255f / 255f, 173f / 255f, 168f / 255f);
 					newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
 					newColors.pressedColor = new Color(255f / 255f, 173f / 255f, 168f / 255f);
+					newColors.fadeDuration = buttonColorFadeDuration;
 
 					toggleComponent.colors = newColors;
 				}
@@ -82,6 +85,7 @@ namespace HexaMod.API.UI
 						newColors.highlightedColor = new Color(1f, 1f, 1f);
 						newColors.normalColor = new Color(255f / 255f, 173f / 255f, 168f / 255f);
 						newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
+						newColors.fadeDuration = buttonColorFadeDuration;
 
 						scrollbarComponent.colors = newColors;
 
@@ -113,6 +117,7 @@ namespace HexaMod.API.UI
 						newColors.highlightedColor = new Color(51f / 255f, 29f / 255f, 33f / 255f);
 						newColors.normalColor = new Color(15f / 255f, 13f / 255f, 13f / 255f);
 						newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
+						newColors.fadeDuration = buttonColorFadeDuration;
 
 						inputFieldComponent.colors = newColors;
 
@@ -148,6 +153,7 @@ namespace HexaMod.API.UI
 							newColors.highlightedColor = new Color(51f / 255f, 29f / 255f, 33f / 255f);
 							newColors.normalColor = new Color(15f / 255f, 13f / 255f, 13f / 255f);
 							newColors.disabledColor = new Color(newColors.normalColor.r, newColors.normalColor.g, newColors.normalColor.b, 0.5f);
+							newColors.fadeDuration = buttonColorFadeDuration;
 
 							buttonComponent.colors = newColors;
 
@@ -160,7 +166,13 @@ namespace HexaMod.API.UI
 								text.fontSize = (int)(text.fontSize * 0.8f);
 							}
 
-							buttonComponent.gameObject.AddComponent<ButtonSoundBehavior>();
+							ButtonSoundBehavior soundBehavior = buttonComponent.gameObject.AddComponent<ButtonSoundBehavior>();
+
+							if (buttonComponent.name == "Back")
+							{
+								soundBehavior.ButtonDownSound = UISound.Back;
+								soundBehavior.ButtonUpSound = UISound.Back;
+							}
 						}
 					}
 				}

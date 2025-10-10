@@ -16,7 +16,16 @@ namespace HexaMod.Patches.Fixes
 			PoolTrigger self = __instance;
 			PoolChore poolChore = self.triggerHolder.GetComponent<PoolChore>();
 
-			FirstPersonController localPlayer = PlayerControllers.LocalPlayer;
+			FirstPersonController localPlayer;
+
+			try
+			{
+				localPlayer = PlayerControllers.LocalPlayer;
+			}
+			catch
+			{
+				localPlayer = null;
+			}
 
 			if (localPlayer != null && self.poolObjs.Contains(other.gameObject))
 			{
@@ -43,7 +52,16 @@ namespace HexaMod.Patches.Fixes
 			PoolTrigger self = __instance;
 			PoolChore poolChore = self.triggerHolder.GetComponent<PoolChore>();
 
-			FirstPersonController localPlayer = PlayerControllers.LocalPlayer;
+			FirstPersonController localPlayer;
+
+			try
+			{
+				localPlayer = PlayerControllers.LocalPlayer;
+			}
+			catch
+			{
+				localPlayer = null;
+			}
 
 			if (localPlayer != null && self.poolObjs.Contains(other.gameObject))
 			{

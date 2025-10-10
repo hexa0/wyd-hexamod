@@ -58,6 +58,13 @@ namespace HexaMod.API.UI.Element.Label
 			return this;
 		}
 
+		public WLabel SetTextColor(Color color)
+		{
+			text.color = color;
+
+			return this;
+		}
+
 		public WLabel SetTextAligment(TextAnchor alignment)
 		{
 			text.alignment = alignment;

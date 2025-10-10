@@ -76,6 +76,7 @@ internal static class BuildInfo
 	<Target Name="ConvertToMdb" AfterTargets="Build">
 		<PropertyGroup>
 			<Pdb2MdbToolPath>$(PkgMono_pdb2mdb)\tools\pdb2mdb.exe</Pdb2MdbToolPath>
+			<MdbFixScriptPath>$(MSBuildProjectDirectory)\cleanupSymbolPaths.ps1</MdbFixScriptPath>
 		</PropertyGroup>
 
 		<Error Text="The pdb2mdb NuGet package seems to be missing." Condition="!Exists('$(Pdb2MdbToolPath)')" />
@@ -83,6 +84,14 @@ internal static class BuildInfo
 		<Message Text="Converting PDB to MDB for $(TargetPath) using NuGet package..." Importance="high" />
 
 		<Exec Command="&quot;$(Pdb2MdbToolPath)&quot; &quot;$(TargetPath)&quot;" />
+
+		<PropertyGroup>
+			<MdbPath>$(TargetPath).mdb</MdbPath>
+		</PropertyGroup>
+
+		<Message Text="Applying byte-shift to remove './' prefix in $(MdbPath)..." Importance="high" />
+
+		<Exec Command="powershell.exe -ExecutionPolicy Bypass -File &quot;$(MdbFixScriptPath)&quot; -MdbPath &quot;$(MdbPath)&quot;" Condition="Exists('$(MdbPath)')" />
 	</Target>
 
 	<ItemGroup>

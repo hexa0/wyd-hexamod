@@ -10,6 +10,7 @@ using HexaMod.API.UI.Element.Control.ToggleButton;
 using HexaMod.API.UI.Element.Label;
 using HexaMod.API.UI.Element.Utility;
 using HexaMod.API.UI.Element.VoiceChatUI;
+using HexaMod.API.UI.Menu.PlayMenu;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity.Settings;
 using HexaMod.API.Voice;
@@ -25,6 +26,7 @@ using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 using VoiceChatShared.Enums;
 using static HexaMod.API.UI.Util.Menu.WYDMenus;
+using static UnityEngine.UI.Button;
 
 namespace HexaMod.API.UI
 {
@@ -173,7 +175,7 @@ namespace HexaMod.API.UI
 
 		public void Init()
 		{
-			if (PlayerPrefs.GetInt("HMV2_DoUITheme", 1) == 1)
+			if (HexaModPreferences.doUItheme.Value)
 			{
 				UITheming.Init();
 			}
@@ -394,63 +396,67 @@ namespace HexaMod.API.UI
 				// booooring
 				splashMenu.Find("Return To New WYD").gameObject.SetActive(false);
 
-				UIElementStack NewRow(string name)
-				{
-					return new UIElementStack(WTextButton.padding.x)
-						.SetName(name)
-						.SetPivot(0f, 0f)
-						.SetPosition(0f, 0f)
-						.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
-				}
+				// replaced/moved
+				splashMenu.Find("PlayOnline").gameObject.SetActive(false);
+				splashMenu.Find("PlayLocal").gameObject.SetActive(false);
+				splashMenu.Find("CharacterCusomization").gameObject.SetActive(false);
+				splashMenu.Find("Challenges").gameObject.SetActive(false);
 
-				UIElementStack topRow = NewRow("top");
-				UIElementStack middleRow = NewRow("middle");
-				UIElementStack bottomRow = NewRow("bottom");
-
-				topRow.AddChild(new WTextButton()
-					.SetName("testDad")
-					.SetTextAuto("Test As\nDad")
-					.SetParent(title.FindMenu("SplashMenu"))
-					.AddListener(ButtonCallbacks.TestDadButton));
-
-				topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayLocal").gameObject));
-				topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayOnline").gameObject));
-
-				middleRow.AddChild(new WTextButton()
-					.SetName("testBaby")
-					.SetTextAuto("Test As\nBaby")
-					.SetParent(title.FindMenu("SplashMenu"))
-					.AddListener(ButtonCallbacks.TestBabyButton));
-
-				middleRow.AddChild(new HexaUIElement(splashMenu.Find("Challenges").gameObject));
-				middleRow.AddChild(new HexaUIElement(splashMenu.Find("CharacterCusomization").gameObject));
-
-				bottomRow.AddChild(new MatchSettingsButton()
-					.SetParent(title.FindMenu("SplashMenu"))
-					.AddListener(ButtonCallbacks.MatchSettingsButton));
-
-				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Options").gameObject));
-				bottomRow.AddChild(new HexaUIElement(splashMenu.Find("Quit").gameObject));
-
-				bottomRow.AddChild(new WTextButton()
-					.SetName("testHostMenu")
-					.SetTextAuto("Test HostMenu")
-					.AddListener(() =>
-					{
-
-					}));
-
-				UIElementStack titleStack = new UIElementStack(WTextButton.padding.y)
+				UIElementStack bottomBarStack = new UIElementStack(WTextButton.padding.x)
 					.SetParent(splashMenu)
-					.SetName("titleStack")
+					.SetName("bottomBarStack")
 					.SetAnchors(0.5f, 0f)
 					.SetPivot(0.5f, 0f)
 					.SetAnchorPosition(0f, WTextButton.padding.y)
-					.SetAlignment(UIElementStack.StackAlignment.TopToBottom);
+					.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
 
-				titleStack.AddChild(topRow);
-				titleStack.AddChild(middleRow);
-				titleStack.AddChild(bottomRow);
+				UIElementStack middleRow = new UIElementStack(WTextButton.padding.x)
+					.SetParent(splashMenu)
+					.SetName("middleRow")
+					.SetAnchors(0.5f, 0.5f)
+					.SetPivot(0.5f, 1f)
+					.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
+
+				//topRow.AddChild(new WTextButton()
+				//	.SetName("testDad")
+				//	.SetTextAuto("Test As\nDad")
+				//	.SetParent(title.FindMenu("SplashMenu"))
+				//	.AddListener(ButtonCallbacks.TestDadButton));
+
+				// topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayLocal").gameObject));
+				// topRow.AddChild(new HexaUIElement(splashMenu.Find("PlayOnline").gameObject));
+
+				middleRow.AddChild(new WTextButton()
+					.SetName("playButton")
+					.SetTextAuto("Play")
+					.AddListener(() =>
+					{
+						title.menuController.ChangeToMenu(title.GetMenuId("playMenu"));
+					}));
+
+				//middleRow.AddChild(new WTextButton()
+				//	.SetName("testBaby")
+				//	.SetTextAuto("Test As\nBaby")
+				//	.SetParent(title.FindMenu("SplashMenu"))
+				//	.AddListener(ButtonCallbacks.TestBabyButton));
+
+				// middleRow.AddChild(new HexaUIElement(splashMenu.Find("Challenges").gameObject));
+				// middleRow.AddChild(new HexaUIElement(splashMenu.Find("CharacterCusomization").gameObject));
+
+				//bottomRow.AddChild(new MatchSettingsButton()
+				//	.SetParent(title.FindMenu("SplashMenu"))
+				//	.AddListener(ButtonCallbacks.MatchSettingsButton));
+
+				middleRow.AddChild(new HexaUIElement(splashMenu.Find("Options").gameObject));
+				bottomBarStack.AddChild(new HexaUIElement(splashMenu.Find("Quit").gameObject));
+
+				//bottomRow.AddChild(new WTextButton()
+				//	.SetName("testPlayMenu")
+				//	.SetTextAuto("Test PlayMenu")
+				//	.AddListener(() =>
+				//	{
+				//		title.menuController.ChangeToMenu(title.GetMenuId("playMenu"));
+				//	}));
 
 				int infoFontSize = 8;
 
@@ -474,9 +480,9 @@ namespace HexaMod.API.UI
 
 			}
 			{ // Play Online Menu
-
+				title.NewMenu(new PlayMenu());
 			}
-			{ // Character Customization Menu
+			{ // Player Customization Menu
 				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").Find("MenuCamera").Find("Camera").Find("Canvas");
 				dadModelSwapper = characterPreviewCanvas.Find("Dad").AddComponent<CharacterModelSwapper>();
 				HexaDadController dadPlayerController = dadModelSwapper.gameObject.AddComponent<HexaDadController>();
@@ -505,6 +511,15 @@ namespace HexaMod.API.UI
 
 				RectTransform characterCustomizationMenu = title.FindMenu("CharacterCustomizationMenu") as RectTransform;
 				characterCustomizationMenu.ScaleWithParent();
+
+				ButtonClickedEvent backButtonClicked = new ButtonClickedEvent();
+
+				backButtonClicked.AddListener(() =>
+				{
+					title.GoBack();
+				});
+
+				characterCustomizationMenu.Find("Back").GetComponent<Button>().onClick = backButtonClicked;
 
 				Vector2 bottomLeft = new Vector2(720f, -350f);
 
@@ -666,6 +681,7 @@ namespace HexaMod.API.UI
 						ButtonCallbacks.SaveBabyModel(option.value);
 					}));
 			}
+			// TODO: remove this
 			{ // Host Menus
 				// we replace all of the match settings with our own menu so hide the originals
 				title.FindMenu("Family Gathering-Host").Find("AlternateCharacters (2)").gameObject.SetActive(false);

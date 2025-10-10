@@ -297,10 +297,7 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		{
 			if (PhotonNetwork.isMasterClient)
 			{
-				MatchStartObject matchStartObject = new MatchStartObject();
-				//	.DetermineSpawns(HexaPersistentLobby.instance.lobbySettings);
-
-				netView.RPC("HexaModMatchStarted", PhotonTargets.All, !PhotonNetwork.room.IsOpen, MatchStartObject.serializer.Serialize(matchStartObject));
+				netView.RPC("HexaModMatchStarted", PhotonTargets.All, !PhotonNetwork.room.IsOpen);
 
 				if (PhotonNetwork.room.IsOpen == false)
 				{
@@ -330,14 +327,12 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		}
 
 		[PunRPC]
-		public void HexaModMatchStarted(bool inGame, byte[] matchStartObjectData)
+		public void HexaModMatchStarted(bool inGame)
 		{
 			HexaGlobal.networkManager.fader.SendMessage("Fade");
 			HexaGlobal.textChat.chat.CheckWho();
 
 			HexaLobbyState.handledPlayersLoaded = true;
-
-			MatchStartObject matchStartObject = MatchStartObject.serializer.Deserialize(matchStartObjectData);
 
 			var mode = GameModes.gameModes[HexaGlobal.networkManager.curGameMode];
 
