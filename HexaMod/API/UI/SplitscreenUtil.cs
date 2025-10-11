@@ -4,7 +4,7 @@
 	{
 		public static bool IsInSplitscreen()
 		{
-			return PhotonNetwork.offlineMode && PhotonNetwork.room.Name != HexaGlobal.instanceGuid;
+			return PhotonNetwork.offlineMode && PhotonNetwork.room != null && PhotonNetwork.room.Name != HexaGlobal.instanceGuid;
 		}
 	}
 }
