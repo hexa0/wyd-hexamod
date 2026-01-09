@@ -4,7 +4,6 @@ using HexaMod.API.UI.Element.Control.ScrollList;
 using HexaMod.API.UI.Element.Control.TextButton;
 using HexaMod.API.UI.Element.Utility;
 using UnityEngine;
-using UnityEngine.UI;
 using static HexaMod.API.UI.Util.Menu;
 
 namespace HexaMod.API.UI.Menu.PlayMenu
@@ -63,31 +62,8 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 				.SetPivot(0.5f, 0.5f)
 				.SetAnchorPosition(0f, 0f)
 				.SetScrollbarSize(2f / 100f)
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry())
-				.AddChild(new LobbyEntry());
+				.AddChild(new CreateLobbyEntry())
+				.AddChild(new JoinLobbyEntry());
 
 		}
 	}

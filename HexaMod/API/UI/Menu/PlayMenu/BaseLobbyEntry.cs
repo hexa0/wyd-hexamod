@@ -1,11 +1,13 @@
 ﻿using HexaMod.API.UI.Element;
+using HexaMod.API.UI.Element.Control;
+using HexaMod.API.UI.Element.Control.TextButton;
 using HexaMod.API.UI.Element.Label;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace HexaMod.API.UI.Menu.PlayMenu
 {
-	public class LobbyEntry : HexaUIElement
+	public class BaseLobbyEntry : HexaUIElement
 	{
 		readonly LayoutElement layoutElement;
 
@@ -13,6 +15,7 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 		readonly WLabel lobbyMotdLabel; // below name
 		readonly WLabel lobbyMapLabel; // top right formatted as (playing on <map>)
 		readonly WLabel lobbyPlayerCountLabel; // bottom right formatted as (<playercount>/<maxplayers>)
+		internal readonly WTextButton interactButton; // right side
 
 		// these shouldn't end up being seen normally as you'll be forced to pick a name when creating a lobby but this will be here when testing the UI without setting the values
 
@@ -55,7 +58,26 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			set
 			{
 				lobbyMap = value;
-				lobbyMapLabel.SetText($"(Playing on {lobbyMap})");
+				if (value != "")
+				{
+					lobbyMapLabel.SetText($"(Playing on {lobbyMap})");
+				}
+				else
+				{
+					lobbyMapLabel.SetText("");
+				}
+			}
+		}
+
+		void UpdatePlayerCountLabel()
+		{
+			if (MaxPlayers > 0)
+			{
+				lobbyPlayerCountLabel.SetText($"({playerCount}/{maxPlayers})");
+			}
+			else
+			{
+				lobbyPlayerCountLabel.SetText("");
 			}
 		}
 
@@ -67,7 +89,7 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			set
 			{
 				playerCount = value;
-				lobbyPlayerCountLabel.SetText($"({playerCount}/{maxPlayers})");
+				UpdatePlayerCountLabel();
 			}
 		}
 
@@ -79,11 +101,11 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			set
 			{
 				maxPlayers = value;
-				lobbyPlayerCountLabel.SetText($"({playerCount}/{maxPlayers})");
+				UpdatePlayerCountLabel();
 			}
 		}
 
-		public LobbyEntry() : base()
+		public BaseLobbyEntry() : base()
 		{
 			gameObject = new GameObject("lobbyEntry", typeof(RectTransform));
 			rectTransform.sizeDelta = new Vector2(0f, 100f);
@@ -144,6 +166,19 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 				.SetRichTextEnabled(false)
 				.SetTextFontSize(14)
 				.SetTextAligment(TextAnchor.LowerRight);
+
+			interactButton = new WTextButton()
+				.SetParent(rectTransform)
+				.SetName("interactButton")
+				.SetAnchorMin(1f, 0.5f)
+				.SetAnchorMax(1f, 0.5f)
+				.SetPivot(1f, 0.5f)
+				.SetAnchorPosition(-10f, 0f)
+				.Resize(100f, 30f)
+				.SetTextAuto("Action")
+				.SetFontSize(18)
+				.SetButtonDownSound(UISound.None)
+				.SetButtonUpSound(UISound.Yes);
 
 		}
 	}
