@@ -15,7 +15,7 @@ namespace VoiceChatHost
 			if (args.Length < 2)
 			{
 				Console.WriteLine($"no arguments specified, assuming the user wants to host a relay server");
-				args = ["r", "0.0.0.0", HexaVoiceChat.Ports.relay.ToString()];
+				args = ["r", "::", HexaVoiceChat.Ports.relay.ToString()];
 			}
 
 			Host host = Host.GetHost(args[0]);
