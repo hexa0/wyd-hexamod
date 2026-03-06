@@ -20,14 +20,25 @@
 
 	<Target Name="ConvertToMdb" AfterTargets="Build" Condition=" '$(TargetFramework)' == 'net35' ">
 		<PropertyGroup>
-			<Pdb2MdbToolPath>$(PkgMono_pdb2mdb)\tools\pdb2mdb.exe</Pdb2MdbToolPath>
+			<IsWindows>$([MSBuild]::IsOSPlatform('Windows'))</IsWindows>
+			<MdbFixScriptPath>$(MSBuildProjectDirectory)\..\cleanupSymbolPaths.ps1</MdbFixScriptPath>
+			<MdbPath>$(TargetPath).mdb</MdbPath>
+			
+			<Pdb2MdbToolPath Condition="'$(IsWindows)' == 'true'">$(PkgMono_pdb2mdb)\tools\pdb2mdb.exe</Pdb2MdbToolPath>
+			<PowerShellBinary Condition="'$(IsWindows)' == 'true'">powershell.exe</PowerShellBinary>
+
+			<PowerShellBinary Condition="'$(IsWindows)' != 'true'">pwsh</PowerShellBinary>
 		</PropertyGroup>
 
-		<Error Text="The pdb2mdb NuGet package seems to be missing." Condition="!Exists('$(Pdb2MdbToolPath)')" />
+		<Message Text="Converting Portable PDB to MDB..." Importance="high" Condition="'$(IsWindows)' != 'true'" />
+		<Exec Command="ppdb2mdb &quot;$(TargetPath)&quot;" Condition="'$(IsWindows)' != 'true'" />
 
-		<Message Text="Converting PDB to MDB for $(TargetPath) using NuGet package..." Importance="high" />
+		<Error Text="The pdb2mdb NuGet package is missing." Condition="'$(IsWindows)' == 'true' AND !Exists('$(Pdb2MdbToolPath)')" />
+		<Message Text="Converting PDB to MDB for $(TargetPath) using NuGet package..." Importance="high" Condition="'$(IsWindows)' == 'true'" />
+		<Exec Command="&quot;$(Pdb2MdbToolPath)&quot; &quot;$(TargetPath)&quot;" Condition="'$(IsWindows)' == 'true'" />
 
-		<Exec Command="&quot;$(Pdb2MdbToolPath)&quot; &quot;$(TargetPath)&quot;" />
+		<Message Text="Applying byte-shift to remove './' prefix in $(MdbPath)..." Importance="high" />
+		<Exec Command="$(PowerShellBinary) -ExecutionPolicy Bypass -File &quot;$(MdbFixScriptPath)&quot; -MdbPath &quot;$(MdbPath)&quot;" Condition="Exists('$(MdbPath)')" />
 	</Target>
 
 	<ItemGroup>
