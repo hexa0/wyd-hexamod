@@ -5,4 +5,4 @@ dotnet_diagnostic.IDE0051.severity = none
 indent_style = tab
 indent_size = 4
 tab_width = 4
-end_of_line = lf
+end_of_line = crlf
