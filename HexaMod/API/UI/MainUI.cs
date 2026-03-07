@@ -321,7 +321,7 @@ namespace HexaMod.API.UI
 					stack.AddChild(
 						new WToggleControl()
 							.SetName("tabOutMute")
-							.SetText("Mute While Tabbed Out")
+							.SetText(Wine.IsWine ? "Mute While Tabbed Out (May be broken on linux)" : "Mute While Tabbed Out")
 							.LinkToPreference(HexaModPreferences.tabOutMute)
 					);
 
@@ -605,7 +605,8 @@ namespace HexaMod.API.UI
 
 				dadStack.AddChild(new WHexColorInputField()
 					.SetName("shirtColor")
-					.AddChangedListener((color, hex) => {
+					.AddChangedListener((color, hex) =>
+					{
 						dadModelSwapper.SetShirtColor(color);
 						babyModelSwapper.SetShirtColor(color);
 					})
@@ -618,7 +619,8 @@ namespace HexaMod.API.UI
 
 				dadStack.AddChild(new WHexColorInputField()
 					.SetName("dadSkinColor")
-					.AddChangedListener((color, hex) => {
+					.AddChangedListener((color, hex) =>
+					{
 						dadModelSwapper.SetSkinColor(color);
 					})
 					.AddSubmitListener((color, hex) =>
@@ -660,7 +662,8 @@ namespace HexaMod.API.UI
 
 				babyStack.AddChild(new WHexColorInputField()
 					.SetName("babySkinColor")
-					.AddChangedListener((color, hex) => {
+					.AddChangedListener((color, hex) =>
+					{
 						babyModelSwapper.SetSkinColor(color);
 					})
 					.AddSubmitListener((color, hex) =>
@@ -683,7 +686,7 @@ namespace HexaMod.API.UI
 			}
 			// TODO: remove this
 			{ // Host Menus
-				// we replace all of the match settings with our own menu so hide the originals
+			  // we replace all of the match settings with our own menu so hide the originals
 				title.FindMenu("Family Gathering-Host").Find("AlternateCharacters (2)").gameObject.SetActive(false);
 				title.FindMenu("Family Gathering-Host").Find("SetSpectate").gameObject.SetActive(false);
 				title.FindMenu("HungryGames").Find("SetSpectate (1)").gameObject.SetActive(false);
@@ -856,7 +859,8 @@ namespace HexaMod.API.UI
 						.SetName("relayServer")
 						.SetText("Voice Chat Relay")
 						.SetFieldText(ls.relay)
-						.AddSubmitListener(text => {
+						.AddSubmitListener(text =>
+						{
 							HexaPersistentLobby.instance.lobbySettings.relay = text;
 							HexaPersistentLobby.instance.CommitChanges();
 							HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");

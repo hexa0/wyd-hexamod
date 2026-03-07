@@ -354,7 +354,8 @@ namespace HexaMod.API.Voice
 
 		public static void SetMicrophoneChannels(byte channels)
 		{
-			if (transcodeReady)			{
+			if (transcodeReady)
+			{
 				transcodeClient.udp.SendMessage(HVCMessage.SetMicChannels, NetData.As(channels));
 			}
 
@@ -370,6 +371,7 @@ namespace HexaMod.API.Voice
 			try
 			{
 				InitTranscodeServerProcess();
+				Thread.Sleep(1000);
 				InitTranscodeServerConnection();
 
 				while (!transcodeClient.tcp.Connected)
