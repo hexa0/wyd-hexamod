@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace HexaMod.API.Voice.Patch
+namespace HexaMod.Patches.Fixes
 {
 	[HarmonyPatch(typeof(Application))]
 	internal class QuitFix

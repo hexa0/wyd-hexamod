@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using HarmonyLib;
 using HexaMod.API.UI;
 using HexaMod.API.Util.WhosYourDaddy;
-using HexaMod.API.Voice;
-using HexaMod.API.Voice.Patch;
 using HexaMod.Scripts.Multiplayer.SerializableObjects;
 using HexaMod.Scripts.Persistent;
 using UnityEngine;
@@ -98,15 +96,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 			{
 				HexaMenus.startupScreen.loadingText.SetText("Waiting for others to load");
 			}
-
-			HexaPersistentLobby.instance.lobbySettingsChanged.AddListener(delegate ()
-			{
-				if (VoiceChatRoomsHook.inRoom)
-				{
-					VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay, HexaPersistentLobby.instance.lobbySettings.voiceRoom);
-					VoiceChat.JoinVoiceRoom(HexaPersistentLobby.instance.lobbySettings.voiceRoom);
-				}
-			});
 		}
 
 		public void Start()
@@ -346,8 +335,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 
 			if (inGame)
 			{
-				VoiceChat.SetMicrophoneChannels(1);
-
 				HexaGlobal.networkManager.fader.SendMessage("Fade");
 
 				if (mode.name == "daddysNightmare")
@@ -362,8 +349,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 
 			if (!inGame)
 			{
-				VoiceChat.SetMicrophoneChannels(2);
-
 				var hostMenuId = WYDMenus.title.GetMenuId(mode.hostMenuName);
 
 				WYDMenus.title.menuController.ChangeToMenu(hostMenuId);
@@ -418,21 +403,9 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 			}
 		}
 
-		void OnCreatedRoom()
-		{
-			VoiceChat.SetMicrophoneChannels(2);
-			VoiceChat.ConnectToRelay(HexaPersistentLobby.instance.lobbySettings.relay);
-			VoiceChat.JoinVoiceRoom(HexaGlobal.instanceGuid);
-		}
-
 		void OnJoinedRoom()
 		{
 			HexaLobbyState.handledPlayersLoaded = true;
-
-			if (!PhotonNetwork.isMasterClient)
-			{
-				VoiceChat.SetMicrophoneChannels(2);
-			}
 		}
 
 		void OnMasterClientSwitched(PhotonPlayer player)

@@ -9,11 +9,9 @@ using HexaMod.API.UI.Element.Control.TextInputField;
 using HexaMod.API.UI.Element.Control.ToggleButton;
 using HexaMod.API.UI.Element.Label;
 using HexaMod.API.UI.Element.Utility;
-using HexaMod.API.UI.Element.VoiceChatUI;
 using HexaMod.API.UI.Menu.PlayMenu;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity.Settings;
-using HexaMod.API.Voice;
 using HexaMod.Scripts.Character;
 using HexaMod.Scripts.Character.Controller.Character;
 using HexaMod.Scripts.Multiplayer.Lobby;
@@ -24,7 +22,6 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
-using VoiceChatShared.Enums;
 using static HexaMod.API.UI.Util.Menu.WYDMenus;
 using static UnityEngine.UI.Button;
 
@@ -252,31 +249,6 @@ namespace HexaMod.API.UI
 
 					bottomBarStack.AddChild(backButton);
 
-					var devices = VoiceChat.GetDevices();
-					WSwitchOption<VoiceChat.MicrophoneDevice>[] deviceOptions = new WSwitchOption<VoiceChat.MicrophoneDevice>[devices.Length];
-
-					for (int i = 0; i < devices.Length; i++)
-					{
-						deviceOptions[i] = new WSwitchOption<VoiceChat.MicrophoneDevice>()
-						{
-							name = $"({i + 1}/{devices.Length}) : {devices[i].capabilities.ProductName}",
-							value = devices[i]
-						};
-					}
-
-					WSwitchOption<int>[] audioBitrateOptions = new WSwitchOption<int>[Enum.GetValues(typeof(Bitrate)).Length];
-
-					for (int i = 0; i < audioBitrateOptions.Length; i++)
-					{
-						int value = (byte)Enum.GetValues(typeof(Bitrate)).GetValue(i);
-
-						audioBitrateOptions[i] = new WSwitchOption<int>()
-						{
-							name = Enum.GetName(typeof(Bitrate), value).Replace("Bitrate_Preset_", ""),
-							value = value
-						};
-					}
-
 					UIElementStack stack = new UIElementStack(WTextButton.padding.y)
 						.SetParent(menu.transform)
 						.SetAnchors(0.5f, 0f)
@@ -286,42 +258,8 @@ namespace HexaMod.API.UI
 
 					stack.AddChild(
 						new WToggleControl()
-							.SetName("micRnNoise")
-							.SetText("Microphone Denoising (RNNoise)")
-							.LinkToPreference(VoiceChat.denoisingEnabled)
-					);
-
-					stack.AddChild(
-						new WToggleControl()
-							.SetName("voiceChatDebugOverlayEnabled")
-							.SetText("Voice Chat Debug Overlay")
-							.LinkToPreference(VoiceChat.debugOverlayEnabled)
-					);
-
-					stack.AddChild(
-						new WSwitchInput<int>()
-							.SetName("microphoneBitrate")
-							.SetText("")
-							.AddOptions(audioBitrateOptions)
-							.LinkToPreference(VoiceChat.microphoneBitrate)
-					);
-
-					stack.AddChild(
-						new WSwitchInput<VoiceChat.MicrophoneDevice>()
-							.SetName("microphoneDevice")
-							.SetText("")
-							.AddOptions(deviceOptions)
-							.LinkToPreference(VoiceChat.microphoneDeviceId)
-					);
-
-					stack.AddChild(
-						new MicrophoneIndicator()
-					);
-
-					stack.AddChild(
-						new WToggleControl()
 							.SetName("tabOutMute")
-							.SetText(Wine.IsWine ? "Mute While Tabbed Out (May be broken on linux)" : "Mute While Tabbed Out")
+							.SetText(Wine.IsWine ? "Mute While Tabbed Out (May be broken under wine)" : "Mute While Tabbed Out")
 							.LinkToPreference(HexaModPreferences.tabOutMute)
 					);
 
@@ -391,10 +329,16 @@ namespace HexaMod.API.UI
 				);
 			}
 			{ // Title Screen
-				Transform splashMenu = title.FindMenu("SplashMenu");
+				RectTransform splashMenu = title.FindMenu("SplashMenu");
 
-				// booooring
-				splashMenu.Find("Return To New WYD").gameObject.SetActive(false);
+				#if NOT_LINUX_NATIVE
+					// booooring
+					splashMenu.Find("Return To New WYD")?.gameObject.SetActive(false);
+				#endif
+				// also handle builds with the "huge announcement video" button like the latest linux native build
+				splashMenu.Find("OpenVideo")?.gameObject.SetActive(false);
+				// that very same build also has the SplashMenu's sizeDelta set wrong, so we fix that
+				splashMenu.sizeDelta = new Vector2(1920, 1080);
 
 				// replaced/moved
 				splashMenu.Find("PlayOnline").gameObject.SetActive(false);
@@ -853,17 +797,6 @@ namespace HexaMod.API.UI
 							HexaPersistentLobby.instance.lobbySettings.cheats = value;
 							HexaPersistentLobby.instance.CommitChanges();
 							HexaGlobal.textChat.SendServerMessage($"cheats changed to {value}");
-						}));
-
-					stack.AddChild(new WSensitiveTextInputField()
-						.SetName("relayServer")
-						.SetText("Voice Chat Relay")
-						.SetFieldText(ls.relay)
-						.AddSubmitListener(text =>
-						{
-							HexaPersistentLobby.instance.lobbySettings.relay = text;
-							HexaPersistentLobby.instance.CommitChanges();
-							HexaGlobal.textChat.SendServerMessage("Voice chat relay server updated.");
 						}));
 				}
 

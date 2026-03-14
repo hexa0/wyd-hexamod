@@ -5,7 +5,6 @@ using System.Reflection;
 using HarmonyLib;
 using HexaMod.API.UI;
 using HexaMod.API.Util.Patching;
-using HexaMod.API.Voice;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -31,19 +30,6 @@ namespace HexaMod.Scripts.Initialization
 		void InitHexaMod()
 		{
 			StartCoroutine(Load());
-		}
-
-		bool AttemptToConnect()
-		{
-			try
-			{
-
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
 		}
 
 		Type[] allSharedPatches;
@@ -192,8 +178,6 @@ namespace HexaMod.Scripts.Initialization
 			QualitySettings.shadowResolution = ShadowResolution.Low;
 			QualitySettings.shadowDistance *= 0.75f;
 			QualitySettings.shadowProjection = ShadowProjection.CloseFit;
-
-			VoiceChat.Init();
 
 			SetLoadingText("Init HexaMod");
 			yield return new WaitForEndOfFrame();

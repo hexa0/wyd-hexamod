@@ -10,7 +10,6 @@ namespace HexaMod.API.UI
 		public static FadeOverlay fadeOverlay;
 		public static StartupScreen startupScreen;
 		public static LoadingOverlay loadingOverlay;
-		public static VoiceChatDebugOverlay voiceChatDebugOverlay;
 		public static MenuUtil util;
 		public static AudioSource uiAudioSource;
 
@@ -28,10 +27,6 @@ namespace HexaMod.API.UI
 				.ScaleWithParent();
 
 			loadingOverlay = new LoadingOverlay()
-				.SetParent(PersistentCanvas.instance.canvas.transform)
-				.ScaleWithParent();
-
-			voiceChatDebugOverlay = new VoiceChatDebugOverlay()
 				.SetParent(PersistentCanvas.instance.canvas.transform)
 				.ScaleWithParent();
 

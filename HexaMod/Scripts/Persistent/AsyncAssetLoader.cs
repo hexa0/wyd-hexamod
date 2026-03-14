@@ -138,17 +138,15 @@ namespace HexaMod.Scripts.Persistent
 					var fontLoadRequest = bundle.LoadAssetAsync<Font>("Assets/ModResources/Init/Font/osd.ttf");
 					var loadingAnimationRequest = bundle.LoadAssetAsync<GameObject>("Assets/ModResources/Init/LoadingUI/HexaLoadingAnimation.prefab");
 
-					fontLoadRequest.completed += (request) =>
-					{
-						LoadingText.loadingFont = fontLoadRequest.asset as Font;
-						Mod.Debug("got loadingFont");
-					};
+					yield return fontLoadRequest;
 
-					loadingAnimationRequest.completed += (request) =>
-					{
-						LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
-						Mod.Debug("got loadingAnimation");
-					};
+					LoadingText.loadingFont = fontLoadRequest.asset as Font;
+					Mod.Debug("got loadingFont");
+
+					yield return loadingAnimationRequest;
+
+					LoadingAnimation.loadingAnimation = loadingAnimationRequest.asset as GameObject;
+					Mod.Debug("got loadingAnimation");
 
 					break;
 				case "resources":

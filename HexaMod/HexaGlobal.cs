@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using HexaMod.API.UI;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity;
 using HexaMod.API.Util.WhosYourDaddy;
-using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
 using HexaMod.Patches.Hooks;
 using HexaMod.Scripts.Character;
@@ -131,7 +131,6 @@ namespace HexaMod
 				GameObject character = Object.Instantiate(PrefabExtensionUtils.GetCachedNetworkPrefab(oldName), PrefabExtensionUtils.Storage, false);
 				character.name = newName;
 				character.AddComponent<CharacterModelSwapper>();
-				character.AddComponent<PlayerVoiceEmitterRPC>();
 				character.AddComponent<CameraController>();
 				character.AddComponent<CharacterInteraction>();
 				character.AddComponent<NetworkedSoundBehavior>();

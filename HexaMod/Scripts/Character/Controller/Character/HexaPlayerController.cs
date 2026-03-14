@@ -4,7 +4,6 @@ using System.Reflection;
 using HarmonyLib;
 using HexaMod.API.Util.Data;
 using HexaMod.API.Util.WhosYourDaddy;
-using HexaMod.API.Voice.Script;
 using HexaMod.Patches.Feature;
 using HexaMod.Patches.Hooks;
 using HexaMod.Scripts.Multiplayer.Lobby;
@@ -275,7 +274,6 @@ namespace HexaMod.Scripts.Character.Controller.Character
 		public DeathCam deathCam;
 		public AudioListener audioListener;
 		public ActionInput input;
-		public PlayerVoiceEmitterRPC voiceEmitter;
 		public AudioSource audioSource;
 
 		[System.Flags]
@@ -351,7 +349,6 @@ namespace HexaMod.Scripts.Character.Controller.Character
 			babyAnimator = GetComponentInChildren<BabyAnimator>();
 			deathCam = GetComponentInChildren<DeathCam>();
 			audioListener = GetComponentInChildren<AudioListener>();
-			voiceEmitter = GetComponent<PlayerVoiceEmitterRPC>();
 			audioSource = GetComponent<AudioSource>();
 
 			if (View && View.isMine)
@@ -1045,7 +1042,6 @@ namespace HexaMod.Scripts.Character.Controller.Character
 			characterModelSwapper.SetCharacterModel(initialState.characterModel);
 			characterModelSwapper.SetShirt(initialState.shirtMaterial);
 			characterModelSwapper.InitialStateDone();
-			voiceEmitter.SetVoicePlayer(View.owner);
 		}
 
 		public virtual void Start()

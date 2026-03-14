@@ -36,6 +36,11 @@
 		<NoWarn>IDE0290</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<DefineConstants Condition="'$(LINUX_NATIVE)' == 'true'">$(DefineConstants);LINUX_NATIVE</DefineConstants>
+		<DefineConstants Condition="'$(LINUX_NATIVE)' != 'true'">$(DefineConstants);NOT_LINUX_NATIVE</DefineConstants>
+	</PropertyGroup>
+
 	<Target Name="GenerateVersionInfo" BeforeTargets="CoreCompile">
 		<PropertyGroup>
 			<TempGitHashFile>$(IntermediateOutputPath)githash.tmp</TempGitHashFile>
@@ -96,11 +101,6 @@ internal static class BuildInfo
 		<Exec Command="$(PowerShellBinary) -ExecutionPolicy Bypass -File &quot;$(MdbFixScriptPath)&quot; -MdbPath &quot;$(MdbPath)&quot;" Condition="Exists('$(MdbPath)')" />
 	</Target>
 
-	<ItemGroup>
-		<ProjectReference Include="..\HexaNet\HexaNet.csproj" />
-		<ProjectReference Include="..\VoiceChatShared\VoiceChatShared.csproj" />
-	</ItemGroup>
-
 	<PropertyGroup>
 		<GameFolder Condition=" '$(GameFolder)' == '' ">C:\Program Files (x86)\Steam\steamapps\common\Whos Your Daddy\Classic\</GameFolder>
 	</PropertyGroup>
@@ -126,7 +126,6 @@ internal static class BuildInfo
 			<HintPath>$(GameFolder)\BepInEx\core\Mono.Cecil.dll</HintPath>
 		</Reference>
 		<PackageReference Include="Mono.pdb2mdb" Version="0.1.0.20130128" PrivateAssets="all" />
-		<PackageReference Include="NAudio" Version="1.10.0" />
 	</ItemGroup>
 
 	<ItemGroup>

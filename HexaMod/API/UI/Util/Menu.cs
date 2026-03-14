@@ -30,13 +30,13 @@ namespace HexaMod.API.UI.Util
 			}
 		}
 
-		public Transform FindMenu(string menuName)
+		public RectTransform FindMenu(string menuName)
 		{
 			for (int i = 0; i < menuController.menus.Count(); i++)
 			{
 				if (menuController.menus[i].name == menuName)
 				{
-					return menuController.menus[i].transform;
+					return menuController.menus[i].transform as RectTransform;
 				}
 			}
 

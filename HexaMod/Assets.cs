@@ -169,7 +169,10 @@ namespace HexaMod
 
 			foreach (var renderer in renderers)
 			{
-				renderer.allowOcclusionWhenDynamic = true;
+				#if NOT_LINUX_NATIVE
+					// this doesn't exist in the older linux native build sadly
+					renderer.allowOcclusionWhenDynamic = true;
+				#endif
 
 				foreach (var material in renderer.materials)
 				{

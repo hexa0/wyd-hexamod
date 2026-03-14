@@ -13,8 +13,22 @@ namespace HexaMod.Patches.Feature.CustomLevels
 		{
 			if (CurrentLevelSkybox.current != null)
 			{
-				GameObject.Find("BackgroundCamera").GetComponent<Camera>().clearFlags = CameraClearFlags.Nothing;
-				__instance.cam.clearFlags = CurrentLevelSkybox.current.clearFlags;
+				#if NOT_LINUX_NATIVE
+					GameObject.Find("BackgroundCamera").GetComponent<Camera>().clearFlags = CameraClearFlags.Nothing;
+					__instance.cam.clearFlags = CurrentLevelSkybox.current.clearFlags;
+				#endif
+
+				#if LINUX_NATIVE
+					GameObject.Find("BackgroundCamera").GetComponent<Camera>().clearFlags = CameraClearFlags.Depth;
+
+					if (CurrentLevelSkybox.current.clearFlags == CameraClearFlags.Nothing) {
+						__instance.cam.clearFlags = CameraClearFlags.Depth;
+					}
+					else
+					{
+						__instance.cam.clearFlags = CurrentLevelSkybox.current.clearFlags;
+					}
+				#endif
 			}
 		}
 	}

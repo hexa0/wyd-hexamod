@@ -18,7 +18,7 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		All,
 	}
 
-	// [XmlRoot("LobbySettings", Namespace = "https://hexa.blueberry.coffee/hexa-mod/")]
+	// [XmlRoot("LobbySettings", Namespace = "https://hexa.pet/hexa-mod/")]
 	public class LobbySettings
 	{
 		public bool allMustDie = true; // TODO: make this a percentage for more customization, needs a UI component first though
@@ -32,8 +32,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		public bool cheats = true;
 		public byte GameMode = 0; // TODO: switching game modes in the lobby
 		public string mapName = Assets.defaultLevelName;
-		public string relay = "127.0.0.1";
-		public string voiceRoom = HexaGlobal.instanceGuid;
 		public ushort roundNumber = 0;
 		public ushort seed = 0;
 
@@ -83,7 +81,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 
 		public static void InitSettingsForCreatedRoom(LobbySettings settings)
 		{
-			settings.voiceRoom = HexaGlobal.instanceGuid;
 			settings.seed = (ushort)UnityEngine.Random.Range(0, ushort.MaxValue);
 		}
 	}
@@ -108,8 +105,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 			writer.Write((byte)lobby.shufflePlayers);
 			writer.Write(lobby.GameMode);
 			writer.Write(lobby.mapName);
-			writer.Write(lobby.relay);
-			writer.Write(lobby.voiceRoom);
 			writer.Write(lobby.roundNumber);
 			writer.Write((byte)lobby.spawnMode);
 
@@ -138,8 +133,6 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 			lobby.shufflePlayers = (ShufflePlayersMode)reader.Read();
 			lobby.GameMode = reader.Read();
 			lobby.mapName = reader.ReadString();
-			lobby.relay = reader.ReadString();
-			lobby.voiceRoom = reader.ReadString();
 			lobby.roundNumber = reader.ReadUshort();
 			lobby.spawnMode = (SpawnLocationMode)reader.Read();
 
