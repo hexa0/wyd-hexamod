@@ -42,12 +42,19 @@ namespace HexaMod.Scripts.Persistent
 
 			Mod.Print($"using {nativeRes.width}x{nativeRes.height} as resolution");
 
-			Screen.SetResolution(64, 64, false);
-			yield return null;
+			#if NATIVE_LINUX
+				Screen.SetResolution(64, 64, false);
+				yield return null;
+			#endif
 			Screen.SetResolution(nativeRes.width, nativeRes.height, true);
-			// GL.Viewport(new Rect(0, 0, nativeRes.width, nativeRes.height));
-			yield return null;
-			UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+			#if NATIVE_LINUX
+				// GL.Viewport(new Rect(0, 0, nativeRes.width, nativeRes.height));
+				yield return null;
+				UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+			#else
+				// bullshit yield so it compiles
+				yield return null;
+			#endif
 		}
 	}
 }
