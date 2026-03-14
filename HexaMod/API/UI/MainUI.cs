@@ -9,6 +9,7 @@ using HexaMod.API.UI.Element.Control.TextInputField;
 using HexaMod.API.UI.Element.Control.ToggleButton;
 using HexaMod.API.UI.Element.Label;
 using HexaMod.API.UI.Element.Utility;
+using HexaMod.API.UI.Menu.HostMenu;
 using HexaMod.API.UI.Menu.PlayMenu;
 using HexaMod.API.UI.Util;
 using HexaMod.API.Util.Unity.Settings;
@@ -425,6 +426,9 @@ namespace HexaMod.API.UI
 			}
 			{ // Play Online Menu
 				title.NewMenu(new PlayMenu());
+			}
+			{ // Host Menu
+				title.NewMenu(new HostMenu());
 			}
 			{ // Player Customization Menu
 				GameObject characterPreviewCanvas = GameObject.Find("BackendObjects").Find("MenuCamera").Find("Camera").Find("Canvas");

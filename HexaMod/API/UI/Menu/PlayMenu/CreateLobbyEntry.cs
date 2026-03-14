@@ -7,7 +7,7 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 		void CreateLobby()
 		{
 			// switch to the new create lobby menu
-			WYDMenus.title.menuController.ChangeToMenu(WYDMenus.title.GetMenuId("createLobby"));
+			WYDMenus.title.menuController.ChangeToMenu(WYDMenus.title.GetMenuId("hostMenu"));
 		}
 
 		public CreateLobbyEntry() : base()

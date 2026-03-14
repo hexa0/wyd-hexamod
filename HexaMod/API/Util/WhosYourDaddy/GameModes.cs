@@ -5,6 +5,14 @@ namespace HexaMod.API.Util.WhosYourDaddy
 	// TODO: teams will be integers indexing the teams class instead of booleans (to allow for custom gamemodes with new team types)
 	public struct Team
 	{
+		public static Team defaultTeam = new Team() {
+			displayName = "Default",
+			selectorName = "D",
+			prefabName = "dadV2",
+			canBeButtered = false,
+			maxPlayers = 0
+		};
+
 		public string displayName;
 		public string selectorName;
 		public string prefabName;

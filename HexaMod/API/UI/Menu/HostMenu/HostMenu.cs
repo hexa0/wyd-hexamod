@@ -1,6 +1,7 @@
 ﻿using HexaMod.API.UI.Element;
 using HexaMod.API.UI.Element.Utility;
 using HexaMod.API.Util.WhosYourDaddy;
+using UnityEngine;
 
 namespace HexaMod.API.UI.Menu.HostMenu
 {
@@ -11,7 +12,6 @@ namespace HexaMod.API.UI.Menu.HostMenu
 		public HostMenu AddTeam(Team team)
 		{
 			teamsStack.AddChild(new TeamStack(team)
-				.SetParent(teamsStack.rectTransform)
 				.SetName(team.selectorName)
 				.SetAnchors(0.5f, 0.5f)
 				.SetPivot(0.5f, 0.5f)
@@ -39,18 +39,25 @@ namespace HexaMod.API.UI.Menu.HostMenu
 
 		public override void Shown()
 		{
-
+			
 		}
 
 		public HostMenu() : base()
 		{
+			gameObject = new GameObject("hostMenu", typeof(RectTransform));
+			
 			teamsStack = new UIElementStack(5f)
+				.SetParent(rectTransform)
 				.SetName("teamsStack")
 				.SetAnchors(0.5f, 0.5f)
 				.SetPivot(0.5f, 0.5f)
 				.SetAlignment(UIElementStack.StackAlignment.LeftToRight);
 
-			gameObject = teamsStack.gameObject;
+			// temp
+			ClearTeams();
+
+			AddTeam(Teams.dadTeam);
+			AddTeam(Teams.babyTeam);
 		}
 	}
 }
