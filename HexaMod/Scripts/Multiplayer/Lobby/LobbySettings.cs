@@ -60,19 +60,19 @@ namespace HexaMod.Scripts.Multiplayer.Lobby
 		{
 			new WSwitchOption<SpawnLocationMode>()
 			{
-				name = "Vanilla Spawns",
+				name = "Vanilla Player Spawns",
 				value = SpawnLocationMode.Vanilla
 			},
 
 			new WSwitchOption<SpawnLocationMode>()
 			{
-				name = "Ideal Spawns",
+				name = "Ideal Player Spawns - Scale based on player count",
 				value = SpawnLocationMode.Ideal
 			},
 
 			new WSwitchOption<SpawnLocationMode>()
 			{
-				name = "All Spawns",
+				name = "All Player Spawns - Always enable all spawn locations",
 				value = SpawnLocationMode.All
 			}
 		};

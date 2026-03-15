@@ -9,7 +9,7 @@ namespace HexaMod.API.UI
 {
 	public class UITheming
 	{
-		static readonly float buttonColorFadeDuration = 1f / 25f;
+		static readonly float buttonColorFadeDuration = 1f / 40f;
 		public static void Init()
 		{
 			if (!HexaGlobal.coreBundle)
@@ -60,7 +60,9 @@ namespace HexaMod.API.UI
 
 						if (check)
 						{
-
+							(check.transform as RectTransform).sizeDelta = new Vector2(30, 30);
+							var checkImage = check.GetComponent<Image>();
+							checkImage.color = new Color(1f, 1f, 1f, 1f);
 						}
 					}
 

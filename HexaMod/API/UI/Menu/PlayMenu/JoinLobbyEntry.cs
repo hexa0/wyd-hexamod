@@ -13,26 +13,26 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			{
 				room = value;
 				interactButton.SetInteractable(room != null);
+				
+				// force an instant UI update
+				FixedUpdate();
+			}
+		}
 
-				if (room != null)
-				{
-					// since room names need to be unique when joining rooms, we'll use custom properties to store it as well as the other properties
-					// however since that isn't implemented yet, this is commented out
-					// LobbyName = room.Name;
-					// LobbyMotd = room.Motd;
-					// LobbyMap = room.Map;
-					LobbyMotd = $"{room.Name}";
-					MaxPlayers = room.MaxPlayers;
-					PlayerCount = room.PlayerCount;
-				}
-				else
-				{
-					LobbyName = "null RoomInfo";
-					LobbyMotd = "RoomInfo must be set";
-					LobbyMap = "";
-					MaxPlayers = 0;
-					PlayerCount = 0;
-				}
+		public override void FixedUpdate() {
+			RoomInfo roomInfo = RoomInfo;
+
+			if (roomInfo != null) {
+				LobbyMotd = $"{room.Name}";
+				MaxPlayers = room.MaxPlayers;
+				PlayerCount = room.PlayerCount;
+			}
+			else {
+				LobbyName = "null RoomInfo";
+				LobbyMotd = "RoomInfo must be set";
+				LobbyMap = "";
+				MaxPlayers = 0;
+				PlayerCount = 0;
 			}
 		}
 

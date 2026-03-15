@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace HexaMod.API.UI.Element.Utility
 {
@@ -7,7 +8,18 @@ namespace HexaMod.API.UI.Element.Utility
 	{
 		readonly List<HexaUIElement> children = new List<HexaUIElement>();
 
-		public float gap = 5f;
+		public float Gap
+		{
+			get => layoutGroup != null ? layoutGroup.spacing : m_gap;
+			set
+			{
+				m_gap = value;
+				if (layoutGroup != null)
+				{
+					layoutGroup.spacing = value;
+				}
+			}
+		}
 
 		public enum StackAlignment
 		{
@@ -31,13 +43,15 @@ namespace HexaMod.API.UI.Element.Utility
 		}
 
 		StackAlignment m_alignment = StackAlignment.BottomToTop;
+		float m_gap;
+		HorizontalOrVerticalLayoutGroup layoutGroup;
+		readonly ContentSizeFitter sizeFitter;
 
 		public UIElementStack AddChild(HexaUIElement child)
 		{
 			children.Add(child
 				.SetParent(rectTransform)
 				.SetPivot(0.5f, 0.5f)
-				.SetPosition(0f, 0f)
 			);
 
 			if (IsShown)
@@ -90,79 +104,67 @@ namespace HexaMod.API.UI.Element.Utility
 
 		void UpdateLayout()
 		{
-			float x = 0f;
-			float y = 0f;
-			float totalWidth = 0f;
-			float totalHeight = 0f;
-			float contentWidth = 0f;
-			float contentHeight = 0f;
-
-			foreach (HexaUIElement child in children)
+			if (layoutGroup != null)
 			{
-				if (child.rectTransform.rect.width > totalWidth)
-				{
-					totalWidth = child.rectTransform.rect.width;
-				}
+				bool needsVertical = (m_alignment == StackAlignment.TopToBottom || m_alignment == StackAlignment.BottomToTop);
+				bool isVertical = layoutGroup is VerticalLayoutGroup;
 
-				if (child.rectTransform.rect.height > totalHeight)
+				if (needsVertical != isVertical)
 				{
-					totalHeight = child.rectTransform.rect.height;
+					Object.DestroyImmediate(layoutGroup);
+					if (needsVertical)
+						layoutGroup = gameObject.AddComponent<VerticalLayoutGroup>();
+					else
+						layoutGroup = gameObject.AddComponent<HorizontalLayoutGroup>();
 				}
-
-				contentWidth += child.rectTransform.rect.width + gap;
-				contentHeight += child.rectTransform.rect.height + gap;
+			}
+			else
+			{
+				if (m_alignment == StackAlignment.TopToBottom || m_alignment == StackAlignment.BottomToTop)
+					layoutGroup = gameObject.AddComponent<VerticalLayoutGroup>();
+				else
+					layoutGroup = gameObject.AddComponent<HorizontalLayoutGroup>();
 			}
 
-			contentWidth -= gap;
-			contentHeight -= gap;
+			layoutGroup.spacing = m_gap;
+			layoutGroup.childControlWidth = false;
+			layoutGroup.childControlHeight = false;
+			layoutGroup.childForceExpandWidth = false;
+			layoutGroup.childForceExpandHeight = false;
 
 			switch (m_alignment)
 			{
 				case StackAlignment.BottomToTop:
-					rectTransform.sizeDelta = new Vector2(totalWidth, contentHeight);
-
-					foreach (HexaUIElement child in children)
+					layoutGroup.childAlignment = TextAnchor.LowerLeft;
+					for (int i = 0; i < children.Count; i++)
 					{
-						child.rectTransform.pivot = new Vector2(0f, 0f);
-						child.rectTransform.SetPivotPosition(new Vector2(0f, y));
-						y += child.rectTransform.rect.height + gap;
+						children[i].rectTransform.pivot = new Vector2(0f, 0f);
+						children[i].rectTransform.SetAsFirstSibling();
 					}
-
 					break;
 				case StackAlignment.TopToBottom:
-					rectTransform.sizeDelta = new Vector2(totalWidth, contentHeight);
-					y = contentHeight;
-
-					foreach (HexaUIElement child in children)
+					layoutGroup.childAlignment = TextAnchor.UpperLeft;
+					for (int i = 0; i < children.Count; i++)
 					{
-						child.rectTransform.pivot = new Vector2(0f, 1f);
-						child.rectTransform.SetPivotPosition(new Vector2(0f, y));
-						y -= child.rectTransform.rect.height + gap;
+						children[i].rectTransform.pivot = new Vector2(0f, 1f);
+						children[i].rectTransform.SetAsLastSibling();
 					}
-
-					break;
-				case StackAlignment.LeftToRight:
-					rectTransform.sizeDelta = new Vector2(contentWidth, totalHeight);
-
-					foreach (HexaUIElement child in children)
-					{
-						child.rectTransform.pivot = new Vector2(0f, 0f);
-						child.rectTransform.SetPivotPosition(new Vector2(x, 0f));
-						x += child.rectTransform.rect.width + gap;
-					}
-
 					break;
 				case StackAlignment.RightToLeft:
-					rectTransform.sizeDelta = new Vector2(contentWidth, totalHeight);
-					x = contentWidth;
-
-					foreach (HexaUIElement child in children)
+					layoutGroup.childAlignment = TextAnchor.LowerRight;
+					for (int i = 0; i < children.Count; i++)
 					{
-						child.rectTransform.pivot = new Vector2(1f, 0f);
-						child.rectTransform.SetPivotPosition(new Vector2(x, 0f));
-						x -= child.rectTransform.rect.width + gap;
+						children[i].rectTransform.pivot = new Vector2(1f, 0f);
+						children[i].rectTransform.SetAsFirstSibling();
 					}
-
+					break;
+				case StackAlignment.LeftToRight:
+					layoutGroup.childAlignment = TextAnchor.LowerLeft;
+					for (int i = 0; i < children.Count; i++)
+					{
+						children[i].rectTransform.pivot = new Vector2(0f, 0f);
+						children[i].rectTransform.SetAsLastSibling();
+					}
 					break;
 			}
 		}
@@ -170,7 +172,12 @@ namespace HexaMod.API.UI.Element.Utility
 		public UIElementStack(float gap) : base()
 		{
 			gameObject = new GameObject("elementStack", typeof(RectTransform));
-			this.gap = gap;
+			sizeFitter = gameObject.AddComponent<ContentSizeFitter>();
+			sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+			sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+			this.m_gap = gap;
+			UpdateLayout();
 		}
 	}
 }

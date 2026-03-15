@@ -24,7 +24,7 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 
 		public PlayOfflineButton() : base()
 		{
-			this.SetTextAuto(PhotonNetwork.offlineMode ? "Play\nOnline" : "Play\nOffline")
+			this.SetTextAuto(PhotonNetwork.offlineMode ? "Playing\nOffline" : "Playing\nOnline")
 				.AddListener(() =>
 				{
 					if (!PhotonNetwork.offlineMode)
@@ -39,7 +39,7 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 						AttemptToConnect();
 					}
 
-					SetTextAuto(PhotonNetwork.offlineMode ? "Play\nOnline" : "Play\nOffline");
+					SetTextAuto(PhotonNetwork.offlineMode ? "Playing\nOffline" : "Playing\nOnline");
 				});
 		}
 	}

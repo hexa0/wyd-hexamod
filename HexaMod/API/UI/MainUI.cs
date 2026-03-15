@@ -578,6 +578,10 @@ namespace HexaMod.API.UI
 					.SetText("Skin Color (Hex)")
 					.SetFieldText(GetCurrentDadSkinColorHex()));
 
+				dadStack.AddChild(new WCharacterRotHoldArrows() {rotModel = dadModelSwapper.GetComponent<RotModel>()}
+					.SetText("Rotate")
+				);
+
 				dadStack.AddChild(new WSwitchInput<Material>()
 					.SetName("dadShirtMaterial")
 					.SetText("")
@@ -620,6 +624,10 @@ namespace HexaMod.API.UI
 					})
 					.SetText("Skin Color (Hex)")
 					.SetFieldText(GetCurrentBabySkinColorHex()));
+
+				babyStack.AddChild(new WCharacterRotHoldArrows() {rotModel = babyModelSwapper.GetComponent<RotModel>()}
+					.SetText("Rotate")
+				);
 
 				babyStack.AddChild(new WSwitchInput<string>()
 					.SetName("babyCharacterModel")

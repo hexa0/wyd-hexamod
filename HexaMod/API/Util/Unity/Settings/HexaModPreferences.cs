@@ -8,5 +8,6 @@ namespace HexaMod.API.Util.Unity.Settings
 		public static readonly ModPreference<bool> doUItheme = new ModPreference<bool>("DoUITheme", true);
 		public static readonly ModPreference<bool> smoothCrouching = new ModPreference<bool>("SmoothCrouching", true);
 		public static readonly ModPreference<bool> viewBobbing = new ModPreference<bool>("ViewBobbing", true);
+		public static readonly ModPreference<bool> defaultRoomAccesibilityIsOpen = new ModPreference<bool>("DefaultRoomAccesibilityIsOpen", true);
 	}
 }

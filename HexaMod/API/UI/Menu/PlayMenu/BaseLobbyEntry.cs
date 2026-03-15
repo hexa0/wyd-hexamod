@@ -35,6 +35,10 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			get => lobbyName;
 			set
 			{
+				if (lobbyName == value) {
+					return;
+				}
+
 				lobbyName = value;
 				lobbyNameLabel.SetText(lobbyName);
 			}
@@ -46,6 +50,10 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			get => lobbyMotd;
 			set
 			{
+				if (lobbyMotd == value) {
+					return;
+				}
+				
 				lobbyMotd = value;
 				lobbyMotdLabel.SetText(lobbyMotd);
 			}
@@ -57,6 +65,10 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			get => lobbyMap;
 			set
 			{
+				if (lobbyMap == value) {
+					return;
+				}
+
 				lobbyMap = value;
 				if (value != "")
 				{
@@ -88,6 +100,10 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			get => playerCount;
 			set
 			{
+				if (playerCount == value) {
+					return;
+				}
+
 				playerCount = value;
 				UpdatePlayerCountLabel();
 			}
@@ -100,6 +116,10 @@ namespace HexaMod.API.UI.Menu.PlayMenu
 			get => maxPlayers;
 			set
 			{
+				if (maxPlayers == value) {
+					return;
+				}
+
 				maxPlayers = value;
 				UpdatePlayerCountLabel();
 			}

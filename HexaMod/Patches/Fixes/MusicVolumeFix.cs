@@ -18,9 +18,9 @@ namespace HexaMod.Patches.Fixes
 		[HarmonyPatch(typeof(SetOptions), "Start")]
 		[HarmonyPrefix]
 		static bool Start()
-		{
-			QualitySettings.antiAliasing = PlayerPrefs.GetInt("AntiAliasing", 0);
-			QualitySettings.vSyncCount = PlayerPrefs.GetInt("UseVSync", 1);
+	{
+			QualitySettings.antiAliasing = WYDPreferences.msaaLevel.Value;
+			QualitySettings.vSyncCount = WYDPreferences.vsync.Value ? 1 : 0;
 			return false; // MasterVolume is now handled by TabOutMuteBehavior
 		}
 

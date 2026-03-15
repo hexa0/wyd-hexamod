@@ -40,16 +40,23 @@ public static class TransformExtensions
 		}
 	}
 
+
 	public static void SetPivotPosition(this RectTransform self, float x, float y)
 	{
 		self.SetPivotPosition(new Vector2(x, y));
 	}
 
+	/// <summary> 
+	/// get the parent as a RectTransform
+	/// </summary>
 	public static RectTransform GetParent(this RectTransform self)
 	{
 		return self.parent as RectTransform;
 	}
 
+	/// <summary> 
+	/// this simply makes us as big as the parent is
+	/// </summary>
 	public static RectTransform ScaleWithParent(this RectTransform rectTransform)
 	{
 		rectTransform.offsetMin = Vector2.zero;
